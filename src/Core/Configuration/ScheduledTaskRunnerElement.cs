@@ -23,7 +23,7 @@ using System.Configuration;
 
 namespace XecMe.Core.Configuration
 {
-    public class ScheduledTaskRunnerElement: ConfigurationElement
+    public class ScheduledTaskRunnerElement : TaskRunnerElement
     {
         #region Contants
         private const string TASK_TYPE = "taskType";
