@@ -4,6 +4,7 @@
  Now the task on the designer and developer is to solve the problem in a task based approach. Let us take some examples of solving the problem.
 
 **Batch job to generate a file and post it to a partner's FTP site.**
+
 There are 3 main activities in this job. Retrieving data from the data source, creating a file and posting it to a FTP site. One can code all the 3 activities in to a single ITask implementation. However it is recommended to break this problem into 3 tasks viz.
 
 1. Retrieving from the database 
@@ -14,7 +15,9 @@ Why? Well, by breaking it into smaller sub tasks will enable us to reuse the tas
  You can wire tasks one after another thru the configuration.
 
 **Order processing from a queue**
+
 You can write one task for reading the queue and other task to process and update the database. This way the queue reading task can be generic and can be used in multiple other solutions. Queue reading task can be wired to the processing task thru configuration.
 
 **Azure Worker Role or WebJob**
+
 Here is the sample to use XecMe in developing  Worker Role
