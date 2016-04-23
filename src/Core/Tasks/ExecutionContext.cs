@@ -17,11 +17,11 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Collections.Specialized;
 using XecMe.Core.Utils;
 using XecMe.Common;
+using SimpleInjector;
 
 namespace XecMe.Core.Tasks
 {
@@ -29,12 +29,24 @@ namespace XecMe.Core.Tasks
     {
         private TaskRunner _taskRunner;
         private StringDictionary _parameters;
+        private static Container _container;
         /// <summary>
         /// Parameters initialized in the config
         /// </summary>
         public StringDictionary Parameters
         {
             get { return _parameters; }
+        }
+
+        internal static Container InternalContainer
+        {
+            get { return _container; }
+            set { _container = value; }
+        }
+
+        public Container Container
+        {
+            get { return _container; }
         }
 
         public TaskRunner TaskRunner

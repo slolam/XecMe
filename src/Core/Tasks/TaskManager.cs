@@ -17,11 +17,11 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using XecMe.Core.Configuration;
 using System.Diagnostics;
+using SimpleInjector;
 
 namespace XecMe.Core.Tasks
 {
@@ -37,8 +37,19 @@ namespace XecMe.Core.Tasks
         public static void Start(ITaskManagerConfig config)
         {
             Stop();
-
+            
             _taskRunners.AddRange(config.Runners);
+
+            Container container = new Container();
+            
+            for (int runnerIndex = 0; runnerIndex < _taskRunners.Count; runnerIndex++)
+            {
+                container.Register(_taskRunners[runnerIndex].TaskType);
+            }
+
+            Bootstrap(container);
+
+            ExecutionContext.InternalContainer = container;
 
             for (int runnerIndex = 0; runnerIndex < _taskRunners.Count; runnerIndex++)
             {
@@ -73,6 +84,9 @@ namespace XecMe.Core.Tasks
             else
                 WaitHandle.WaitAll(handles, milliSeconds);
         }
+
+        public static Action<Container> Bootstrap
+        { get; set; }
 
     }
 }

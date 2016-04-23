@@ -17,7 +17,6 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Collections.Specialized;
 using XecMe.Core.Utils;
@@ -48,9 +47,13 @@ namespace XecMe.Core.Tasks
             _taskType = taskType;
             _parameters = parameters;
             _waitHandle = new EventWaitHandle(true, EventResetMode.ManualReset);
-            EventManager.AddPublisher(string.Concat("Task.", _name, ".Completed"), this, "Completed"); 
+            EventManager.AddPublisher(string.Concat("Task.", _name, ".Completed"), this, "Completed");
         }
 
+        internal Type TaskType
+        {
+            get { return _taskType; }
+        }
         public string Name
         {
             get { return _name; }
@@ -63,7 +66,8 @@ namespace XecMe.Core.Tasks
 
         protected ITask GetTaskInstance()
         {
-            ITask task = Reflection.CreateInstance<ITask>(_taskType);
+            //ITask task = Reflection.CreateInstance<ITask>(_taskType);
+            ITask task = ExecutionContext.InternalContainer.GetInstance(_taskType) as ITask;
             EventManager.Register(task);
             return task;
         }
