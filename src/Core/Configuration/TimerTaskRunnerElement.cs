@@ -11,8 +11,9 @@
 /// You should have received a copy of the GNU General Public License along with XecMe. If not, see http://www.gnu.org/licenses/.
 /// 
 /// History:
-/// ______________________________________________________________
-/// Created         01-2013             Shailesh Lolam
+/// _______________________________________________________________________________________________
+/// Created         01-2013             Shailesh Lolam          Added
+/// Added           02-2013             Shailesh Lolam          Added time zone
 
 #endregion
 using System;
@@ -21,6 +22,7 @@ using System.Linq;
 using System.Text;
 using XecMe.Core.Tasks;
 using System.Configuration;
+using System.Diagnostics;
 
 namespace XecMe.Core.Configuration
 {
@@ -35,6 +37,7 @@ namespace XecMe.Core.Configuration
         private const string END = "endDateTime";
         private const string DAY_START_TIME = "dayStartTime";
         private const string DAY_END_TIME = "dayEndTime";
+        private const string TIME_ZONE = "timeZone";
         #endregion
 
         static TimerTaskRunnerElement()
@@ -92,6 +95,25 @@ namespace XecMe.Core.Configuration
             }
         }
 
+        [ConfigurationProperty(TIME_ZONE, IsRequired = false)]
+        public string TimeZoneName
+        {
+            get { return (string)base[TIME_ZONE]; }
+            set
+            {
+                try
+                {
+                    TimeZoneInfo.FindSystemTimeZoneById(value);
+                    base[END] = value;
+                }
+                catch(Exception e)
+                {
+                    Trace.TraceError("Error reading Timer Task: {0}", e);
+                    throw;
+                }
+            }
+        }
+
         [ConfigurationProperty(DAY_START_TIME, IsRequired = false)]
         public TimeSpan DayStartTime
         {
@@ -127,8 +149,12 @@ namespace XecMe.Core.Configuration
 
         public override TaskRunner GetRunner()
         {
+            TimeZoneInfo tz = null;
+            string tzn = TimeZoneName;
+            if (!string.IsNullOrEmpty(tzn))
+                tz = TimeZoneInfo.FindSystemTimeZoneById(tzn);
             return new TimerTaskRunner(this.Name, this.GetTaskType(), InternalParameters(), Interval, Recurrence,
-                    this.StartDateTime, this.EndDateTime, this.DayStartTime, this.DayEndTime);
+                    this.StartDateTime, this.EndDateTime, this.DayStartTime, this.DayEndTime, tz);
         }
     }
 }

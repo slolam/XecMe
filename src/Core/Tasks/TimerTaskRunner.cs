@@ -13,6 +13,7 @@
 /// History:
 /// ______________________________________________________________
 /// Created         01-2013             Shailesh Lolam
+/// Added           01-2013             Shailesh Lolam      Added time zone to the timer for Azure
 
 #endregion
 using System;
@@ -39,6 +40,7 @@ namespace XecMe.Core.Tasks
         private TimeSpan _dayEndTime = TimeSpan.FromSeconds(86399);
         private Timer _timer;
         private TaskWrapper _task;
+        private TimeZoneInfo _timeZoneInfo;
 
         static TimerTaskRunner()
         {
@@ -47,7 +49,7 @@ namespace XecMe.Core.Tasks
         }
 
         public TimerTaskRunner(string name, Type taskType, StringDictionary parameters, long interval, long recurrence,
-            DateTime startDateTime, DateTime endDateTime, TimeSpan dayStartTime, TimeSpan dayEndTime) :
+            DateTime startDateTime, DateTime endDateTime, TimeSpan dayStartTime, TimeSpan dayEndTime, TimeZoneInfo timeZoneInfo) :
             base(name, taskType, parameters)
         {
             if (interval < 1)
@@ -68,6 +70,7 @@ namespace XecMe.Core.Tasks
             if (dayEndTime < dayStartTime)
                 throw new ArgumentOutOfRangeException("dayStartTime", "dayStartTime should be less than dayEndTime");
 
+            _timeZoneInfo = timeZoneInfo;
             _interval = interval;
             _recurrence = recurrence;
             _startDateTime = startDateTime;
@@ -120,8 +123,15 @@ namespace XecMe.Core.Tasks
                 return _dayEndTime;
             }
         }
+        public TimeZoneInfo TimeZone
+        {
+            get
+            {
+                return _timeZoneInfo;
+            }
+        }
 
-        
+
         #region TaskRunner Members
 
         public override void Start()
@@ -156,13 +166,26 @@ namespace XecMe.Core.Tasks
 
         #endregion
 
+        private DateTime Now
+        {
+            get
+            {
+                if (_timeZoneInfo == null
+                    || _timeZoneInfo == TimeZoneInfo.Local)
+                    return DateTime.Now;
+                DateTime now = TimeZoneInfo.ConvertTime(DateTime.Now, _timeZoneInfo);
+                Trace.TraceInformation("Now: {0}", now);
+                return now;
+            }
+        }
+
         private void RunTask(object state)
         {
             ///Task not started, call should never come here
             if (_timer == null)
                 return;
 
-            DateTime today = DateTime.Now;
+            DateTime today = Now;
             ///Not in the limit of the date time range
             if (today > _endDateTime)
             {
@@ -170,8 +193,7 @@ namespace XecMe.Core.Tasks
                 return;
             }
             ///Sleep until the 5 secs before start time
-            TimeSpan wait = _startDateTime.Subtract(today).Add(TimeSpan.FromMilliseconds(-_interval - 5000));
-            //if (today.AddMilliseconds(-(Interval + 5000)) < _startDateTime)
+            TimeSpan wait = _startDateTime.Subtract(today).Add(TimeSpan.FromMilliseconds(-_interval));
             if (wait.TotalMilliseconds > 0)
             {
                 Trace.TraceInformation("Timer task \"{0}\" will wait for {1} before it starts", this.Name, wait);
@@ -182,10 +204,9 @@ namespace XecMe.Core.Tasks
                 return;
 
 
-            TimeSpan now = DateTime.Now.TimeOfDay;
+            TimeSpan now = today.TimeOfDay;
             ///Not in the range of time of the day
-            wait = _dayStartTime.Subtract(now.Add(TimeSpan.FromSeconds(5)));
-            //if (now.Add(TimeSpan.FromSeconds(-5)) < _dayStartTime)
+            wait = _dayStartTime.Subtract(now);
             if (wait.TotalMilliseconds > 0)
             {
                 Trace.TraceInformation("Timer task \"{0}\" will wait for {1} before it starts", this.Name, wait);
