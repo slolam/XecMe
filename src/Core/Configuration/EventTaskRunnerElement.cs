@@ -30,7 +30,16 @@ namespace XecMe.Core.Configuration
         #region Constants
         private const string EVENT_TOPIC = "eventTopic";
         private const string THREAD_OPTION = "threadOption";
+        private const string TIME_OUT = "timeout";
         #endregion
+
+        [ConfigurationProperty(TIME_OUT, IsRequired = false, DefaultValue=5000)]
+        [IntegerValidator(MinValue=1, MaxValue=10000)]
+        public int Timeout
+        {
+            get { return (int)base[TIME_OUT]; }
+            set { base[TIME_OUT] = value; }
+        }
 
         [ConfigurationProperty(EVENT_TOPIC, IsRequired = true)]
         public string EventTopic
@@ -48,7 +57,7 @@ namespace XecMe.Core.Configuration
 
         public override TaskRunner GetRunner()
         {
-            return new EventTaskRunner(this.Name, this.GetTaskType(), InternalParameters(), EventTopic, this.ThreadOption);
+            return new EventTaskRunner(this.Name, this.GetTaskType(), InternalParameters(), EventTopic, this.ThreadOption, Timeout);
         }
     }
 }

@@ -104,7 +104,7 @@ namespace XecMe.Core.Configuration
                 try
                 {
                     TimeZoneInfo.FindSystemTimeZoneById(value);
-                    base[END] = value;
+                    base[TIME_ZONE] = value;
                 }
                 catch(Exception e)
                 {

@@ -238,9 +238,11 @@ namespace XecMe.Core.Tasks
                         RaiseComplete(_task.Context);
                         break;
                     case ExecutionState.Stop:
+                        _task.Release();
                         Stop();
                         return;
                     case ExecutionState.Recycle:
+                        _task.Release();
                         _task = new TaskWrapper(this.GetTaskInstance(), new ExecutionContext(Parameters, this));
                         break;
                 }

@@ -37,10 +37,15 @@ namespace XecMe.Core.Tasks
         private ManualResetEvent _syncEvent = null;
         private Queue<EventArgs> _queue = null;
         private bool _threadWorking = false;
-        public EventTaskRunner(string name, Type taskType, StringDictionary parameters, string eventTopic, ThreadOption threadOption) :
+        private int _timeout;
+        public EventTaskRunner(string name, Type taskType, StringDictionary parameters, string eventTopic, ThreadOption threadOption, int timeout) :
             base(name, taskType, parameters)
         {
             Guard.ArgumentNotNullOrEmptyString(eventTopic, "eventTopic");
+            if (timeout < 1 || timeout > 10000)
+                throw new ArgumentOutOfRangeException("timeout", "timeout should be between 1 and 10,000 ms (10 sec)");
+
+            _timeout = timeout;
             _eventTopic = eventTopic;
             _threadOption = threadOption;
             _executionContext = new ExecutionContext(this.Parameters, this);
@@ -59,6 +64,8 @@ namespace XecMe.Core.Tasks
         public override void Start()
         {
             EventManager.AddSubscriber(_eventTopic, this, "EventSink", _threadOption);
+            if (_threadOption != ThreadOption.Publisher)
+                base.Start();
             _task.OnStart(_executionContext);
             Trace.TraceInformation("Event task \"{0}\" started", this.Name);
         }
@@ -66,6 +73,12 @@ namespace XecMe.Core.Tasks
         public override void Stop()
         {
             EventManager.RemoveSubscriber(_eventTopic, this, "EventSink");
+            if (_threadOption != ThreadOption.Publisher)
+                ThreadPool.QueueUserWorkItem(delegate(object o)
+                {
+                    Thread.Sleep(_timeout);
+                    base.Stop();
+                });
             _task.OnStop(_executionContext);
             Trace.TraceInformation("Event task \"{0}\" stopped", this.Name);
         }
