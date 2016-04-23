@@ -216,7 +216,8 @@ namespace XecMe.Core.Tasks
             Trace.TraceInformation("Parallel task \"{0}\" is running {1} threads", this.Name, _parallelInstances);
 
             ExecutionState executionState = taskWrapper.RunTask();
-            Trace.TraceInformation("Parallel task \"{0}\" has executed with return value {1}", this.Name, executionState);
+            Trace.TraceInformation("Parallel task \"{0}\" has executed with return value {1} on Managed thread {2}",
+                this.Name, executionState, Thread.CurrentThread.ManagedThreadId);
     
             switch (executionState)
             {
