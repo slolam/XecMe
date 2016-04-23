@@ -1,7 +1,12 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sign File", "Sign File", "{44CEE8DC-0CAB-4D4D-B5E2-644D9C6E31DB}"
+	ProjectSection(SolutionItems) = preProject
+		Signing\Sign.pfx = Signing\Sign.pfx
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XecMeHost", "XecMeHost\XecMeHost.csproj", "{201E71C7-8ACB-4E0A-BB46-1B0C8014C389}"
 EndProject

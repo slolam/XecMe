@@ -1,1 +1,6 @@
-$tf
+$tf*
+.git
+[Bb][Ii][Nn]
+[Oo][Bb][Jj]
+*.user
+.vs
