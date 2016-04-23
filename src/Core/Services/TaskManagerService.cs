@@ -58,7 +58,13 @@ namespace XecMe.Core.Services
 
         void IService.OnStart()
         {
-            string configTypeString = ExtensionsSection.ThisSection.GetExtensions("configs")["ITaskManagerConfig"].Type;
+            ExtensionElement extnElement = ExtensionsSection.ThisSection.Settings["ITaskManagerConfig"];
+
+            string configTypeString = null;
+            
+            if (extnElement != null)
+                configTypeString = extnElement.Type;
+
             ITaskManagerConfig tmConfig;
             if (!string.IsNullOrEmpty(configTypeString))
             {

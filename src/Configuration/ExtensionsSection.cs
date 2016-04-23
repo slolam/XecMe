@@ -27,12 +27,26 @@ namespace XecMe.Configuration
     {
         #region Constants
         private const string EXTENSIONS = "extensions";
+        private const string SETTINGS = "settings";
         private readonly ConfigurationElementCollection<ExtensionElement> EMPTY_COLL = new ConfigurationElementCollection<ExtensionElement>();
         #endregion
 
         public static ExtensionsSection ThisSection
         {
             get { return (ExtensionsSection)XecMeSectionGroup.ThisSection.Sections[EXTENSIONS]; }
+        }
+
+        public ConfigurationElementCollection<ExtensionElement> Settings
+        {
+            get
+            {
+                ConfigurationElementCollection<ExtensionElement> retVal = (ConfigurationElementCollection<ExtensionElement>)base[SETTINGS];
+                
+                if (retVal == null)
+                    return EMPTY_COLL;
+
+                return retVal;
+            }
         }
 
        

@@ -144,7 +144,8 @@ namespace XecMe.Core.Tasks
                 this.Wait();
                 ITask task = _task;
                 ExecutionState state = _task.OnExecute(ec);
-                Trace.TraceInformation("Event task \"{0}\" is executed with a return value {1}", this.Name, state);
+                Trace.TraceInformation("Event task \"{0}\" is executed with a return value {1} on Managed thread {2}",
+                    this.Name, state, Thread.CurrentThread.ManagedThreadId);
                 switch (state)
                 {
                     case ExecutionState.Stop:

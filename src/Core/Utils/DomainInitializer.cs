@@ -25,6 +25,7 @@ using XecMe.Core.Services;
 using XecMe.Core.Batch;
 using XecMe.Common;
 using System.Diagnostics;
+using XecMe.Configuration;
 
 namespace XecMe.Core.Utils
 {
@@ -36,7 +37,8 @@ namespace XecMe.Core.Utils
         public static void RunService(string[] args)
         {
             Initialize(args);
-            string serviceTypeName = ConfigurationManager.AppSettings["IService"];
+            
+            string serviceTypeName = ExtensionsSection.ThisSection.Settings["IService"].Type;
 
             if (Debugger.IsAttached)
             {
@@ -55,7 +57,8 @@ namespace XecMe.Core.Utils
         public static void RunBatch(string[] args)
         {
             Initialize(args);
-            string batchTypeName = ConfigurationManager.AppSettings["IBatchProcess"];
+
+            string batchTypeName = ExtensionsSection.ThisSection.Settings["IBatchProcess"].Type;
 
             IBatchProcess batchProcess = Reflection.CreateInstance<IBatchProcess>(batchTypeName);
             try
