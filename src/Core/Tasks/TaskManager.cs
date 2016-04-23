@@ -37,15 +37,21 @@ namespace XecMe.Core.Tasks
         public static void Start(ITaskManagerConfig config)
         {
             Stop();
-            
+
             _taskRunners.AddRange(config.Runners);
 
             Container container = new Container();
-            
+
+            ///Play safe with the duplicate tasks
+            container.Options.AllowOverridingRegistrations = true;
+
             for (int runnerIndex = 0; runnerIndex < _taskRunners.Count; runnerIndex++)
             {
                 container.Register(_taskRunners[runnerIndex].TaskType);
             }
+            ///Restore it back for the developer
+            container.Options.AllowOverridingRegistrations = false;
+
 
             Bootstrap(container);
 

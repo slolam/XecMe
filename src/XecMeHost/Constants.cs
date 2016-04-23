@@ -33,5 +33,6 @@ namespace XecMe
         public const string PARAM_USER = "id";
         public const string PARAM_START_TYPE = "m";
         public const string PARAM_TIMEOUT = "t";
+        public const string PARAM_GUI = "gui";
     }
 }

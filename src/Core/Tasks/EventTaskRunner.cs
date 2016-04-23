@@ -48,8 +48,7 @@ namespace XecMe.Core.Tasks
             _eventTopic = eventTopic;
             _threadOption = threadOption;
             _executionContext = new ExecutionContext(this.Parameters, this);
-            _task = this.GetTaskInstance();
-            
+
             if (threadOption != ThreadOption.BackgroundSerial)
                 _syncEvent = new ManualResetEvent(true);
 
@@ -62,6 +61,12 @@ namespace XecMe.Core.Tasks
 
         public override void Start()
         {
+            lock (this)
+            {
+                if (_task == null)
+                    _task = this.GetTaskInstance();
+            }
+
             EventManager.AddSubscriber(_eventTopic, this, "EventSink", _threadOption);
             if (_threadOption != ThreadOption.Publisher)
                 base.Start();
@@ -77,14 +82,42 @@ namespace XecMe.Core.Tasks
                 ThreadPool.QueueUserWorkItem(delegate(object o)
                 {
                     Thread.Sleep(_timeout);
-                    _task.OnStop(_executionContext);
+                    try
+                    {
+                        _task.OnStop(_executionContext);
+                    }
+                    catch (Exception e)
+                    {
+                        try
+                        {
+                            _task.OnUnhandledException(e);
+                        }
+                        catch (Exception badEx)
+                        {
+                            Trace.TraceError("Bad Error: {0}", badEx);
+                        }
+                    }
                     Trace.TraceInformation("Event task \"{0}\" stopped", this.Name);
                     base.Stop();
                 });
             }
             else
             {
-                _task.OnStop(_executionContext);
+                try
+                {
+                    _task.OnStop(_executionContext);
+                }
+                catch (Exception e)
+                {
+                    try
+                    {
+                        _task.OnUnhandledException(e);
+                    }
+                    catch (Exception badEx)
+                    {
+                        Trace.TraceError("Bad Error: {0}", badEx);
+                    }
+                }
                 Trace.TraceInformation("Event task \"{0}\" stopped", this.Name);
             }
         }
@@ -135,12 +168,12 @@ namespace XecMe.Core.Tasks
         private void RunTask(EventArgs args)
         {
             ExecutionContext ec = null;
-            
+
             if (args is EventArgs<ExecutionContext>)
             {
                 ec = ((EventArgs<ExecutionContext>)args).Value;
             }
-            else 
+            else
             {
                 Type argType = args.GetType();
                 if (argType.IsGenericType)
@@ -148,7 +181,7 @@ namespace XecMe.Core.Tasks
                     ec = _executionContext.Copy();
                     if (argType.GetGenericTypeDefinition() == typeof(EventArgs<>))
                     {
-                        ec["EventArgs"] = argType.InvokeMember("get_Value", BindingFlags.Instance | BindingFlags.GetProperty | BindingFlags.Public, null, args, null);
+                        ec["EventArgs"] = argType.InvokeMember("Value", BindingFlags.Instance | BindingFlags.GetProperty | BindingFlags.Public, null, args, null);
                     }
                     else
                     {
@@ -162,6 +195,8 @@ namespace XecMe.Core.Tasks
             {
                 this.Wait();
                 ITask task = _task;
+                Trace.TraceInformation("Event task \"{0}\" is executing on Managed thread {1}",
+                    this.Name, Thread.CurrentThread.ManagedThreadId);
                 ExecutionState state = _task.OnExecute(ec);
                 Trace.TraceInformation("Event task \"{0}\" is executed with a return value {1} on Managed thread {2}",
                     this.Name, state, Thread.CurrentThread.ManagedThreadId);

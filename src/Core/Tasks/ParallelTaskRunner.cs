@@ -212,18 +212,22 @@ namespace XecMe.Core.Tasks
                 _parallelInstances++;
             }
 
-            Trace.TraceInformation("Parallel task \"{0}\" is running {1} threads", this.Name, _parallelInstances);
+            Trace.TraceInformation("Parallel task \"{0}\" is executing on Managed Thread {2} running {1} threads", 
+                this.Name, _parallelInstances, Thread.CurrentThread.ManagedThreadId);
 
             ExecutionState executionState = taskWrapper.RunTask();
+
             Trace.TraceInformation("Parallel task \"{0}\" has executed with return value {1} on Managed thread {2}",
                 this.Name, executionState, Thread.CurrentThread.ManagedThreadId);
-    
+
             switch (executionState)
             {
                 case ExecutionState.Executed:
                     //Since there is work it should also create one more instance for parallel tasking
                     lock (_sync)
                     {
+                        ///Reduce the number of instances
+                        _parallelInstances--;
                         ///Put back the task into the free pool
                         _freeTaskPool.Add(taskWrapper);
                         //Since executed successfully it should go back for execution
@@ -240,6 +244,8 @@ namespace XecMe.Core.Tasks
                     //Since the task has indicated to stop, release it
                     lock (_sync)
                     {
+                        ///Reduce the number of instances
+                        _parallelInstances--;
                         _allTasks.Remove(taskWrapper);
                         _freeTaskPool.Remove(taskWrapper);
                         if (_jobsInQueue == 0 && _parallelInstances == 1)
@@ -250,6 +256,9 @@ namespace XecMe.Core.Tasks
                     //Since the task has indicated to recycle it, release it and add new.
                     lock (_sync)
                     {
+                        ///Reduce the number of instances
+                        _parallelInstances--;
+
                         _allTasks.Remove(taskWrapper);
                         _freeTaskPool.Remove(taskWrapper);
                         AddTask(1);
@@ -260,6 +269,9 @@ namespace XecMe.Core.Tasks
                     //This is tough task :-), not enough work to do, start firing ;-)
                     lock (_sync)
                     {
+                        ///Reduce the number of instances
+                        _parallelInstances--;
+                        
                         ///Put back the task into the free pool
                         _freeTaskPool.Add(taskWrapper);
                         //There are other items in the queue do nothing come out.
@@ -279,24 +291,27 @@ namespace XecMe.Core.Tasks
                         ///get work reset it to 5 secs
                         if (_timer == null)
                             _timer = new Timer(new TimerCallback(RunTask), null, Timeout.Infinite, Timeout.Infinite);
-                        ///Wait for 5 second to see whether there is something to do
-                        _jobsInQueue++;
-                        _timer.Change(_idlePollingPeriod, Timeout.Infinite);
+                        ///Wait for 5 seconds to see whether there is something to do
+                        ///Do it only for the last thread.
+                        if (_parallelInstances == 0)
+                        {
+                            ///This is for the timer job
+                            _jobsInQueue++;
+                            _timer.Change(_idlePollingPeriod, Timeout.Infinite);
+                            Trace.TraceInformation("Parallel task \"{0}\" in timer mode",this.Name);
+                        }
                     }
                     break;
                 default:
                     lock (_sync)
                     {
+                        ///Reduce the number of instances
+                        _parallelInstances--;
                         ///Put back the task into the free pool
                         _freeTaskPool.Add(taskWrapper);
                         QueueTask();
                     }
                     break;
-            }
-
-            lock (_sync)
-            {
-                _parallelInstances--;
             }
         }
 
