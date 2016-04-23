@@ -84,6 +84,7 @@
     <Compile Include="Configuration\ParallelTaskRunnerElement.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Configuration\RunOnceTaskRunnerElement.cs" />
     <Compile Include="Configuration\ScheduledTaskRunnerElement.cs" />
     <Compile Include="Configuration\TaskManagerSection.cs">
       <SubType>Code</SubType>
@@ -108,6 +109,7 @@
     <Compile Include="Tasks\ExecutionContext.cs" />
     <Compile Include="Tasks\ITaskManagerConfig.cs" />
     <Compile Include="Tasks\ParallelTaskRunner.cs" />
+    <Compile Include="Tasks\RunOnceTaskRunner.cs" />
     <Compile Include="Tasks\ScheduledTaskRunner.cs" />
     <Compile Include="Tasks\TaskManagerConfig.cs" />
     <Compile Include="Tasks\TaskRunner.cs" />
