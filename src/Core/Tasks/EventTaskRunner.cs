@@ -77,10 +77,10 @@ namespace XecMe.Core.Tasks
                 ThreadPool.QueueUserWorkItem(delegate(object o)
                 {
                     Thread.Sleep(_timeout);
+                    _task.OnStop(_executionContext);
+                    Trace.TraceInformation("Event task \"{0}\" stopped", this.Name);
                     base.Stop();
                 });
-            _task.OnStop(_executionContext);
-            Trace.TraceInformation("Event task \"{0}\" stopped", this.Name);
         }
 
         #endregion
