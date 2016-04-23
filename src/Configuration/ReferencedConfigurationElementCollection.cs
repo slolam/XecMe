@@ -30,13 +30,21 @@ namespace XecMe.Configuration
     /// <typeparam name="T"></typeparam>
     public class ReferencedConfigurationElementCollection<T> : ConfigurationElementCollection where T : ConfigurationElement, new()
     {
+        /// <summary>
+        /// ExtensionElement collection field
+        /// </summary>
         private ConfigurationElementCollection<ExtensionElement> _extensions;
+
+        /// <summary>
+        /// Extention elements collection used for parsing the collection
+        /// </summary>
         public ConfigurationElementCollection<ExtensionElement> Extensions 
         { 
             get { return _extensions;}
             set { _extensions = value; }
         }
 
+        
         protected override ConfigurationElement CreateNewElement()
         {
             ExtensionElement eElement = _extensions[this.AddElementName];

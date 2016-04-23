@@ -24,7 +24,7 @@ using XecMe.Common;
 using XecMe.Core.Events;
 using System.Threading;
 using System.Diagnostics;
-using XecMe.Core.Diagnostics;
+using XecMe.Common.Diagnostics;
 
 namespace XecMe.Core.Tasks
 {

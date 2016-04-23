@@ -51,7 +51,8 @@
             // 
             this.lblMin.AutoSize = true;
             this.lblMin.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblMin.Location = new System.Drawing.Point(19, 14);
+            this.lblMin.Location = new System.Drawing.Point(6, 28);
+            this.lblMin.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.lblMin.Name = "lblMin";
             this.lblMin.Size = new System.Drawing.Size(42, 13);
             this.lblMin.TabIndex = 5;
@@ -59,7 +60,8 @@
             // 
             // intervalTrack
             // 
-            this.intervalTrack.Location = new System.Drawing.Point(133, 14);
+            this.intervalTrack.Location = new System.Drawing.Point(76, 16);
+            this.intervalTrack.Margin = new System.Windows.Forms.Padding(6);
             this.intervalTrack.Maximum = new decimal(new int[] {
             86400000,
             0,
@@ -71,7 +73,7 @@
             0,
             0});
             this.intervalTrack.Name = "intervalTrack";
-            this.intervalTrack.Size = new System.Drawing.Size(120, 20);
+            this.intervalTrack.Size = new System.Drawing.Size(260, 31);
             this.intervalTrack.TabIndex = 1;
             this.intervalTrack.Value = new decimal(new int[] {
             100,
@@ -83,16 +85,18 @@
             // 
             this.dtStartDate.CustomFormat = "MM/dd/yyyy";
             this.dtStartDate.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dtStartDate.Location = new System.Drawing.Point(133, 44);
+            this.dtStartDate.Location = new System.Drawing.Point(76, 74);
+            this.dtStartDate.Margin = new System.Windows.Forms.Padding(6);
             this.dtStartDate.Name = "dtStartDate";
-            this.dtStartDate.Size = new System.Drawing.Size(120, 20);
+            this.dtStartDate.Size = new System.Drawing.Size(260, 31);
             this.dtStartDate.TabIndex = 2;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(19, 44);
+            this.label1.Location = new System.Drawing.Point(6, 86);
+            this.label1.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(53, 13);
             this.label1.TabIndex = 5;
@@ -102,7 +106,8 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(19, 74);
+            this.label2.Location = new System.Drawing.Point(6, 143);
+            this.label2.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(52, 13);
             this.label2.TabIndex = 5;
@@ -112,16 +117,18 @@
             // 
             this.dtEndDate.CustomFormat = "MM/dd/yyyy";
             this.dtEndDate.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dtEndDate.Location = new System.Drawing.Point(133, 74);
+            this.dtEndDate.Location = new System.Drawing.Point(76, 131);
+            this.dtEndDate.Margin = new System.Windows.Forms.Padding(6);
             this.dtEndDate.Name = "dtEndDate";
-            this.dtEndDate.Size = new System.Drawing.Size(120, 20);
+            this.dtEndDate.Size = new System.Drawing.Size(260, 31);
             this.dtEndDate.TabIndex = 3;
             // 
             // label3
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(19, 104);
+            this.label3.Location = new System.Drawing.Point(384, 86);
+            this.label3.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(51, 13);
             this.label3.TabIndex = 5;
@@ -131,16 +138,18 @@
             // 
             this.dtStartTime.CustomFormat = "hh:mm:ss tt";
             this.dtStartTime.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dtStartTime.Location = new System.Drawing.Point(133, 104);
+            this.dtStartTime.Location = new System.Drawing.Point(494, 74);
+            this.dtStartTime.Margin = new System.Windows.Forms.Padding(6);
             this.dtStartTime.Name = "dtStartTime";
-            this.dtStartTime.Size = new System.Drawing.Size(120, 20);
+            this.dtStartTime.Size = new System.Drawing.Size(260, 31);
             this.dtStartTime.TabIndex = 4;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(19, 134);
+            this.label4.Location = new System.Drawing.Point(384, 143);
+            this.label4.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(48, 13);
             this.label4.TabIndex = 5;
@@ -150,16 +159,18 @@
             // 
             this.dtEndTime.CustomFormat = "hh:mm:ss tt";
             this.dtEndTime.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dtEndTime.Location = new System.Drawing.Point(133, 134);
+            this.dtEndTime.Location = new System.Drawing.Point(494, 129);
+            this.dtEndTime.Margin = new System.Windows.Forms.Padding(6);
             this.dtEndTime.Name = "dtEndTime";
-            this.dtEndTime.Size = new System.Drawing.Size(120, 20);
+            this.dtEndTime.Size = new System.Drawing.Size(260, 31);
             this.dtEndTime.TabIndex = 5;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.Location = new System.Drawing.Point(19, 164);
+            this.label5.Location = new System.Drawing.Point(384, 27);
+            this.label5.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(63, 13);
             this.label5.TabIndex = 5;
@@ -167,16 +178,18 @@
             // 
             // recurrenceTrack
             // 
-            this.recurrenceTrack.Location = new System.Drawing.Point(133, 164);
+            this.recurrenceTrack.Location = new System.Drawing.Point(494, 17);
+            this.recurrenceTrack.Margin = new System.Windows.Forms.Padding(6);
             this.recurrenceTrack.Name = "recurrenceTrack";
-            this.recurrenceTrack.Size = new System.Drawing.Size(120, 20);
+            this.recurrenceTrack.Size = new System.Drawing.Size(260, 31);
             this.recurrenceTrack.TabIndex = 6;
             // 
             // label6
             // 
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.Location = new System.Drawing.Point(19, 194);
+            this.label6.Location = new System.Drawing.Point(6, 197);
+            this.label6.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(58, 13);
             this.label6.TabIndex = 5;
@@ -185,23 +198,25 @@
             // cmbTz
             // 
             this.cmbTz.FormattingEnabled = true;
-            this.cmbTz.Location = new System.Drawing.Point(133, 194);
+            this.cmbTz.Location = new System.Drawing.Point(76, 185);
+            this.cmbTz.Margin = new System.Windows.Forms.Padding(6);
             this.cmbTz.Name = "cmbTz";
-            this.cmbTz.Size = new System.Drawing.Size(326, 21);
+            this.cmbTz.Size = new System.Drawing.Size(678, 33);
             this.cmbTz.TabIndex = 7;
             // 
             // parameters
             // 
             this.parameters.DataSource = null;
             this.parameters.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.parameters.Location = new System.Drawing.Point(0, 221);
+            this.parameters.Location = new System.Drawing.Point(0, 425);
+            this.parameters.Margin = new System.Windows.Forms.Padding(12);
             this.parameters.Name = "parameters";
-            this.parameters.Size = new System.Drawing.Size(525, 136);
+            this.parameters.Size = new System.Drawing.Size(764, 262);
             this.parameters.TabIndex = 8;
             // 
             // TimerTaskControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.parameters);
             this.Controls.Add(this.cmbTz);
@@ -218,8 +233,9 @@
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.lblMin);
+            this.Margin = new System.Windows.Forms.Padding(6);
             this.Name = "TimerTaskControl";
-            this.Size = new System.Drawing.Size(525, 357);
+            this.Size = new System.Drawing.Size(764, 687);
             ((System.ComponentModel.ISupportInitialize)(this.intervalTrack)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.recurrenceTrack)).EndInit();
             this.ResumeLayout(false);

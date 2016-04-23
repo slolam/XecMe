@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using System.Reflection;
 using System.Diagnostics;
 using System.IO;
+using XecMeConfig.Controls;
 
 namespace XecMeConfig
 {
@@ -20,6 +21,11 @@ namespace XecMeConfig
         public MainForm()
         {
             InitializeComponent();
+            _type.Items.Add("Event Task");
+            _type.Items.Add("Parallel Task");
+            _type.Items.Add("Run Once Task");
+            _type.Items.Add("Scheduled Task");
+            _type.Items.Add("Timer Task");
         }
 
         private string[] GetTaskTypes(string[] files)
@@ -59,7 +65,7 @@ namespace XecMeConfig
                     {
                         _taskTypes.Add(types[i]);
                     }
-                    dgTask.DataSource = _taskTypes.ToList<string>();
+                    _task.DataSource = _taskTypes.ToList<string>();
                     
                     //_taskTypes.AddRange(GetTaskTypes(selectFile.FileNames));
                 }
@@ -69,14 +75,7 @@ namespace XecMeConfig
         private void clearTasksToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _taskTypes.Clear();
-            dgTask.DataSource = null;
-            chkList.Items.Add("Monday");
-            chkList.Items.Add("Tuesday");
-            chkList.Items.Add("Wednesday");
-            chkList.Items.Add("Thursday");
-            chkList.Items.Add("Friday");
-            chkList.Items.Add("Saturday");
-            chkList.Items.Add("Sunday");
+            _task.DataSource = null;
         }
     }
 }

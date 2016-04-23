@@ -21,8 +21,12 @@ using System.Text;
 
 namespace XecMe.Common
 {
+    /// <summary>
+    /// This class is a helper class for creating instances using reflection
+    /// </summary>
     public static class Reflection
     {
+
         public static T CreateInstance<T>()
         {
             return CreateInstance<T>(typeof(T));

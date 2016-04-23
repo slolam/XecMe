@@ -22,10 +22,13 @@ using System.Text;
 using XecMe.Core.Tasks;
 using System.Configuration;
 using System.Diagnostics;
-using XecMe.Core.Diagnostics;
+using XecMe.Common.Diagnostics;
 
 namespace XecMe.Core.Configuration
 {
+    /// <summary>
+    ///  Type to read the timer task configurations
+    /// </summary>
     public class TimerTaskRunnerElement : TaskRunnerElement
     {
         #region Constants
@@ -41,12 +44,18 @@ namespace XecMe.Core.Configuration
         private const string WEEK_DAYS = "weekdays";
         #endregion
 
+        /// <summary>
+        /// Type initializer for the timer task element
+        /// </summary>
         static TimerTaskRunnerElement()
         {
             TS_MIN = TimeSpan.FromSeconds(0);
             TS_MAX = TimeSpan.FromSeconds(86400);
         }
 
+        /// <summary>
+        /// Constructor to create this type of instance
+        /// </summary>
         public TimerTaskRunnerElement()
         {
             base[START] = DateTime.MinValue;
@@ -55,6 +64,9 @@ namespace XecMe.Core.Configuration
             base[DAY_END_TIME] = TimeSpan.FromSeconds(86399.0);//23:59:59
         }
 
+        /// <summary>
+        /// Gets or sets the valid weekdays for this instance
+        /// </summary>
         [ConfigurationProperty(WEEK_DAYS, IsRequired = false, DefaultValue=Weekdays.All)]
         public Weekdays Weekdays
         {
@@ -62,6 +74,9 @@ namespace XecMe.Core.Configuration
             set { base[WEEK_DAYS] = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the interval of the instance
+        /// </summary>
         [ConfigurationProperty(INTERVAL, IsRequired = true)]
         public long Interval
         {
@@ -69,6 +84,9 @@ namespace XecMe.Core.Configuration
             set { base[INTERVAL] = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the reccurrence of the instance. Default value is -1 that indicates there is no upper bound defined for this task
+        /// </summary>
         [ConfigurationProperty(RECURRENCE, IsRequired = false, DefaultValue = -1L)]
         [LongValidator(MinValue = -1L, MaxValue = long.MaxValue)]
         public long Recurrence
@@ -77,6 +95,9 @@ namespace XecMe.Core.Configuration
             set { base[RECURRENCE] = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the start date time for this instance
+        /// </summary>
         [ConfigurationProperty(START, IsRequired = false)]
         public DateTime StartDateTime
         {
@@ -90,6 +111,9 @@ namespace XecMe.Core.Configuration
             }
         }
 
+        /// <summary>
+        /// Gets or sets the end date time for this instance
+        /// </summary>
         [ConfigurationProperty(END, IsRequired = false)]
         public DateTime EndDateTime
         {
@@ -103,6 +127,9 @@ namespace XecMe.Core.Configuration
             }
         }
 
+        /// <summary>
+        /// Gets or set the time zone for this configuration instance. It should be a valid time zone id string from the list TimeZoneInfo.GetSystemTimeZones()
+        /// </summary>
         [ConfigurationProperty(TIME_ZONE, IsRequired = false)]
         public string TimeZoneName
         {
@@ -118,17 +145,18 @@ namespace XecMe.Core.Configuration
                 {
                     Log.Error(string.Format("Error reading Timer Task: {0}", e));
                     Log.Error("Valid timeZones are ....");
-                    Console.WriteLine("Valid timeZones are ....");
                     foreach (var tz in TimeZoneInfo.GetSystemTimeZones())
                     {
                         Log.Error(string.Format("{0} - {1}", tz.Id, tz.StandardName));
-                        Console.WriteLine("{0} - {1}", tz.Id, tz.StandardName);
                     }
                     throw;
                 }
             }
         }
 
+        /// <summary>
+        /// Gets or sets the start time for this instance
+        /// </summary>
         [ConfigurationProperty(DAY_START_TIME, IsRequired = false)]
         public TimeSpan DayStartTime
         {
@@ -145,6 +173,9 @@ namespace XecMe.Core.Configuration
             }
         }
 
+        /// <summary>
+        /// Gets or sets the end time for this instance
+        /// </summary>
         [ConfigurationProperty(DAY_END_TIME, IsRequired = false)]
         public TimeSpan DayEndTime
         {
@@ -162,6 +193,10 @@ namespace XecMe.Core.Configuration
         }
 
 
+        /// <summary>
+        /// Returns the instance of TimerTaskRunner type
+        /// </summary>
+        /// <returns></returns>
         public override TaskRunner GetRunner()
         {
             TimeZoneInfo tz = null;

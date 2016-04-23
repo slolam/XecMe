@@ -382,6 +382,7 @@ namespace XecMe.Core.Tasks
                     }
                     break;
                 case ExecutionState.Idle:
+                case ExecutionState.Exception://If there is an unhandled exception we should treat it as idle else it will lead to CPU racing
                     //This is tough task :-), not enough work to do, start firing ;-)
                     lock (_sync)
                     {
@@ -394,7 +395,7 @@ namespace XecMe.Core.Tasks
                         if (_jobsInQueue > 0)
                             break;
 
-                        ///Fire 1 task, save resources
+                        ///Fire 1 task, save resources ONLY if task return Idle
                         if (_allTasks.Count > MinInstances)
                         {
                             taskWrapper = _freeTaskPool[0];
@@ -419,6 +420,7 @@ namespace XecMe.Core.Tasks
                     }
                     break;
                 default:
+                    ///This could be for any new state
                     lock (_sync)
                     {
                         ///Reduce the number of instances

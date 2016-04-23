@@ -10,7 +10,7 @@ using XecMeConfig.Entities;
 
 namespace XecMeConfig.Controls
 {
-    public partial class EventTaskControl : BaseControl
+    public partial class EventTaskControl : UserControl
     {
         public EventTaskControl()
         {
@@ -18,20 +18,21 @@ namespace XecMeConfig.Controls
             cmbThreadOptions.DataSource = Enum.GetNames(typeof(ThreadOptions));
         }
 
-        public override BaseTask Entity
+        public BaseTask Entity
         {
             get
             {
-                if (base.Entity == null)
-                    base.Entity = new EventTask();
+                //if (base.Entity == null)
+                //    base.Entity = new EventTask();
 
-                EventTask entity = base.Entity as EventTask;
+                //EventTask entity = base.Entity as EventTask;
 
-                entity.EventTopic = txtTopicName.Text;
-                entity.Timeout = (int)timeoutTrack.Value;
-                entity.ThreadOption = (ThreadOptions)Enum.Parse(typeof(ThreadOptions), cmbThreadOptions.SelectedValue.ToString());
+                //entity.EventTopic = txtTopicName.Text;
+                //entity.Timeout = (int)timeoutTrack.Value;
+                //entity.ThreadOption = (ThreadOptions)Enum.Parse(typeof(ThreadOptions), cmbThreadOptions.SelectedValue.ToString());
 
-                return entity;
+                //return entity;
+                return null;
             }
             set
             {
@@ -42,12 +43,12 @@ namespace XecMeConfig.Controls
                     timeoutTrack.Value = entity.Timeout;
                     cmbThreadOptions.SelectedValue = entity.ThreadOption.ToString();
 
-                    base.Entity = entity;
+                    //base.Entity = entity;
                 }
             }
         }
 
-        public override bool ValidateEntity()
+        public bool ValidateEntity()
         {
             if (txtTopicName.Text.Trim().Length == 0)
             {
@@ -57,7 +58,7 @@ namespace XecMeConfig.Controls
             return true;
         }
 
-        protected override List<Parameter> DataSource
+        protected List<Parameter> DataSource
         {
             set
             {

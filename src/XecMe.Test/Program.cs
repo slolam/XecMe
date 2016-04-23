@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using XecMe.Core.Diagnostics;
+using XecMe.Common.Diagnostics;
 using XecMe.Core.Tasks;
 
 namespace XecMe.Test

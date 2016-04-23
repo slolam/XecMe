@@ -29,9 +29,9 @@ namespace XecMe.Common
         /// <summary>
         /// Checks whether the parameter is null
         /// </summary>
-        /// <param name="parameter">parameter to the method</param>
+        /// <param name="parameter">Value of the parameter</param>
         /// <param name="parameterName">Name of the parameter</param>
-        public static void ArgumentNotNull(object parameter, string parameterName)
+        public static void ArgumentNotNull(this object parameter, string parameterName)
         {
             if (parameter == null)
                 throw new ArgumentNullException(parameterName);
@@ -40,9 +40,9 @@ namespace XecMe.Common
         /// <summary>
         /// This method check the parameter passed to it is null of empty
         /// </summary>
-        /// <param name="parameter"></param>
-        /// <param name="parameterName"></param>
-        public static void ArgumentNotNullOrEmptyString(string parameter, string parameterName)
+        /// <param name="parameter">Value of the string parameter</param>
+        /// <param name="parameterName">Name of the string parameter</param>
+        public static void ArgumentNotNullOrEmptyString(this string parameter, string parameterName)
         {
             if(string.IsNullOrEmpty(parameter))
                 throw new ArgumentNullException(parameterName);

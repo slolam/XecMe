@@ -26,7 +26,7 @@ using XecMe.Common;
 using System.Diagnostics;
 using XecMe.Configuration;
 using System.IO;
-using XecMe.Core.Diagnostics;
+using XecMe.Common.Diagnostics;
 
 namespace XecMe.Core.Utils
 {
@@ -73,6 +73,7 @@ namespace XecMe.Core.Utils
                 try
                 {
                     batchProcess.Exception(e);
+                    Log.Error(string.Format("An unhandled exception was thrown by the batch job {0}", e));
                 }
                 catch (Exception badEx)
                 {
@@ -99,13 +100,13 @@ namespace XecMe.Core.Utils
 
         static System.Reflection.Assembly ReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
         {
-            Log.Information(string.Format("Reflection Resolve assembly {0} : {1}", args.Name, args.RequestingAssembly));
+            Log.Error(string.Format("Reflection Resolve assembly {0} : {1}", args.Name, args.RequestingAssembly));
             return null;
         }
 
         static System.Reflection.Assembly AssemblyResolve(object sender, ResolveEventArgs args)
         {
-            Log.Information(string.Format("Resolve assembly {0} : {1}", args.Name, args.RequestingAssembly));
+            Log.Error(string.Format("Resolve assembly {0} : {1}", args.Name, args.RequestingAssembly));
             return null;
         }
 

@@ -21,10 +21,13 @@ using System.Text;
 using System.Configuration;
 using System.Diagnostics;
 using XecMe.Core.Tasks;
-using XecMe.Core.Diagnostics;
+using XecMe.Common.Diagnostics;
 
 namespace XecMe.Core.Configuration
 {
+    /// <summary>
+    /// Type to read the scheduled task configurations
+    /// </summary>
     public class ScheduledTaskRunnerElement : TaskRunnerElement
     {
         #region Constants
@@ -38,12 +41,18 @@ namespace XecMe.Core.Configuration
         private const string TIME_ZONE = "timeZone";
         #endregion
 
+        /// <summary>
+        /// Type initializer setting the constants
+        /// </summary>
         static ScheduledTaskRunnerElement()
         {
             TS_MIN = TimeSpan.FromSeconds(0.0);
             TS_MAX = TimeSpan.FromSeconds(86399.0);
         }
 
+        /// <summary>
+        /// Constructor to create the new instance of tyis type
+        /// </summary>
         public ScheduledTaskRunnerElement()
         {
             base[START] = DateTime.MinValue;
@@ -51,6 +60,9 @@ namespace XecMe.Core.Configuration
             base[SCHEDULE] = string.Empty;
         }
 
+        /// <summary>
+        /// Gets or sets recursion for this configuration instance
+        /// </summary>
         [ConfigurationProperty(RECURSION, IsRequired = true)]
         public Recursion Recursion
         {
@@ -58,6 +70,9 @@ namespace XecMe.Core.Configuration
             set { base[RECURSION] = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the schedule string for this configuration instance
+        /// </summary>
         [ConfigurationProperty(SCHEDULE, IsRequired = false)]
         public string Schedule
         {
@@ -65,6 +80,9 @@ namespace XecMe.Core.Configuration
             set { base[SCHEDULE] = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the repeat  for this configuration instance that defines how often to repeat, the default is 1 indicating every occurrence
+        /// </summary>
         [ConfigurationProperty(REPEAT, IsRequired = false, DefaultValue = 1)]
         [IntegerValidator(MinValue = 1, MaxValue = short.MaxValue)]
         public int Repeat
@@ -73,6 +91,9 @@ namespace XecMe.Core.Configuration
             set { base[REPEAT] = value; }
         }
 
+        /// <summary>
+        /// Gets or sets start date for this configuration instance
+        /// </summary>
         [ConfigurationProperty(START, IsRequired = false)]
         public DateTime StartDate
         {
@@ -86,7 +107,9 @@ namespace XecMe.Core.Configuration
             }
         }
 
-
+        /// <summary>
+        /// Gets or set the time zone for this configuration instance. It should be a valid time zone id string from the list TimeZoneInfo.GetSystemTimeZones()
+        /// </summary>
         [ConfigurationProperty(TIME_ZONE, IsRequired = false)]
         public string TimeZoneName
         {
@@ -102,17 +125,18 @@ namespace XecMe.Core.Configuration
                 {
                     Log.Error(string.Format("Error reading Scheduled Task: {0}", e));
                     Log.Error("Valid timeZones are ....");
-                    Console.WriteLine("Valid timeZones are ....");
                     foreach (var tz in TimeZoneInfo.GetSystemTimeZones())
                     {
                         Log.Error(string.Format("{0} - {1}", tz.Id, tz.StandardName));
-                        Console.WriteLine("{0} - {1}", tz.Id, tz.StandardName);
                     }
                     throw;
                 }
             }
         }
 
+        /// <summary>
+        /// Gets or set the task time for this configuration instance.
+        /// </summary>
         [ConfigurationProperty(TASKTIME, IsRequired = true)]
         public TimeSpan TaskTime
         {
@@ -130,7 +154,10 @@ namespace XecMe.Core.Configuration
         }
 
 
-
+        /// <summary>
+        /// Returns the instance of the ScheduledTaskRunner type
+        /// </summary>
+        /// <returns>Returns the ScheduledTaskRunner instance</returns>
         public override TaskRunner GetRunner()
         {
             TimeZoneInfo tz = null;

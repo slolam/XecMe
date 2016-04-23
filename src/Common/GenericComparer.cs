@@ -67,6 +67,12 @@ namespace XecMe.Common
             return this.C(x, y);
         }
 
+        /// <summary>
+        /// Compares the values of both object using reflection
+        /// </summary>
+        /// <param name="x">Value of object x</param>
+        /// <param name="y">Value of object y</param>
+        /// <returns></returns>
         private int C(T x, T y)
         {
             try
@@ -77,13 +83,13 @@ namespace XecMe.Common
                     return -1;
                 if (x != null && y == null)
                     return 1;
-                MethodInfo mix = x.GetType().GetMethod("get_" + _property);
-                MethodInfo miy = y.GetType().GetMethod("get_" + _property);
+                PropertyInfo mix = x.GetType().GetProperty(_property);
+                PropertyInfo miy = y.GetType().GetProperty(_property);
                 if (mix == null || miy == null)
                     return 0;
                 object vx, vy;
-                vx = mix.Invoke(x, null);
-                vy = mix.Invoke(y, null);
+                vx = mix.GetValue(x, null);
+                vy = mix.GetValue(y, null);
                 if (vx == null && vy == null)
                     return 0;
                 if (vx == null && vy != null)

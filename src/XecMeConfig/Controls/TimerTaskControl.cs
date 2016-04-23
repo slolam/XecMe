@@ -10,7 +10,7 @@ using XecMeConfig.Entities;
 
 namespace XecMeConfig.Controls
 {
-    public partial class TimerTaskControl : BaseControl
+    public partial class TimerTaskControl : UserControl
     {
         public TimerTaskControl()
         {
@@ -20,33 +20,34 @@ namespace XecMeConfig.Controls
             cmbTz.DataSource = XecMeConfig.Entities.TimeZone.TimeZones;
         }
 
-        public override BaseTask Entity
+        public  BaseTask Entity
         {
             get
             {
-                if (base.Entity == null)
-                    base.Entity = new TimerTask();
+                //if (base.Entity == null)
+                //    base.Entity = new TimerTask();
 
-                TimerTask entity = base.Entity as TimerTask;
+                //TimerTask entity = base.Entity as TimerTask;
 
-                entity.StartDateTime = dtStartDate.Value;
-                entity.EndDateTime = dtEndDate.Value;
-                entity.StartTime = dtStartTime.Value.TimeOfDay;
-                entity.EndTime = dtEndTime.Value.TimeOfDay;
+                //entity.StartDateTime = dtStartDate.Value;
+                //entity.EndDateTime = dtEndDate.Value;
+                //entity.StartTime = dtStartTime.Value.TimeOfDay;
+                //entity.EndTime = dtEndTime.Value.TimeOfDay;
 
-                entity.Recurrence = (long)recurrenceTrack.Value;
-                entity.Interval = (long)intervalTrack.Value;
-                entity.TimeZone = cmbTz.SelectedValue as string;
+                //entity.Recurrence = (long)recurrenceTrack.Value;
+                //entity.Interval = (long)intervalTrack.Value;
+                //entity.TimeZone = cmbTz.SelectedValue as string;
 
-                return base.Entity;
+                //return base.Entity;
+                return null;
             }
             set
             {
-                base.Entity = value as TimerTask;
+                //base.Entity = value as TimerTask;
             }
         }
 
-        public override bool ValidateEntity()
+        public bool ValidateEntity()
         {
             if(dtStartDate.Value > dtEndDate.Value)
             {
@@ -63,12 +64,15 @@ namespace XecMeConfig.Controls
             return true;
         }
 
-        protected override List<Parameter> DataSource
+        protected List<Parameter> DataSource
         {
             set
             {
                 parameters.DataSource = value;
             }
         }
+
+      
+
     }
 }

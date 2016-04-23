@@ -28,7 +28,7 @@ namespace XecMe.Core.Tasks
         public TaskManagerConfig()
         {
             _runners = new List<TaskRunner>();
-            foreach (TaskRunnerElement taskRunner in TaskManagerSection.ThisSection.TaskRunners)
+            foreach (TaskRunnerElement taskRunner in TaskManagerSection.ThisSection.Tasks)
             {
                 _runners.Add(taskRunner.GetRunner());
             }

@@ -24,7 +24,7 @@ using System.ServiceProcess;
 using System.Text;
 using System.IO;
 using XecMe.Common;
-using XecMe.Core.Diagnostics;
+using XecMe.Common.Diagnostics;
 
 namespace XecMe.Core.Services
 {

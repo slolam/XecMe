@@ -25,10 +25,22 @@ using SimpleInjector;
 
 namespace XecMe.Core.Tasks
 {
+    /// <summary>
+    /// Instance of this type hold the execution context of the tasks
+    /// </summary>
     public class ExecutionContext : Dictionary<string, object>
     {
+        /// <summary>
+        /// TaskRunner for this task
+        /// </summary>
         private TaskRunner _taskRunner;
+        /// <summary>
+        /// Parameters for this task from configuration
+        /// </summary>
         private StringDictionary _parameters;
+        /// <summary>
+        /// Simple injector container for DI
+        /// </summary>
         private static Container _container;
         /// <summary>
         /// Parameters initialized in the config
@@ -38,17 +50,26 @@ namespace XecMe.Core.Tasks
             get { return _parameters; }
         }
 
+        /// <summary>
+        /// Internal Simple Injector container to be used in the Task
+        /// </summary>
         internal static Container InternalContainer
         {
             get { return _container; }
             set { _container = value; }
         }
 
+        /// <summary>
+        /// Simple Injector container
+        /// </summary>
         public Container Container
         {
             get { return _container; }
         }
 
+        /// <summary>
+        /// TaskRummer instance running this task
+        /// </summary>
         public TaskRunner TaskRunner
         {
             get 
@@ -60,9 +81,18 @@ namespace XecMe.Core.Tasks
                 _taskRunner = value; 
             }
         }
+        /// <summary>
+        /// Constructor to create ExecutionContext from parameters
+        /// </summary>
+        /// <param name="parameter">Parameters initialized from the config</param>
         public ExecutionContext(StringDictionary parameter):this(parameter, null)
         {
         }
+        /// <summary>
+        /// Constructor to create ExecutionContext from the parameters and the parent TaskRunner instance
+        /// </summary>
+        /// <param name="parameter">Parameters initialized from the config</param>
+        /// <param name="taskRunner">TaskRunner executing the current task</param>
         public ExecutionContext(StringDictionary parameter, TaskRunner taskRunner)
         {
             Guard.ArgumentNotNull(parameter, "parameter");
@@ -70,6 +100,10 @@ namespace XecMe.Core.Tasks
             _taskRunner = taskRunner;
         }
 
+        /// <summary>
+        /// Create the deep copy of this instance 
+        /// </summary>
+        /// <returns></returns>
         public ExecutionContext Copy()
         {
             ExecutionContext retVal = new ExecutionContext(_parameters, _taskRunner);

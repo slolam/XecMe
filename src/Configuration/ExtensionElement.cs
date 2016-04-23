@@ -32,6 +32,9 @@ namespace XecMe.Configuration
         private const string NAME = "name";
         #endregion
 
+        /// <summary>
+        /// Gets or sets the type string of the configuration extension element
+        /// </summary>
         [ConfigurationProperty(TYPE, IsRequired=true)]
         public string Type
         {
@@ -39,6 +42,9 @@ namespace XecMe.Configuration
             set { base[TYPE] = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the name associated with this configuration extension element
+        /// </summary>
         [ConfigurationProperty(NAME, IsRequired = true, IsKey=true)]
         public string Name
         {

@@ -63,12 +63,12 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFrameworkProfile />
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Framework)' == 'net451' ">
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+  <PropertyGroup Condition=" '$(Framework)' == 'net46' ">
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
+    <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\$(Framework)</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
@@ -135,7 +135,7 @@
     <!-- This is the key to the whole process. The second build happens here.  We set our 'Framework' variable allowing the above PropertyGroups to run more frameworks.  -->
     <MSBuild Condition=" '$(Framework)' == 'net40' And '$(Configuration)' == 'Release'" Projects="$(MSBuildProjectFile)" Properties="Framework=net40-client" RunEachTargetSeparately="true" />
     <MSBuild Condition=" '$(Framework)' == 'net40-client' And '$(Configuration)' == 'Release'" Projects="$(MSBuildProjectFile)" Properties="Framework=net45" RunEachTargetSeparately="true" />
-    <MSBuild Condition=" '$(Framework)' == 'net45' And '$(Configuration)' == 'Release'" Projects="$(MSBuildProjectFile)" Properties="Framework=net451" RunEachTargetSeparately="true" />
+    <MSBuild Condition=" '$(Framework)' == 'net45' And '$(Configuration)' == 'Release'" Projects="$(MSBuildProjectFile)" Properties="Framework=net46" RunEachTargetSeparately="true" />
     <!-- You could repeat the above node again here and target another framework if there was a property group that would evaluate to true-->
     <!-- Just more logging -->
     <Message Text="Exiting After Build TargetFrameworkVersion:$(TargetFrameworkVersion) Framework:$(Framework)" Importance="high" />

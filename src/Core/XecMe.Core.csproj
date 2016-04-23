@@ -66,13 +66,13 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFrameworkProfile />
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Framework)' == 'net451' ">
+  <PropertyGroup Condition=" '$(Framework)' == 'net46' ">
     <SimpleInjectorReference>net45</SimpleInjectorReference>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
+    <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\$(Framework)</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
@@ -82,7 +82,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="SimpleInjector, Version=2.8.0.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
-      <HintPath>..\packages\SimpleInjector.2.8.0\lib\$(SimpleInjectorReference)\SimpleInjector.dll</HintPath>
+      <HintPath>..\packages\SimpleInjector.2.8.0\lib\net40-client\SimpleInjector.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -140,7 +140,6 @@
     <Compile Include="Tasks\TaskManager.cs" />
     <Compile Include="Tasks\TaskWrapper.cs" />
     <Compile Include="Tasks\TimerTaskRunner.cs" />
-    <Compile Include="Diagnostics\Log.cs" />
     <Compile Include="Utils\DomainInitializer.cs" />
     <Compile Include="Services\ServiceHost.cs">
       <SubType>Component</SubType>
@@ -205,7 +204,7 @@
     <!-- This is the key to the whole process. The second build happens here.  We set our 'Framework' variable allowing the above PropertyGroups to run more frameworks.  -->
     <MSBuild Condition=" '$(Framework)' == 'net40' And '$(Configuration)' == 'Release'" Projects="$(MSBuildProjectFile)" Properties="Framework=net40-client" RunEachTargetSeparately="true" />
     <MSBuild Condition=" '$(Framework)' == 'net40-client' And '$(Configuration)' == 'Release'" Projects="$(MSBuildProjectFile)" Properties="Framework=net45" RunEachTargetSeparately="true" />
-    <MSBuild Condition=" '$(Framework)' == 'net45' And '$(Configuration)' == 'Release'" Projects="$(MSBuildProjectFile)" Properties="Framework=net451" RunEachTargetSeparately="true" />
+    <MSBuild Condition=" '$(Framework)' == 'net45' And '$(Configuration)' == 'Release'" Projects="$(MSBuildProjectFile)" Properties="Framework=net46" RunEachTargetSeparately="true" />
     <!-- You could repeat the above node again here and target another framework if there was a property group that would evaluate to true-->
     <!-- Just more logging -->
     <Message Text="Exiting After Build TargetFrameworkVersion:$(TargetFrameworkVersion) Framework:$(Framework)" Importance="high" />

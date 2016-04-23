@@ -22,7 +22,7 @@ using System.Threading;
 using XecMe.Core.Configuration;
 using System.Diagnostics;
 using SimpleInjector;
-using XecMe.Core.Diagnostics;
+using XecMe.Common.Diagnostics;
 
 namespace XecMe.Core.Tasks
 {

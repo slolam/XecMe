@@ -27,16 +27,53 @@ using System.Diagnostics;
 
 namespace XecMe.Core.Tasks
 {
+    /// <summary>
+    /// EventTaskRunner subscribe to a event topic and runs the task when it receive the event in the topic
+    /// </summary>
     public class EventTaskRunner : TaskRunner
     {
+        /// <summary>
+        /// Instance of the task
+        /// </summary>
         private ITask _task;
+        /// <summary>
+        /// Execution context for the task
+        /// </summary>
         private ExecutionContext _executionContext;
+        /// <summary>
+        /// Name of the event topic this runner is subscribed to
+        /// </summary>
         private string _eventTopic;
+        /// <summary>
+        /// Threading option fo this task runner
+        /// </summary>
         private ThreadOption _threadOption;
+        /// <summary>
+        /// Mutext for synchronization
+        /// </summary>
         private ManualResetEvent _syncEvent = null;
+        /// <summary>
+        /// Event arguments queued for execution
+        /// </summary>
         private Queue<EventArgs> _queue = null;
+        /// <summary>
+        /// Indicate whether a thread is processing
+        /// </summary>
         private bool _threadWorking = false;
+        /// <summary>
+        /// Timeout before the task stops
+        /// </summary>
         private int _timeout;
+        /// <summary>
+        /// Contructor for the EentTaskRunner
+        /// </summary>
+        /// <param name="name">Unique name of the task runner</param>
+        /// <param name="taskType">.NET Type for the task</param>
+        /// <param name="parameters">Parameters from the configuration</param>
+        /// <param name="eventTopic">Name of the event topic</param>
+        /// <param name="threadOption">ThreadOption for the task</param>
+        /// <param name="timeout">Timeout of the runner before it stops</param>
+        /// <param name="traceType">TraceType filter for this runner</param>
         public EventTaskRunner(string name, Type taskType, StringDictionary parameters, string eventTopic, ThreadOption threadOption, int timeout, TraceType traceType) :
             base(name, taskType, parameters, traceType)
         {
@@ -58,7 +95,9 @@ namespace XecMe.Core.Tasks
 
 
         #region TaskRunner Members
-
+        /// <summary>
+        /// Starts this task runner
+        /// </summary>
         public override void Start()
         {
             lock (this)
@@ -74,6 +113,9 @@ namespace XecMe.Core.Tasks
             TraceInformation("Started");
         }
 
+        /// <summary>
+        /// Stops this task runner
+        /// </summary>
         public override void Stop()
         {
             EventManager.RemoveSubscriber(_eventTopic, this, "EventSink");
@@ -127,6 +169,11 @@ namespace XecMe.Core.Tasks
         #endregion
 
         #region Event Subscription
+        /// <summary>
+        /// This method subscribes to the event
+        /// </summary>
+        /// <param name="sender">Publisher object</param>
+        /// <param name="args">EventArg of published by publisher</param>
         private void EventSink(object sender, EventArgs args)
         {
             switch (_threadOption)
@@ -173,6 +220,11 @@ namespace XecMe.Core.Tasks
             }
 
         }
+
+        /// <summary>
+        /// Runs the underlying task
+        /// </summary>
+        /// <param name="args">EventArg published by publisher</param>
         private void RunTask(EventArgs args)
         {
             ExecutionContext ec = null;
@@ -264,19 +316,27 @@ namespace XecMe.Core.Tasks
         }
 
         #endregion
-
+        /// <summary>
+        /// Sets the mutex to allow thread to process
+        /// </summary>
         private void Set()
         {
             if (_threadOption != ThreadOption.BackgroundSerial)
                 _syncEvent.Set();
         }
 
+        /// <summary>
+        /// Resets the mutex to block the threads to process
+        /// </summary>
         private void Reset()
         {
             if (_threadOption != ThreadOption.BackgroundSerial)
                 _syncEvent.Reset();
         }
 
+        /// <summary>
+        /// Waits until mutex is signaled
+        /// </summary>
         private void Wait()
         {
             if (_threadOption != ThreadOption.BackgroundSerial)

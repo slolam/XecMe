@@ -21,12 +21,18 @@ using System.Text;
 using XecMe.Common;
 using System.Reflection;
 using System.Diagnostics;
-using XecMe.Core.Diagnostics;
+using XecMe.Common.Diagnostics;
 
 namespace XecMe.Core.Events
 {
+    /// <summary>
+    /// Event broker that wire all the events together by ties them through event topic
+    /// </summary>
     public static class EventManager
     {
+        /// <summary>
+        /// Field to hold the event topic name to event topic object
+        /// </summary>
         private static Dictionary<string, EventTopic> _eventTopics;
 
         static EventManager()
@@ -34,6 +40,11 @@ namespace XecMe.Core.Events
             _eventTopics = new Dictionary<string, EventTopic>();
         }
 
+        /// <summary>
+        /// Returns the EventTopic object for the event topic is exists else return null
+        /// </summary>
+        /// <param name="topic">Event topic name</param>
+        /// <returns>EventTopic object associated with the event topic</returns>
         public static EventTopic GetEventTopic(string topic)
         {
             if(_eventTopics.ContainsKey(topic))
@@ -41,6 +52,11 @@ namespace XecMe.Core.Events
             return null;
         }
 
+        /// <summary>
+        /// Returns the EventTopic object for the event topic. If does not already exist creates one
+        /// </summary>
+        /// <param name="topic">Event topic name</param>
+        /// <returns>EventTopic object associated with the event topic</returns>
         public static EventTopic CreateOrGetEventTopic(string topic)
         {
             lock (_eventTopics)
@@ -79,22 +95,36 @@ namespace XecMe.Core.Events
          * */
         #endregion
 
+        /// <summary>
+        /// Processes the object using reflection to wire up event source and sinks
+        /// </summary>
+        /// <param name="item">Object to be registered</param>
         public static void Register(object item)
         {
             Guard.ArgumentNotNull(item, "item");
-            ProcessPublishers(item, item.GetType(), true);
-            ProcessSubscribers(item, item.GetType(), true);
+            ProcessPublishers(item, true);
+            ProcessSubscribers(item, true);
         }
 
+        /// <summary>
+        /// Unregisters the object using reflection to remove the event source and sink
+        /// </summary>
+        /// <param name="item">Object to be unregistered</param>
         public static void Unregister(object item)
         {
             Guard.ArgumentNotNull(item, "item");
-            ProcessPublishers(item, item.GetType(), false);
-            ProcessSubscribers(item, item.GetType(), false);
+            ProcessPublishers(item, false);
+            ProcessSubscribers(item, false);
         }
 
-        private static void ProcessPublishers(object item, Type itemType, bool register)
+        /// <summary>
+        /// Process the object for event sources
+        /// </summary>
+        /// <param name="item">Object to be processed</param>
+        /// <param name="register">Registered if true, else false</param>
+        private static void ProcessPublishers(object item, bool register)
         {
+            Type itemType = item.GetType();
             lock (_eventTopics)
             {
                 foreach (EventInfo info in itemType.GetEvents(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
@@ -108,8 +138,14 @@ namespace XecMe.Core.Events
             }
         }
 
-        private static void ProcessSubscribers(object item, Type itemType, bool register)
+        /// <summary>
+        /// Process the object for event sinks
+        /// </summary>
+        /// <param name="item">Object to be processed</param>
+        /// <param name="register">Register if true, else false</param>
+        private static void ProcessSubscribers(object item, bool register)
         {
+            Type itemType = item.GetType();
             lock (_eventTopics)
             {
                 foreach (MethodInfo info in itemType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
@@ -123,16 +159,35 @@ namespace XecMe.Core.Events
             }
         }
 
+        /// <summary>
+        /// Add publishing source for the given event topic and event name. Use this method when EventPublicationAttribute is not used
+        /// </summary>
+        /// <param name="topic">Name of the event topic</param>
+        /// <param name="item">Object on which the event is present</param>
+        /// <param name="eventName">Name of the event on the object</param>
         public static void AddPublisher(string topic, object item, string eventName)
         {
             ProcessPublisher(topic, item, eventName, true);
         }
 
+        /// <summary>
+        /// Removes the publishing source from the given event topic name if exist. Use this method if you want to remove the publishing source
+        /// </summary>
+        /// <param name="topic">Name of the event topic</param>
+        /// <param name="item">Object on which the event is present</param>
+        /// <param name="eventName">Name of the event on the object</param>
         public static void RemovePublisher(string topic, object item, string eventName)
         {
             ProcessPublisher(topic, item, eventName, false);
         }
 
+        /// <summary>
+        /// Registers/unregister the event as publishing source in topic
+        /// </summary>
+        /// <param name="topic">Name of the event topic</param>
+        /// <param name="item">Object for the publishing source</param>
+        /// <param name="eventName">EVent name on the publishing object</param>
+        /// <param name="register">Register if true, else false</param>
         private static void ProcessPublisher(string topic, object item, string eventName, bool register)
         {
             Guard.ArgumentNotNullOrEmptyString(topic, "topic");
@@ -146,17 +201,37 @@ namespace XecMe.Core.Events
         }
 
 
-
+        /// <summary>
+        /// Register named method on the given object for the event topic with the threading option
+        /// </summary>
+        /// <param name="topic">Name of the event topic</param>
+        /// <param name="item">Object to be used for event sink</param>
+        /// <param name="methodName">Name of the method to be used for the sink</param>
+        /// <param name="threadOption">Threading option while consuming the event</param>
         public static void AddSubscriber(string topic, object item, string methodName, ThreadOption threadOption)
         {
             ProcessSubscriber(topic, item, methodName, threadOption, true);
         }
 
+        /// <summary>
+        /// Unregister named method on the given object for the event topic
+        /// </summary>
+        /// <param name="topic">Name of the event topic</param>
+        /// <param name="item">Object to be unregistered</param>
+        /// <param name="methodName">Name of the method</param>
         public static void RemoveSubscriber(string topic, object item, string methodName)
         {
             ProcessSubscriber(topic, item, methodName, ThreadOption.BackgroundParallel, false);
         }
 
+        /// <summary>
+        /// Registers/unregister the event sink for event topic
+        /// </summary>
+        /// <param name="topic">Name of the event topic</param>
+        /// <param name="item">Object to be processed for event sink</param>
+        /// <param name="methodName">Name of the method to be attached</param>
+        /// <param name="threadOption">Thread option to be used while processing this event</param>
+        /// <param name="register">Register if true, else false</param>
         private static void ProcessSubscriber(string topic, object item, string methodName, ThreadOption threadOption, bool register)
         {
             Guard.ArgumentNotNullOrEmptyString(topic, "topic");
