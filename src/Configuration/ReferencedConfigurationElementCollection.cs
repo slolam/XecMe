@@ -78,8 +78,6 @@ namespace XecMe.Configuration
             {
                 throw new ConfigurationErrorsException(string.Format("Type \"{0}\" is not subclass of \"{1}\"",elementType.ToString(), typeof(T).ToString()));
             }
-
-            //return base.OnDeserializeUnrecognizedElement(elementName, reader);
         }
     }
 }
