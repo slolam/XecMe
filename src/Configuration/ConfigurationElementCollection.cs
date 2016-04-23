@@ -32,7 +32,7 @@ namespace XecMe.Configuration
         }
 
         /// <summary>
-        /// This is used by the customer elements.
+        /// This is used by the custom elements.
         /// </summary>
         /// <param name="reader"></param>
         internal void Deserialize(System.Xml.XmlReader reader)

@@ -23,6 +23,9 @@ using System.Configuration;
 
 namespace XecMe.Configuration
 {
+    /// <summary>
+    /// This class is used to read the extension sections
+    /// </summary>
     public class ExtensionsSection: ConfigurationSection
     {
         #region Constants

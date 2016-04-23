@@ -23,6 +23,9 @@ using System.Configuration;
 
 namespace XecMe.Configuration
 {
+    /// <summary>
+    /// This class is used to create extension elements
+    /// </summary>
     public class ExtensionElement: ConfigurationElement
     {
         #region Constants
