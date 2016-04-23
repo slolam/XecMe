@@ -48,30 +48,35 @@ namespace XecMe.Core.Services
         {
             _service.OnStart();
             base.OnStart(args);
+            Trace.TraceInformation("Service \"{0}\" has started", ServiceName);
         }
 
         protected override void OnStop()
         {
             _service.OnStop();
             base.OnStop();
+            Trace.TraceInformation("Service \"{0}\" has stopped", ServiceName);
         }
 
         protected override void OnContinue()
         {
             _service.OnContinue();
             base.OnContinue();
+            Trace.TraceInformation("Service \"{0}\" has resumed", ServiceName);
         }
 
         protected override void OnPause()
         {
             _service.OnPause();
             base.OnPause();
+            Trace.TraceInformation("Service \"{0}\" has paused", ServiceName);
         }
 
         protected override void OnShutdown()
         {
             _service.OnShutdown();
             base.OnShutdown();
+            Trace.TraceInformation("Service \"{0}\" has shutdown", ServiceName);
         }
     }
 }

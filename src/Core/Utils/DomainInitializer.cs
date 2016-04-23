@@ -72,7 +72,7 @@ namespace XecMe.Core.Utils
                 }
                 catch (Exception badEx)
                 {
-                    Trace.TraceError("Bad Error:" + badEx.ToString());
+                    Trace.TraceError("Bad Error: {0}", badEx);
                 }
             }
         }
@@ -80,6 +80,33 @@ namespace XecMe.Core.Utils
         private static void Initialize(string[] args)
         {
             ServiceInfo.ServiceName = args[0];
+            AppDomain current = AppDomain.CurrentDomain;
+            current.AssemblyLoad += new AssemblyLoadEventHandler(AssemblyLoad);
+            current.AssemblyResolve += new ResolveEventHandler(AssemblyResolve);
+            current.ReflectionOnlyAssemblyResolve += new ResolveEventHandler(ReflectionOnlyAssemblyResolve);
+            current.UnhandledException += new UnhandledExceptionEventHandler(UnhandledException);
+        }
+
+        static void UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            Trace.TraceError("Unhandled Exception: {0}", e.ExceptionObject);
+        }
+
+        static System.Reflection.Assembly ReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            Trace.TraceInformation("Reflection Resolve assembly {0} : {1}", args.Name, args.RequestingAssembly);
+            return null;
+        }
+
+        static System.Reflection.Assembly AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            Trace.TraceInformation("Resolve assembly {0} : {1}", args.Name, args.RequestingAssembly);
+            return null;
+        }
+
+        static void AssemblyLoad(object sender, AssemblyLoadEventArgs args)
+        {
+            Trace.TraceInformation("Assembly loaded {0}", args.LoadedAssembly);
         }
     }
 }

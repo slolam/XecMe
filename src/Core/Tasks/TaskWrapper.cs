@@ -55,7 +55,7 @@ namespace XecMe.Core.Tasks
                     }
                     catch (Exception badEx)
                     {
-                        Trace.TraceError("Bad Error:" + badEx.ToString());
+                        Trace.TraceError("Bad Error: {0}", badEx);
                     }
                 }
             }
@@ -78,7 +78,7 @@ namespace XecMe.Core.Tasks
                 }
                 catch (Exception badEx)
                 {
-                    Trace.TraceError("Bad Error:" + badEx.ToString());
+                    Trace.TraceError("Bad Error: {0}", badEx);
                 }
                 return ExecutionState.Exception;
             }
@@ -99,9 +99,14 @@ namespace XecMe.Core.Tasks
                 }
                 catch (Exception badEx)
                 {
-                    Trace.TraceError("Bad Error:" + badEx.ToString());
+                    Trace.TraceError("Bad Error: {0}", badEx);
                 }
             }
+        }
+
+        public ExecutionContext Context
+        {
+            get { return _executionContext; }
         }
     }
 }

@@ -58,8 +58,8 @@ namespace XecMe.Core.Configuration
             set { base[INTERVAL] = value; }
         }
 
-        [ConfigurationProperty(RECURRENCE, IsRequired = false, DefaultValue = -1)]
-        [LongValidator(MinValue = -1, MaxValue = long.MaxValue)]
+        [ConfigurationProperty(RECURRENCE, IsRequired = false, DefaultValue = -1L)]
+        [LongValidator(MinValue = -1L, MaxValue = long.MaxValue)]
         public long Recurrence
         {
             get { return (long)base[RECURRENCE]; }
@@ -102,7 +102,7 @@ namespace XecMe.Core.Configuration
                     throw new ConfigurationErrorsException(string.Concat(DAY_START_TIME, " should be greater than 0 seconds"));
 
                 if (DayEndTime < value)
-                    throw new ConfigurationErrorsException(string.Concat(DAY_START_TIME," is greater than ", DAY_END_TIME));
+                    throw new ConfigurationErrorsException(string.Concat(DAY_START_TIME, " is greater than ", DAY_END_TIME));
 
                 base[DAY_START_TIME] = value;
             }
@@ -115,7 +115,7 @@ namespace XecMe.Core.Configuration
             set
             {
                 if (TS_MAX < value)
-                    throw new ConfigurationErrorsException(string.Concat(DAY_END_TIME,"{0} should be less than 23:59:59"));
+                    throw new ConfigurationErrorsException(string.Concat(DAY_END_TIME, " should be less than 23:59:59"));
 
                 if (DayStartTime > value)
                     throw new ConfigurationErrorsException(string.Concat(DAY_END_TIME, " is less than ", DAY_START_TIME));
@@ -127,8 +127,8 @@ namespace XecMe.Core.Configuration
 
         public override TaskRunner GetRunner()
         {
-            return new TimerTaskRunner(this.Name, this.GetTaskType(), InternalParameters(), Interval, Recurrence) 
-                    { StartDateTime = this.StartDateTime, EndDateTime = this.EndDateTime, DayStartTime = this.DayStartTime, DayEndTime = this.DayEndTime  };
+            return new TimerTaskRunner(this.Name, this.GetTaskType(), InternalParameters(), Interval, Recurrence,
+                    this.StartDateTime, this.EndDateTime, this.DayStartTime, this.DayEndTime);
         }
     }
 }

@@ -24,6 +24,7 @@ using XecMe.Core.Utils;
 using XecMe.Common;
 using XecMe.Core.Events;
 using System.Threading;
+using System.Diagnostics;
 
 namespace XecMe.Core.Tasks
 {
@@ -37,7 +38,7 @@ namespace XecMe.Core.Tasks
         private StringDictionary _parameters;
         private EventWaitHandle _waitHandle;
         private string _name;
-        protected event Events.EventHandler<ExecutionContext> Completed;
+        public event Events.EventHandler<ExecutionContext> Completed;
         public TaskRunner(string name, Type taskType, StringDictionary parameters)
         {
             Guard.ArgumentNotNullOrEmptyString(name, "name");
@@ -47,7 +48,7 @@ namespace XecMe.Core.Tasks
             _taskType = taskType;
             _parameters = parameters;
             _waitHandle = new EventWaitHandle(true, EventResetMode.ManualReset);
-            EventManager.AddPublisher(string.Concat("ITask.", _name, ".Completed"), this, "Completed"); 
+            EventManager.AddPublisher(string.Concat("Task.", _name, ".Completed"), this, "Completed"); 
         }
 
         public string Name
@@ -85,6 +86,7 @@ namespace XecMe.Core.Tasks
         protected void RaiseComplete(ExecutionContext context)
         {
             Completed(this, new EventArgs<ExecutionContext>(context.Copy()));
+            Trace.TraceInformation("Task {0} has completed and raised the event", _name);
         }
     }
 }

@@ -23,6 +23,7 @@ using XecMe.Core.Tasks;
 using XecMe.Core.Utils;
 using System.Threading;
 using System.Collections.Specialized;
+using System.Diagnostics;
 
 namespace XecMe.Core.Tasks
 {
@@ -88,9 +89,9 @@ namespace XecMe.Core.Tasks
             base(name, taskType, parameters)
         {
             if (min < 1 || max < min)
-                throw new ArgumentOutOfRangeException("min and max should be greater than 1 and min should be less than or equal to max");
+                throw new ArgumentOutOfRangeException("min", "min and max should be greater than 1 and min should be less than or equal to max");
             if (idlePollingPeriod < 100)
-                throw new ArgumentOutOfRangeException("idlePollingPeriod should be at least 100ms.");
+                throw new ArgumentOutOfRangeException("max", "idlePollingPeriod should be at least 100ms.");
             _minInstances = min;
             _maxInstances = max;
             _idlePollingPeriod = idlePollingPeriod;
@@ -146,6 +147,7 @@ namespace XecMe.Core.Tasks
                     _parallelInstances = 0;
                     QueueTask();
                     base.Start();
+                    Trace.TraceInformation("Parallel task \"{0}\" has started", this.Name);
                 }
             }
         }
@@ -175,6 +177,7 @@ namespace XecMe.Core.Tasks
                     _parallelInstances = 0;
                     _isStarted = false;
                     base.Stop();
+                    Trace.TraceInformation("Parallel task \"{0}\" has stopped", this.Name);
                 }
             }
         }
@@ -210,7 +213,11 @@ namespace XecMe.Core.Tasks
                 _parallelInstances++;
             }
 
+            Trace.TraceInformation("Parallel task \"{0}\" is running {1} threads", this.Name, _parallelInstances);
+
             ExecutionState executionState = taskWrapper.RunTask();
+            Trace.TraceInformation("Parallel task \"{0}\" has executed with return value {1}", this.Name, executionState);
+    
             switch (executionState)
             {
                 case ExecutionState.Executed:
@@ -227,6 +234,7 @@ namespace XecMe.Core.Tasks
                             QueueTask();
                         }
                     }
+                    RaiseComplete(taskWrapper.Context);
                     break;
                 case ExecutionState.Stop:
                     //Since the task has indicated to stop, release it

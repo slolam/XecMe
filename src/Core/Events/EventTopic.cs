@@ -59,7 +59,7 @@ namespace XecMe.Core.Events
                     }
                     catch (Exception e)
                     {
-                        Trace.TraceError("Error while firing the event" + e.ToString());
+                        Trace.TraceError("Error while firing the event: {0}", e);
                     }
                 }
             }
@@ -81,11 +81,15 @@ namespace XecMe.Core.Events
             Delegate handler = Delegate.CreateDelegate(info.EventHandlerType, this, this.GetType().GetMethod("HandlePublish", BindingFlags.Instance | BindingFlags.NonPublic));
             if (register)
             {
-                info.AddEventHandler(item, handler);
+                var addMethod = info.GetAddMethod(true);
+                addMethod.Invoke(item, new object[] { handler });
+                Trace.TraceInformation("Added new subscriber to event topic {0}", _topic);
             }
             else
             {
-                info.RemoveEventHandler(item, handler);
+                var removeMethod = info.GetRemoveMethod(true);
+                removeMethod.Invoke(item, new object[] { handler });
+                Trace.TraceInformation("Removed new subscriber to event topic {0}", _topic);
             }
         }
 
@@ -98,10 +102,12 @@ namespace XecMe.Core.Events
                 if (register)
                 {
                     _subscribers.Add(new Subcriber(this, item, info, threadOption));
+                    Trace.TraceInformation("Added new publisher to event topic {0}", _topic);
                 }
                 else
                 {
                     _subscribers.Remove(new Subcriber(this, item, info, threadOption));
+                    Trace.TraceInformation("Removed new publisher to event topic {0}", _topic);
                 }
             }
         }

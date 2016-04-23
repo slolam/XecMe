@@ -49,7 +49,7 @@ namespace XecMe.Core.Tasks
             if (threadOption != ThreadOption.BackgroundSerial)
                 _syncEvent = new ManualResetEvent(true);
 
-            if (threadOption == ThreadOption.BackgroundParallel)
+            if (threadOption == ThreadOption.BackgroundSerial)
                 _queue = new Queue<EventArgs>();
         }
 
@@ -60,13 +60,14 @@ namespace XecMe.Core.Tasks
         {
             EventManager.AddSubscriber(_eventTopic, this, "EventSink", _threadOption);
             _task.OnStart(_executionContext);
+            Trace.TraceInformation("Event task \"{0}\" started", this.Name);
         }
 
         public override void Stop()
         {
             EventManager.RemoveSubscriber(_eventTopic, this, "EventSink");
             _task.OnStop(_executionContext);
-
+            Trace.TraceInformation("Event task \"{0}\" stopped", this.Name);
         }
 
         #endregion
@@ -82,7 +83,9 @@ namespace XecMe.Core.Tasks
                         _queue.Enqueue(args);
 
                         if (_threadWorking)
+                        {
                             return;
+                        }
 
                         _threadWorking = true;
                     }
@@ -113,6 +116,7 @@ namespace XecMe.Core.Tasks
         private void RunTask(EventArgs args)
         {
             ExecutionContext ec = null;
+            
             if (args is EventArgs<ExecutionContext>)
             {
                 ec = ((EventArgs<ExecutionContext>)args).Value;
@@ -133,12 +137,14 @@ namespace XecMe.Core.Tasks
                     }
                 }
             }
+            ec.TaskRunner = this;
 
             try
             {
                 this.Wait();
                 ITask task = _task;
                 ExecutionState state = _task.OnExecute(ec);
+                Trace.TraceInformation("Event task \"{0}\" is executed with a return value {1}", this.Name, state);
                 switch (state)
                 {
                     case ExecutionState.Stop:
@@ -164,7 +170,7 @@ namespace XecMe.Core.Tasks
                                     }
                                     catch (Exception badEx)
                                     {
-                                        Trace.TraceError("Bad Error:" + badEx.ToString());
+                                        Trace.TraceError("Bad Error: {0}", badEx);
                                     }
                                 }
                                 _task = this.GetTaskInstance();
@@ -179,7 +185,14 @@ namespace XecMe.Core.Tasks
             }
             catch (Exception ex)
             {
-                _task.OnUnhandledException(ex);
+                try
+                {
+                    _task.OnUnhandledException(ex);
+                }
+                catch (Exception badEx)
+                {
+                    Trace.TraceError("Bad Error: {0}", badEx);
+                }
             }
         }
 
@@ -202,6 +215,5 @@ namespace XecMe.Core.Tasks
             if (_threadOption != ThreadOption.BackgroundSerial)
                 _syncEvent.WaitOne();
         }
-
     }
 }

@@ -39,7 +39,14 @@ namespace XecMe.Core.Tasks
 
         public TaskRunner TaskRunner
         {
-            get { return _taskRunner; }
+            get 
+            {
+                return _taskRunner; 
+            }
+            internal set 
+            { 
+                _taskRunner = value; 
+            }
         }
         public ExecutionContext(StringDictionary parameter):this(parameter, null)
         {

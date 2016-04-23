@@ -26,7 +26,7 @@ namespace XecMe.Configuration
     public class XecMeSectionGroup: ConfigurationSectionGroup
     {
         #region Constants
-        private const string SECTION_GROUP = "XecMe.Core";
+        private const string SECTION_GROUP = "xecMe.Core";
         #endregion
         private static XecMeSectionGroup _section;
 

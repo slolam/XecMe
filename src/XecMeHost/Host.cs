@@ -47,19 +47,6 @@ namespace XecMe
         public const string APP_NAME = "WinSvc";
         #endregion
 
-        private static CrossDomainEventBroker _evtBroker;
-
-        static Host()
-        {
-            _evtBroker = new CrossDomainEventBroker();
-            _evtBroker.UnhandledException += new UnhandledExceptionEventHandler(_evtBroker_UnhandledException);
-        }
-
-        static void _evtBroker_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            Trace.TraceError("Very Bad Error:" + e.ExceptionObject.ToString());
-        }
-
         /// <summary> 
         /// This method  is entry point in WinSvc component 
         /// </summary> 
@@ -68,7 +55,7 @@ namespace XecMe
         /// <returns></returns> 
         [MTAThread]
         public static int Main(string[] a)
-        {           
+        {
             Arguments args = new Arguments(a);
             if (!string.IsNullOrEmpty(args["?"])
                 || !string.IsNullOrEmpty(args["help"]))
@@ -160,7 +147,7 @@ namespace XecMe
                                     break;
                                 case "user":
                                     ServiceInfo.Account = ServiceAccount.User;
-                                    if(string.IsNullOrEmpty(ServiceInfo.User))
+                                    if (string.IsNullOrEmpty(ServiceInfo.User))
                                         ServiceInfo.User = Thread.CurrentPrincipal.Identity.Name;
                                     break;
                                 default:
@@ -222,10 +209,10 @@ namespace XecMe
                         {
                             //This is required to support the Process name for the PerformanceCounters
                             //Registry Path HKEY_LOCAL_MACHINE-> SYSTEM-> CONTROLSET*-> SERVICES-> PerfProc-> Performance
-                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PerfProc\Performance", 
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PerfProc\Performance",
                                 "ProcessNameFormat", 2, RegistryValueKind.DWord);
                         }
-                        
+
                         EventLog.WriteEntry(ServiceInfo.ServiceName, "Service installed successfully.",
                             EventLogEntryType.Information);
                     }
@@ -269,6 +256,12 @@ namespace XecMe
             if (!string.IsNullOrEmpty(args[Constants.PARAM_TIMEOUT]))
             {
                 int.TryParse(args[Constants.PARAM_TIMEOUT], out ServiceInfo.Timeout);
+            }
+
+            if (ServiceInfo.CpuUsageLimit >= 5 && ServiceInfo.CpuUsageLimit <= 90)
+            {
+                CpuUsageLimiter.Limit = ServiceInfo.CpuUsageLimit;
+                CpuUsageLimiter.Start();
             }
 
             if (string.IsNullOrEmpty(args[Constants.PARAM_SERVICE]))
@@ -328,6 +321,7 @@ namespace XecMe
             appInfo.AppDomainInitializerArguments = new string[] { ServiceInfo.ServiceName };
             appInfo.LoaderOptimization = LoaderOptimization.MultiDomain;
             appInfo.ApplicationBase = ServiceInfo.Directory;
+            appInfo.PrivateBinPath = ServiceInfo.Directory;
             appInfo.ApplicationName = current.SetupInformation.ApplicationName;
             appInfo.DisallowCodeDownload = true;
 
@@ -335,21 +329,14 @@ namespace XecMe
             Thread thread = new Thread(new ThreadStart(delegate()
                 {
                     app = AppDomain.CreateDomain(ServiceInfo.ServiceName, current.Evidence, appInfo);
-                    if (ServiceInfo.CpuUsageLimit >= 5 && ServiceInfo.CpuUsageLimit <= 90)
-                    {
-                        CpuUsageLimiter.Limit = ServiceInfo.CpuUsageLimit;
-                        CpuUsageLimiter.Start();
-                    }
                 }));
-            Thread.Sleep(-1);
-
-            app.UnhandledException += new UnhandledExceptionEventHandler(_evtBroker.UnhandledExceptionSink);
+            thread.IsBackground = true;
+            thread.Start();
 
             if (ServiceInfo.Timeout > 0)
                 thread.Join(ServiceInfo.Timeout * 1000);
-
-            thread.Join();
-            
+            else
+                thread.Join();
         }
 
         /// <summary>
@@ -365,17 +352,11 @@ namespace XecMe
             appInfo.AppDomainInitializerArguments = new string[] { ServiceInfo.ServiceName };
             appInfo.LoaderOptimization = LoaderOptimization.MultiDomain;
             appInfo.ApplicationBase = ServiceInfo.Directory;
+            appInfo.PrivateBinPath = ServiceInfo.Directory;
             appInfo.ApplicationName = current.SetupInformation.ApplicationName;
             appInfo.DisallowCodeDownload = true;
 
             AppDomain app = AppDomain.CreateDomain(ServiceInfo.ServiceName, current.Evidence, appInfo);
-            if (ServiceInfo.CpuUsageLimit >= 5 && ServiceInfo.CpuUsageLimit <= 90)
-            {
-                CpuUsageLimiter.Limit = ServiceInfo.CpuUsageLimit;
-                CpuUsageLimiter.Start();
-            }
-
-            app.UnhandledException += new UnhandledExceptionEventHandler(_evtBroker.UnhandledExceptionSink);
         }
     }
 }
