@@ -4,7 +4,8 @@
  Now the task on the designer and developer is to solve the problem in a task based approach. Let us take some examples of solving the problem.
 
 **Batch job to generate a file and post it to a partner's FTP site.**
-There are 3 main activities in this job. Retrieving data from the data source, creating a file and posting it to a FTP site. One can code all the 3 activities in to a single ITask implementation. However it is recommended to break this problem into 3 tasks viz. 
+There are 3 main activities in this job. Retrieving data from the data source, creating a file and posting it to a FTP site. One can code all the 3 activities in to a single ITask implementation. However it is recommended to break this problem into 3 tasks viz.
+
 1. Retrieving from the database 
 2. Generating the file 
 3. Posting a file to FTP site
