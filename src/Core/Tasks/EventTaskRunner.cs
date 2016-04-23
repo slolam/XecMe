@@ -74,6 +74,7 @@ namespace XecMe.Core.Tasks
         {
             EventManager.RemoveSubscriber(_eventTopic, this, "EventSink");
             if (_threadOption != ThreadOption.Publisher)
+            {
                 ThreadPool.QueueUserWorkItem(delegate(object o)
                 {
                     Thread.Sleep(_timeout);
@@ -81,6 +82,12 @@ namespace XecMe.Core.Tasks
                     Trace.TraceInformation("Event task \"{0}\" stopped", this.Name);
                     base.Stop();
                 });
+            }
+            else
+            {
+                _task.OnStop(_executionContext);
+                Trace.TraceInformation("Event task \"{0}\" stopped", this.Name);
+            }
         }
 
         #endregion

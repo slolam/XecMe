@@ -1,9 +1,9 @@
 ﻿This document contains the description of this project.
 
-Project Name: WinHost
+Project Name: XecMeHost
 Project Type: Executable
 Project Default Namespace: XecMe
-Project Output : WinHost.exe
+Project Output : XecMeHost.exe
 Project References: XecMe.Core.dll
 Signed Assembly : No
 GAC-able : No

@@ -105,6 +105,13 @@ namespace XecMe.Core.Tasks
                 throw new ArgumentNullException("schedule", "schedule cannot be null");
             if (startDate > DateTime.Now)
                 throw new ArgumentNullException("startDate should be less than now");
+            _schedule = schedule.ToUpper();
+            _recursion = recursion;
+            _startDate = startDate;
+            _repeat = repeat;
+            _taskTime = taskTime;
+            _timeZoneInfo = timeZoneInfo ?? TimeZoneInfo.Local;
+
 
             switch (recursion)
             {
@@ -115,10 +122,10 @@ namespace XecMe.Core.Tasks
                     //WD:Tuesday, Friday, Monday
                     Weekdays weekdays = Weekdays.None;
                     if (schedule.Length < 3 || schedule.Substring(0, 3) != "WD:")
-                        throw new ArgumentOutOfRangeException("schedule", "schedule does not conform to the format");
+                        throw new ArgumentOutOfRangeException("schedule", "schedule does not have the weekdays defined for the Weekly tasks");
 
                     if (!Enum.TryParse<Weekdays>(schedule.Substring(3), true, out weekdays) || weekdays == Weekdays.None)
-                        throw new ArgumentOutOfRangeException("schedule", "schedule does not conform to the format");
+                        throw new ArgumentOutOfRangeException("schedule", "schedule does not have the weekdays defined for the Weekly tasks");
 
                     _recur = new Weekly(repeat, weekdays);
                     break;
@@ -136,16 +143,16 @@ namespace XecMe.Core.Tasks
                         switch (item.Substring(0, 3))
                         {
                             case "MN:":
-                                if (!Enum.TryParse<Months>(item.Substring(3), true, out months))
-                                    throw new ArgumentOutOfRangeException("schedule", "schedule does not conform to the format");
+                                if (!Enum.TryParse<Months>(item.Substring(3), true, out months) || months == Months.None)
+                                    throw new ArgumentOutOfRangeException("schedule", "schedule does not have the months defined for the Monthly tasks");
                                 break;
                             case "WK:":
-                                if (!Enum.TryParse<Week>(item.Substring(3), true, out week))
-                                    throw new ArgumentOutOfRangeException("schedule", "schedule does not conform to the format");
+                                if (!Enum.TryParse<Week>(item.Substring(3), true, out week) || week == Week.None)
+                                    throw new ArgumentOutOfRangeException("schedule", "schedule does not have the weeks defined for the Monthly tasks");
                                 break;
                             case "WD:":
-                                if (!Enum.TryParse<Weekdays>(item.Substring(3), true, out weekdays))
-                                    throw new ArgumentOutOfRangeException("schedule", "schedule does not conform to the format");
+                                if (!Enum.TryParse<Weekdays>(item.Substring(3), true, out weekdays) || weekdays == Weekdays.None)
+                                    throw new ArgumentOutOfRangeException("schedule", "schedule does not have the weekdays defined for the Monthly tasks");
                                 break;
                             case "DY:":
                                 foreach (var d in item.Substring(3).Split(','))
@@ -155,8 +162,10 @@ namespace XecMe.Core.Tasks
 
                                     if (d == "LAST")
                                         days |= 0x80000000;//Last day of the month
+                                    else if (d == "ALL")
+                                        days |= 0x7FFFFFFF;//This is for all 1-31 days
                                     else if (!int.TryParse(d, out x) || (x < 1 && x > 31))
-                                        throw new ArgumentOutOfRangeException("schedule", "schedule does not conform to the format");
+                                        throw new ArgumentOutOfRangeException("schedule", "schedule does not have the day defined for the Monthly tasks in a valid range");
                                     else
                                         days |= day << (x - 1);
                                 }
@@ -165,8 +174,7 @@ namespace XecMe.Core.Tasks
                                 throw new ArgumentOutOfRangeException("schedule", "schedule does not conform to the format");
                         }
                     }
-                    if (months == Months.None)
-                        throw new ArgumentOutOfRangeException("schedule", "schedule does not conform to the format");
+
                     if (week != Week.None && weekdays != Weekdays.None)
                         _recur = new MonthlyByWeekdays(months, weekdays, week);
                     else if (days > 1)
@@ -177,12 +185,6 @@ namespace XecMe.Core.Tasks
                 default:
                     throw new ArgumentOutOfRangeException("schedule", "schedule does not conform to the format");
             }
-            _recursion = recursion;
-            _startDate = startDate;
-            _repeat = repeat;
-            _taskTime = taskTime;
-            _schedule = schedule.ToUpper();
-            _timeZoneInfo = timeZoneInfo ?? TimeZoneInfo.Local;
 
             _lastDateTime = new DateTime(_startDate.Year, _startDate.Month, _startDate.Day, _taskTime.Hours, _taskTime.Minutes, _taskTime.Seconds, DateTimeKind.Unspecified);
         }
@@ -309,7 +311,7 @@ namespace XecMe.Core.Tasks
         DateTime Next(DateTime from);
     }
 
-    public class Daily : IRecur
+    internal class Daily : IRecur
     {
         int _repeat;
 
@@ -325,7 +327,7 @@ namespace XecMe.Core.Tasks
         }
     }
 
-    public class Weekly : IRecur
+    internal class Weekly : IRecur
     {
         int _repeat;
         Weekdays _weekdays;
@@ -333,7 +335,7 @@ namespace XecMe.Core.Tasks
         {
             if (repeat < 1)
                 throw new ArgumentOutOfRangeException("repeat");
-            _repeat = repeat;
+            _repeat = repeat - 1;//Multiplying with 7(week) becomes easy when we do it here
             _weekdays = weekdays;
         }
 
@@ -344,13 +346,13 @@ namespace XecMe.Core.Tasks
             if (_weekdays == Weekdays.All)
             {
                 if (thisDay == Weekdays.Saturday)
-                    from = from.AddDays(_repeat * 7 + 1);
+                    from = from.AddDays((_repeat * 7) + 1);
                 else
                     from = from.AddDays(1);
             }
             else
             {
-                int d, i = (((int)from.DayOfWeek) % 7);
+                int d, i = (int)from.DayOfWeek;
                 for (d = 0; !Utils.HasWeekday(_weekdays, Utils.WeekdayList[i]); i = ++i % 7)
                 {
                     d++;
@@ -362,14 +364,14 @@ namespace XecMe.Core.Tasks
                 }
                 else
                 {
-                    from = from.AddDays(d + ((_repeat - 1) * 7));
+                    from = from.AddDays(d + (_repeat * 7));
                 }
             }
             return from;
         }
     }
 
-    public class MonthlyByWeekdays : IRecur
+    internal class MonthlyByWeekdays : IRecur
     {
         Months _months;
         Weekdays _weekdays;
@@ -498,7 +500,7 @@ namespace XecMe.Core.Tasks
         }
     }
 
-    public class MonthlyByDay : IRecur
+    internal class MonthlyByDay : IRecur
     {
         const uint LAST = 0x80000000;
         Months _months;
@@ -548,8 +550,8 @@ namespace XecMe.Core.Tasks
 
     static class Utils
     {
-        public readonly static ReadOnlyCollection<Weekdays> WeekdayList;
-        public readonly static ReadOnlyCollection<Months> MonthList;
+        public readonly static Weekdays[] WeekdayList;
+        public readonly static Months[] MonthList;
 
         static Utils()
         {
@@ -562,7 +564,7 @@ namespace XecMe.Core.Tasks
             weekdayList.Add(Weekdays.Friday);
             weekdayList.Add(Weekdays.Saturday);
 
-            WeekdayList = weekdayList.AsReadOnly();
+            WeekdayList = weekdayList.ToArray();
 
             List<Months> monthList = new List<Months>(12);
             monthList.Add(Months.January);
@@ -578,7 +580,7 @@ namespace XecMe.Core.Tasks
             monthList.Add(Months.November);
             monthList.Add(Months.December);
 
-            MonthList = monthList.AsReadOnly();
+            MonthList = monthList.ToArray();
         }
         public static Months GetMonth(int month)
         {
