@@ -25,6 +25,7 @@ using XecMe.Core.Batch;
 using XecMe.Common;
 using System.Diagnostics;
 using XecMe.Configuration;
+using System.IO;
 
 namespace XecMe.Core.Utils
 {
@@ -87,6 +88,7 @@ namespace XecMe.Core.Utils
             current.AssemblyResolve += new ResolveEventHandler(AssemblyResolve);
             current.ReflectionOnlyAssemblyResolve += new ResolveEventHandler(ReflectionOnlyAssemblyResolve);
             current.UnhandledException += new UnhandledExceptionEventHandler(UnhandledException);
+            Directory.SetCurrentDirectory(current.BaseDirectory);
         }
 
         static void UnhandledException(object sender, UnhandledExceptionEventArgs e)

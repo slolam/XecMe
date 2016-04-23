@@ -99,7 +99,14 @@ namespace XecMe.Core.Configuration
                 }
                 catch (Exception e)
                 {
-                    Trace.TraceError("Error reading Timer Task: {0}", e);
+                    Trace.TraceError("Error reading Scheduled Task: {0}", e);
+                    Trace.TraceError("Valid timeZones are ....");
+                    Console.WriteLine("Valid timeZones are ....");
+                    foreach (var tz in TimeZoneInfo.GetSystemTimeZones())
+                    {
+                        Trace.TraceError("{0} - {1}", tz.Id, tz.StandardName);
+                        Console.WriteLine("{0} - {1}", tz.Id, tz.StandardName);
+                    }
                     throw;
                 }
             }

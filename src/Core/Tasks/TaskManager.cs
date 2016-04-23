@@ -52,8 +52,18 @@ namespace XecMe.Core.Tasks
             ///Restore it back for the developer
             container.Options.AllowOverridingRegistrations = false;
 
+            if (Bootstrap != null)
+                Bootstrap(container);
 
-            Bootstrap(container);
+            try
+            {
+                container.Verify();
+            }
+            catch(Exception e)
+            {
+                Trace.WriteLine(string.Format("Error while verifying the container - {0}", e));
+                throw;
+            }
 
             ExecutionContext.InternalContainer = container;
 

@@ -64,6 +64,14 @@ namespace XecMe
                 return 0;
             }
 
+            //if(a.Length == 0)
+            //{
+            //    Application.EnableVisualStyles();
+            //    Application.SetCompatibleTextRenderingDefault(false);
+            //    Application.Run(new MainForm());
+            //    return 0;
+            //}
+
             if (!string.IsNullOrEmpty(args[Constants.PARAM_CPU]))
             {
                 if (float.TryParse(args[Constants.PARAM_CPU], out ServiceInfo.CpuUsageLimit))
@@ -119,12 +127,12 @@ namespace XecMe
                         if (ServiceInfo.CpuUsageLimit > 0)
                         {
                             assemblyPath = string.Format("\"{0}\" -s  -p=\"{1}\" -c=\"{2}\" -n=\"{3}\" -cpu=\"{4}\" ",
-                            asm.Location, ServiceInfo.Directory, ServiceInfo.ConfigFilePath, ServiceInfo.ServiceName, ServiceInfo.CpuUsageLimit);
+                            asm.Location, Path.GetFullPath(ServiceInfo.Directory), Path.GetFullPath(ServiceInfo.ConfigFilePath), ServiceInfo.ServiceName, ServiceInfo.CpuUsageLimit);
                         }
                         else
                         {
                             assemblyPath = string.Format("\"{0}\" -s  -p=\"{1}\" -c=\"{2}\" -n=\"{3}\" ",
-                            asm.Location, ServiceInfo.Directory, ServiceInfo.ConfigFilePath, ServiceInfo.ServiceName);
+                            asm.Location, Path.GetFullPath(ServiceInfo.Directory), Path.GetFullPath(ServiceInfo.ConfigFilePath), ServiceInfo.ServiceName);
                         }
                         string account = args[Constants.PARAM_SERVICEACCOUNT];
                         if (string.IsNullOrEmpty(account))
@@ -320,8 +328,8 @@ namespace XecMe
             appInfo.AppDomainInitializer = new AppDomainInitializer(DomainInitializer.RunBatch);
             appInfo.AppDomainInitializerArguments = new string[] { ServiceInfo.ServiceName };
             appInfo.LoaderOptimization = LoaderOptimization.MultiDomain;
-            appInfo.ApplicationBase = ServiceInfo.Directory;
-            appInfo.PrivateBinPath = ServiceInfo.Directory;
+            appInfo.ApplicationBase = Path.GetFullPath(ServiceInfo.Directory);
+            appInfo.PrivateBinPath = Path.GetFullPath(ServiceInfo.Directory);
             appInfo.ApplicationName = current.SetupInformation.ApplicationName;
             appInfo.DisallowCodeDownload = true;
 
@@ -351,8 +359,8 @@ namespace XecMe
             appInfo.AppDomainInitializer = new AppDomainInitializer(DomainInitializer.RunService);
             appInfo.AppDomainInitializerArguments = new string[] { ServiceInfo.ServiceName };
             appInfo.LoaderOptimization = LoaderOptimization.MultiDomain;
-            appInfo.ApplicationBase = ServiceInfo.Directory;
-            appInfo.PrivateBinPath = ServiceInfo.Directory;
+            appInfo.ApplicationBase = Path.GetFullPath(ServiceInfo.Directory);
+            appInfo.PrivateBinPath = Path.GetFullPath(ServiceInfo.Directory);
             appInfo.ApplicationName = current.SetupInformation.ApplicationName;
             appInfo.DisallowCodeDownload = true;
 

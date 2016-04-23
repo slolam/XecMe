@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.ServiceProcess;
 using System.Net;
+using System.Net.NetworkInformation;
 
 namespace XecMe.Core.Utils
 {
@@ -27,7 +28,14 @@ namespace XecMe.Core.Utils
     {
         static ServiceInfo()
         {
-            MachineName = Dns.GetHostName().ToUpper();
+            try
+            {
+                MachineName = Environment.MachineName.ToUpper();
+            }
+            catch 
+            {
+                MachineName = string.Empty;
+            }
         }
         /// <summary>
         /// This is the name of the machine it is running on.

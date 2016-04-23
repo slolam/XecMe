@@ -37,12 +37,13 @@ namespace XecMe.Core.Configuration
         private const string DAY_START_TIME = "dayStartTime";
         private const string DAY_END_TIME = "dayEndTime";
         private const string TIME_ZONE = "timeZone";
+        private const string WEEK_DAYS = "weekdays";
         #endregion
 
         static TimerTaskRunnerElement()
         {
-            TS_MIN = TimeSpan.FromSeconds(0.0);
-            TS_MAX = TimeSpan.FromSeconds(86399.0);
+            TS_MIN = TimeSpan.FromSeconds(0);
+            TS_MAX = TimeSpan.FromSeconds(86400);
         }
 
         public TimerTaskRunnerElement()
@@ -51,6 +52,13 @@ namespace XecMe.Core.Configuration
             base[END] = DateTime.MaxValue;
             base[DAY_START_TIME] = TimeSpan.FromSeconds(0.0);//Midnight
             base[DAY_END_TIME] = TimeSpan.FromSeconds(86399.0);//23:59:59
+        }
+
+        [ConfigurationProperty(WEEK_DAYS, IsRequired = false, DefaultValue=Weekdays.All)]
+        public Weekdays Weekdays
+        {
+            get { return (Weekdays)base[WEEK_DAYS]; }
+            set { base[WEEK_DAYS] = value; }
         }
 
         [ConfigurationProperty(INTERVAL, IsRequired = true)]
@@ -108,6 +116,13 @@ namespace XecMe.Core.Configuration
                 catch(Exception e)
                 {
                     Trace.TraceError("Error reading Timer Task: {0}", e);
+                    Trace.TraceError("Valid timeZones are ....");
+                    Console.WriteLine("Valid timeZones are ....");
+                    foreach (var tz in TimeZoneInfo.GetSystemTimeZones())
+                    {
+                        Trace.TraceError("{0} - {1}", tz.Id, tz.StandardName);
+                        Console.WriteLine("{0} - {1}", tz.Id, tz.StandardName);
+                    }
                     throw;
                 }
             }
@@ -152,7 +167,7 @@ namespace XecMe.Core.Configuration
             string tzn = TimeZoneName;
             if (!string.IsNullOrEmpty(tzn))
                 tz = TimeZoneInfo.FindSystemTimeZoneById(tzn);
-            return new TimerTaskRunner(this.Name, this.GetTaskType(), InternalParameters(), Interval, Recurrence,
+            return new TimerTaskRunner(this.Name, this.GetTaskType(), InternalParameters(), Interval, Recurrence, Weekdays,
                     this.StartDateTime, this.EndDateTime, this.DayStartTime, this.DayEndTime, tz);
         }
     }
