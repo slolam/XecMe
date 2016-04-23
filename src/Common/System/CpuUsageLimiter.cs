@@ -78,7 +78,7 @@ namespace XecMe.Common.System
             _processPriorities[3] = ProcessPriorityClass.AboveNormal;
             _processPriorities[4] = ProcessPriorityClass.High;
             //_processPriorities[5] = ProcessPriorityClass.RealTime;
-            //Initilize to Normal
+            //Initialize to Normal
             _priorityIndex = 2;
             ProcessorCount = Environment.ProcessorCount;
             _currentProcess = Process.GetCurrentProcess();
