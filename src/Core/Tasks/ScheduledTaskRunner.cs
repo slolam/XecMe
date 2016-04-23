@@ -214,18 +214,9 @@ namespace XecMe.Core.Tasks
                 {
                     _task = new TaskWrapper(this.GetTaskInstance(), new ExecutionContext(Parameters));
 
-                    TimeSpan delay = GetDelay();
-                    if (delay.TotalMilliseconds > int.MaxValue)
-                    {
-                        _skip = true;
-                        _timer = new Timer(new TimerCallback(RunTask), null, int.MaxValue, Timeout.Infinite);
-                    }
-                    else
-                    {
-                        _skip = false;
-                        _timer = new Timer(new TimerCallback(RunTask), null, delay, TimeSpan.FromMilliseconds(-1));
-                    }
-                    Trace.TraceInformation("Scheduled Task \"{0}\" scheduled to run next at {1}", this.Name, _lastDateTime);
+                    _timer = new Timer(new TimerCallback(RunTask), null, Timeout.Infinite, Timeout.Infinite);
+                    
+                    ScheduleNextRun();
                     
                     base.Start();
                     Trace.TraceInformation("Scheduled Task \"{0}\" started", this.Name);
@@ -256,7 +247,7 @@ namespace XecMe.Core.Tasks
             if (_timer == null)
                 return;
 
-            if (_skip)
+            if (!_skip)
             {
                 ExecutionState executionState = _task.RunTask();
                 Trace.TraceInformation("Scheduled Task \"{0}\" executed with return value {1}", this.Name, executionState);
@@ -267,7 +258,6 @@ namespace XecMe.Core.Tasks
                         RaiseComplete(_task.Context);
                         break;
                     case ExecutionState.Stop:
-                        _task.Release();
                         Stop();
                         return;
                     case ExecutionState.Recycle:
@@ -277,8 +267,22 @@ namespace XecMe.Core.Tasks
                 }
             }
 
-            TimeSpan delay = GetDelay(); 
-            
+            ScheduleNextRun();
+        }
+
+        private void ScheduleNextRun()
+        {
+            DateTime now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _timeZoneInfo);
+            while (_lastDateTime < now)
+            {
+                //if it is the same day but past job time
+                if (_lastDateTime.Date == now.Date)
+                    _lastDateTime = _lastDateTime.AddDays(1);
+                _lastDateTime = Next(_lastDateTime);
+            }
+
+            TimeSpan delay = TimeZoneInfo.ConvertTimeToUtc(_lastDateTime, _timeZoneInfo) - TimeZoneInfo.ConvertTimeToUtc(now, _timeZoneInfo);
+
             if (delay.TotalMilliseconds > int.MaxValue)
             {
                 _skip = true;
@@ -290,20 +294,6 @@ namespace XecMe.Core.Tasks
                 _timer = new Timer(new TimerCallback(RunTask), null, delay, TimeSpan.FromMilliseconds(-1));
             }
             Trace.TraceInformation("Scheduled Task \"{0}\" scheduled to run next at {1}", this.Name, _lastDateTime);
-        }
-
-        private TimeSpan GetDelay()
-        {
-            DateTime now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _timeZoneInfo);
-            while (_lastDateTime < now)
-            {
-                //if it is the same day but past job time
-                if (_lastDateTime.Date == now.Date)
-                    _lastDateTime = _lastDateTime.AddDays(1);
-                _lastDateTime = Next(_lastDateTime);
-            }
-
-            return TimeZoneInfo.ConvertTimeToUtc(_lastDateTime, _timeZoneInfo) - TimeZoneInfo.ConvertTimeToUtc(now, _timeZoneInfo);
         }
         
         private DateTime Next(DateTime from)
