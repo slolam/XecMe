@@ -21,6 +21,7 @@ using System.Text;
 using XecMe.Core.Utils;
 using XecMe.Common;
 using System.Diagnostics;
+using System.Threading;
 
 namespace XecMe.Core.Tasks
 {
@@ -29,6 +30,7 @@ namespace XecMe.Core.Tasks
         private ITask _task;
         private ExecutionContext _executionContext;
         private bool _initialized;
+        private Stopwatch _stopwatch = new Stopwatch();
         public TaskWrapper(ITask task, ExecutionContext executionContext)
         {
             Guard.ArgumentNotNull(task, "task");
@@ -45,39 +47,47 @@ namespace XecMe.Core.Tasks
                 {
                     _task.OnStart(_executionContext);
                     _initialized = true;
+                    _executionContext.TaskRunner.TraceInformation("Started");
                 }
                 catch (Exception e)
                 {
                     try
                     {
+                        _executionContext.TaskRunner.TraceError("Caught unhandled exception in OnStart, calling OnUnhandledException: {0}", e);
                         _task.OnUnhandledException(e);
                     }
                     catch (Exception badEx)
                     {
-                        Trace.TraceError("Bad Error: {0}", badEx);
+                        _executionContext.TaskRunner.TraceError("Bad Error: {0}", badEx);
                     }
                 }
             }
             try
             {
+                _executionContext.TaskRunner.TraceInformation("Executing on Managed thread {0}",Thread.CurrentThread.ManagedThreadId);
+                _stopwatch.Restart();
                 ExecutionState state = _task.OnExecute(_executionContext);
+                _stopwatch.Stop();
+                _executionContext.TaskRunner.TraceInformation("Executed in {2} ms. with a return value {0} on Managed thread {1}", state, Thread.CurrentThread.ManagedThreadId, _stopwatch.ElapsedMilliseconds);
                 if (state == ExecutionState.Recycle
                     || state == ExecutionState.Stop)
                 {
-                    _task.OnStop(_executionContext);
-                    _initialized = false;
+                    Release();
                 }
                 return state;
             }
             catch (Exception ex)
             {
+                _stopwatch.Stop();
+                _executionContext.TaskRunner.TraceInformation("Executed in {2} ms. with a return value {0} on Managed thread {1}", ExecutionState.Exception, Thread.CurrentThread.ManagedThreadId, _stopwatch.ElapsedMilliseconds);
                 try
                 {
+                    _executionContext.TaskRunner.TraceError("Caught unhandled exception in OnExecute, calling OnUnhandledException: {0}", ex);
                     _task.OnUnhandledException(ex);
                 }
                 catch (Exception badEx)
                 {
-                    Trace.TraceError("Bad Error: {0}", badEx);
+                    _executionContext.TaskRunner.TraceError("Bad Error: {0}", badEx);
                 }
                 return ExecutionState.Exception;
             }
@@ -89,18 +99,21 @@ namespace XecMe.Core.Tasks
             {
                 if (_initialized)
                     _task.OnStop(_executionContext);
+                _executionContext.TaskRunner.TraceInformation("Stopped successfully");
             }
             catch (Exception e)
             {
                 try
                 {
+                    _executionContext.TaskRunner.TraceError("Caught unhandled exception in OnStop, calling OnUnhandledException: {0}", e);
                     _task.OnUnhandledException(e);
                 }
                 catch (Exception badEx)
                 {
-                    Trace.TraceError("Bad Error: {0}", badEx);
+                    _executionContext.TaskRunner.TraceError("Bad Error: {0}", badEx);
                 }
             }
+            _initialized = false;
         }
 
         public ExecutionContext Context

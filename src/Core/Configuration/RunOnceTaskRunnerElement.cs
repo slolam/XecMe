@@ -39,7 +39,7 @@ namespace XecMe.Core.Configuration
 
         public override TaskRunner GetRunner()
         {
-            return new RunOnceTaskRunner(this.Name, this.GetTaskType(), InternalParameters(), Delay);
+            return new RunOnceTaskRunner(this.Name, this.GetTaskType(), InternalParameters(), Delay, TraceFilter);
         }
 
     }

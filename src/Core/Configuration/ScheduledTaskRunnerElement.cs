@@ -21,6 +21,7 @@ using System.Text;
 using System.Configuration;
 using System.Diagnostics;
 using XecMe.Core.Tasks;
+using XecMe.Core.Diagnostics;
 
 namespace XecMe.Core.Configuration
 {
@@ -45,7 +46,7 @@ namespace XecMe.Core.Configuration
 
         public ScheduledTaskRunnerElement()
         {
-            base[START] = DateTime.Now.Date;
+            base[START] = DateTime.MinValue;
             base[TASKTIME] = TimeSpan.FromSeconds(0);
             base[SCHEDULE] = string.Empty;
         }
@@ -99,12 +100,12 @@ namespace XecMe.Core.Configuration
                 }
                 catch (Exception e)
                 {
-                    Trace.TraceError("Error reading Scheduled Task: {0}", e);
-                    Trace.TraceError("Valid timeZones are ....");
+                    Log.Error(string.Format("Error reading Scheduled Task: {0}", e));
+                    Log.Error("Valid timeZones are ....");
                     Console.WriteLine("Valid timeZones are ....");
                     foreach (var tz in TimeZoneInfo.GetSystemTimeZones())
                     {
-                        Trace.TraceError("{0} - {1}", tz.Id, tz.StandardName);
+                        Log.Error(string.Format("{0} - {1}", tz.Id, tz.StandardName));
                         Console.WriteLine("{0} - {1}", tz.Id, tz.StandardName);
                     }
                     throw;
@@ -137,7 +138,7 @@ namespace XecMe.Core.Configuration
             if (!string.IsNullOrEmpty(tzn))
                 tz = TimeZoneInfo.FindSystemTimeZoneById(tzn);
             return new ScheduledTaskRunner(this.Name, this.GetTaskType(), InternalParameters(), Repeat, Recursion,
-                    this.Schedule, this.StartDate, this.TaskTime, tz);
+                    this.Schedule, this.StartDate, this.TaskTime, tz, TraceFilter);
         }
     }
 }

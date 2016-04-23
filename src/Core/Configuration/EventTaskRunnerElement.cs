@@ -56,7 +56,7 @@ namespace XecMe.Core.Configuration
 
         public override TaskRunner GetRunner()
         {
-            return new EventTaskRunner(this.Name, this.GetTaskType(), InternalParameters(), EventTopic, this.ThreadOption, Timeout);
+            return new EventTaskRunner(this.Name, this.GetTaskType(), InternalParameters(), EventTopic, this.ThreadOption, Timeout, TraceFilter);
         }
     }
 }

@@ -22,6 +22,7 @@ using System.Reflection;
 using System.Threading;
 using XecMe.Common;
 using System.Diagnostics;
+using XecMe.Core.Diagnostics;
 
 namespace XecMe.Core.Events
 {
@@ -58,7 +59,7 @@ namespace XecMe.Core.Events
                     }
                     catch (Exception e)
                     {
-                        Trace.TraceError("Error while firing the event: {0}", e);
+                        Log.Error(string.Format("Error while firing the event: {0}", e));
                     }
                 }
             }
@@ -82,13 +83,13 @@ namespace XecMe.Core.Events
             {
                 var addMethod = info.GetAddMethod(true);
                 addMethod.Invoke(item, new object[] { handler });
-                Trace.TraceInformation("Added new subscriber to event topic {0}", _topic);
+                Log.Information(string.Format("Added new subscriber to event topic {0}", _topic));
             }
             else
             {
                 var removeMethod = info.GetRemoveMethod(true);
                 removeMethod.Invoke(item, new object[] { handler });
-                Trace.TraceInformation("Removed new subscriber to event topic {0}", _topic);
+                Log.Information(string.Format("Removed new subscriber to event topic {0}", _topic));
             }
         }
 
@@ -101,12 +102,12 @@ namespace XecMe.Core.Events
                 if (register)
                 {
                     _subscribers.Add(new Subcriber(this, item, info, threadOption));
-                    Trace.TraceInformation("Added new publisher to event topic {0}", _topic);
+                    Log.Information(string.Format("Added new publisher to event topic {0}", _topic));
                 }
                 else
                 {
                     _subscribers.Remove(new Subcriber(this, item, info, threadOption));
-                    Trace.TraceInformation("Removed new publisher to event topic {0}", _topic);
+                    Log.Information(string.Format("Removed new publisher to event topic {0}", _topic));
                 }
             }
         }

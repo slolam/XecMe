@@ -103,7 +103,7 @@ namespace XecMe
                 ServiceInfo.Directory = args[Constants.PARAM_PATH];
                 if (install && string.IsNullOrEmpty(args[Constants.PARAM_APPCONFIG]))
                 {
-                    Console.WriteLine("application config path was not supplied");
+                    Console.WriteLine("Application config path was not supplied");
                     return -1;
                 }
                 ServiceInfo.ConfigFilePath = args[Constants.PARAM_APPCONFIG];

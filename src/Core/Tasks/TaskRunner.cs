@@ -24,9 +24,18 @@ using XecMe.Common;
 using XecMe.Core.Events;
 using System.Threading;
 using System.Diagnostics;
+using XecMe.Core.Diagnostics;
 
 namespace XecMe.Core.Tasks
 {
+    public enum TraceType
+    {
+        None = 0,
+        Error = 1,
+        Warning = Error * 2,
+        Information = Warning * 2,
+        All = (Information * 2) - 1
+    }
     /// <summary>
     /// TaskRunner is the base class for all TaskRunners, this class will serve as base class for 
     /// all the 
@@ -37,8 +46,11 @@ namespace XecMe.Core.Tasks
         private StringDictionary _parameters;
         private EventWaitHandle _waitHandle;
         private string _name;
+        private bool isErrorTrace, isWarningTrace, isInfoTrace; 
+        private string _taskRunnerTypeName;
+        protected readonly Stopwatch _stopwatch = new Stopwatch();
         public event Events.EventHandler<ExecutionContext> Completed;
-        public TaskRunner(string name, Type taskType, StringDictionary parameters)
+        public TaskRunner(string name, Type taskType, StringDictionary parameters, TraceType traceType)
         {
             Guard.ArgumentNotNullOrEmptyString(name, "name");
             Guard.ArgumentNotNull(taskType, "taskType");
@@ -46,8 +58,12 @@ namespace XecMe.Core.Tasks
             _name = name;
             _taskType = taskType;
             _parameters = parameters;
+            isErrorTrace = (TraceType.Error & traceType) == TraceType.Error;
+            isInfoTrace = (TraceType.Information & traceType) == TraceType.Information;
+            isWarningTrace = (TraceType.Warning & traceType) == TraceType.Warning;
             _waitHandle = new EventWaitHandle(true, EventResetMode.ManualReset);
             EventManager.AddPublisher(string.Concat("Task.", _name, ".Completed"), this, "Completed");
+            _taskRunnerTypeName = this.GetType().Name;
         }
 
         internal Type TaskType
@@ -90,7 +106,59 @@ namespace XecMe.Core.Tasks
         protected void RaiseComplete(ExecutionContext context)
         {
             Completed(this, new EventArgs<ExecutionContext>(context.Copy()));
-            Trace.TraceInformation("Task {0} has completed and raised the event", _name);
+            TraceInformation("Task completed and raised the event");
+            
+        }
+
+        
+        protected internal void TraceInformation(string format, params object[] args)
+        {
+            if (isInfoTrace)
+                Information(string.Format(string.Concat(_taskRunnerTypeName, " Task \"",_name,"\" : ",format),(object[]) args));
+        }
+
+        protected internal void TraceInformation(string msg)
+        {
+            if (isInfoTrace)
+                Information(string.Format(string.Concat(_taskRunnerTypeName, " Task \"", _name, "\" : ", msg)));
+        }
+
+        protected internal void TraceWarning(string format, params object[] args)
+        {
+            if (isInfoTrace)
+                Warning(string.Format(string.Concat(_taskRunnerTypeName, " Task \"", _name, "\" : ", format), (object[]) args));
+        }
+
+        protected internal void TraceWarning(string msg)
+        {
+            if (isWarningTrace)
+                Warning(string.Format(string.Concat(_taskRunnerTypeName, " Task \"", _name, "\" : ", msg)));
+        }
+
+        protected internal void TraceError(string format, params object[] args)
+        {
+            if (isErrorTrace)
+                Error(string.Format(string.Concat(_taskRunnerTypeName, " Task \"", _name, "\" : ", format), (object[])args));
+        }
+
+        protected internal void TraceError(string msg)
+        {
+            if (isErrorTrace)
+                Error(string.Format(string.Concat(_taskRunnerTypeName, " Task \"", _name, "\" : ", msg)));
+        }
+
+        private void Information(string log)
+        {
+            Log.Information(log);
+        }
+
+        private void Error(string log)
+        {
+            Log.Error(log);
+        }
+        private void Warning(string log)
+        {
+            Log.Warning(log);
         }
     }
 }

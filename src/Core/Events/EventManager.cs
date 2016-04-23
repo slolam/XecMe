@@ -21,6 +21,7 @@ using System.Text;
 using XecMe.Common;
 using System.Reflection;
 using System.Diagnostics;
+using XecMe.Core.Diagnostics;
 
 namespace XecMe.Core.Events
 {
@@ -47,7 +48,7 @@ namespace XecMe.Core.Events
                 if (!_eventTopics.ContainsKey(topic))
                 {
                     _eventTopics.Add(topic, new EventTopic(topic));
-                    Trace.TraceInformation("Event topic {0} create", topic);
+                    Log.Information(string.Format("Event topic {0} create", topic));
                 }
                 return _eventTopics[topic];
             }

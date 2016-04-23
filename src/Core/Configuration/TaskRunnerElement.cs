@@ -31,6 +31,7 @@ namespace XecMe.Core.Configuration
         private const string TASK_TYPE = "taskType";
         private const string PARAMETERS = "parameters";
         private const string NAME = "name";
+        private const string TRACE = "traceFilter";
         #endregion
 
         [ConfigurationProperty(TASK_TYPE, IsRequired = true)]
@@ -47,6 +48,12 @@ namespace XecMe.Core.Configuration
             set { base[NAME] = value; }
         }
 
+        [ConfigurationProperty(TRACE, DefaultValue=TraceType.All)]
+        public TraceType TraceFilter
+        {
+            get { return (TraceType)base[TRACE]; }
+            set { base[TRACE] = value; }
+        }
         public virtual TaskRunner GetRunner() { return null; }
 
         [ConfigurationProperty(PARAMETERS, IsRequired = true)]

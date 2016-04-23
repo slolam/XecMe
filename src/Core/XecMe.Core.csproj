@@ -10,6 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>XecMe.Core</RootNamespace>
     <AssemblyName>XecMe.Core</AssemblyName>
+    <Framework Condition=" '$(Framework)' == '' ">net40</Framework>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SignAssembly>true</SignAssembly>
@@ -35,6 +36,10 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -46,23 +51,39 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Framework)' == 'net40' ">
+    <SimpleInjectorReference>net40-client</SimpleInjectorReference>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Framework)' == 'net40-client' ">
+    <SimpleInjectorReference>net40-client</SimpleInjectorReference>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>client</TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Framework)' == 'net45' ">
+    <SimpleInjectorReference>net45</SimpleInjectorReference>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Framework)' == 'net451' ">
+    <SimpleInjectorReference>net45</SimpleInjectorReference>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>bin\Release\$(Framework)</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="SimpleInjector, Version=2.6.1.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\SimpleInjector.2.6.1\lib\net45\SimpleInjector.dll</HintPath>
-    </Reference>
-    <Reference Include="SimpleInjector.Diagnostics, Version=2.6.1.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\SimpleInjector.2.6.1\lib\net45\SimpleInjector.Diagnostics.dll</HintPath>
+    <Reference Include="SimpleInjector, Version=2.8.0.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
+      <HintPath>..\packages\SimpleInjector.2.8.0\lib\$(SimpleInjectorReference)\SimpleInjector.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -119,6 +140,7 @@
     <Compile Include="Tasks\TaskManager.cs" />
     <Compile Include="Tasks\TaskWrapper.cs" />
     <Compile Include="Tasks\TimerTaskRunner.cs" />
+    <Compile Include="Diagnostics\Log.cs" />
     <Compile Include="Utils\DomainInitializer.cs" />
     <Compile Include="Services\ServiceHost.cs">
       <SubType>Component</SubType>
@@ -130,6 +152,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\CrossDomainEventBroker.cs" />
     <Compile Include="Utils\ServiceInfo.cs" />
+    <Compile Include="Utils\TimeConditions.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Services\ServiceHost.resx">
@@ -175,7 +198,16 @@
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
-  <Target Name="AfterBuild">
-  </Target>
   -->
+  <Target Name="AfterBuild">
+    <!-- This just allows us to drop a note in the build output -->
+    <Message Text="Enter After Build TargetFrameworkVersion:$(TargetFrameworkVersion) Framework:$(Framework)" Importance="high" />
+    <!-- This is the key to the whole process. The second build happens here.  We set our 'Framework' variable allowing the above PropertyGroups to run more frameworks.  -->
+    <MSBuild Condition=" '$(Framework)' == 'net40' And '$(Configuration)' == 'Release'" Projects="$(MSBuildProjectFile)" Properties="Framework=net40-client" RunEachTargetSeparately="true" />
+    <MSBuild Condition=" '$(Framework)' == 'net40-client' And '$(Configuration)' == 'Release'" Projects="$(MSBuildProjectFile)" Properties="Framework=net45" RunEachTargetSeparately="true" />
+    <MSBuild Condition=" '$(Framework)' == 'net45' And '$(Configuration)' == 'Release'" Projects="$(MSBuildProjectFile)" Properties="Framework=net451" RunEachTargetSeparately="true" />
+    <!-- You could repeat the above node again here and target another framework if there was a property group that would evaluate to true-->
+    <!-- Just more logging -->
+    <Message Text="Exiting After Build TargetFrameworkVersion:$(TargetFrameworkVersion) Framework:$(Framework)" Importance="high" />
+  </Target>
 </Project>

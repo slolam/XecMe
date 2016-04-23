@@ -36,7 +36,7 @@ namespace XecMe.Core.Tasks
         Third = Second * 2,
         Fourth = Third * 2,
         Last = Fourth * 2,
-        All = (Last * 2) -1
+        All = (Last * 2) - 1
     }
 
     public enum Weekdays
@@ -88,13 +88,13 @@ namespace XecMe.Core.Tasks
 
         static ScheduledTaskRunner()
         {
-            TS_MIN = TimeSpan.FromSeconds(0.0);
-            TS_MAX = TimeSpan.FromSeconds(86399.0);
+            TS_MIN = TimeSpan.FromSeconds(0);
+            TS_MAX = TimeSpan.FromSeconds(86400);
         }
 
         public ScheduledTaskRunner(string name, Type taskType, StringDictionary parameters, int repeat, Recursion recursion, string schedule,
-            DateTime startDate, TimeSpan taskTime, TimeZoneInfo timeZoneInfo) :
-            base(name, taskType, parameters)
+            DateTime startDate, TimeSpan taskTime, TimeZoneInfo timeZoneInfo, TraceType traceType) :
+            base(name, taskType, parameters, traceType)
         {
             if (repeat < 1)
                 throw new ArgumentOutOfRangeException("repeat", "repeat should be greater than 0");
@@ -106,7 +106,8 @@ namespace XecMe.Core.Tasks
                 throw new ArgumentNullException("startDate should be less than now");
             _schedule = schedule.ToUpper();
             _recursion = recursion;
-            _startDate = startDate;
+            ///If the start time is not configured set it to Sunday of this week
+            _startDate = startDate == DateTime.MinValue ? DateTime.Now.AddDays(-(int)DateTime.Now.DayOfWeek) : startDate;
             _repeat = repeat;
             _taskTime = taskTime;
             _timeZoneInfo = timeZoneInfo ?? TimeZoneInfo.Local;
@@ -163,7 +164,7 @@ namespace XecMe.Core.Tasks
                                         days |= 0x80000000;//Last day of the month
                                     else if (d == "ALL")
                                         days |= 0x7FFFFFFF;//This is for all 1-31 days
-                                    else if (!int.TryParse(d, out x) || (x < 1 && x > 31))
+                                    else if (!int.TryParse(d, out x) || x < 1 || x > 31)
                                         throw new ArgumentOutOfRangeException("schedule", "schedule does not have the day defined for the Monthly tasks in a valid range");
                                     else
                                         days |= day << (x - 1);
@@ -174,9 +175,9 @@ namespace XecMe.Core.Tasks
                         }
                     }
 
-                    if (week != Week.None && weekdays != Weekdays.None)
+                    if (week != Week.None && weekdays != Weekdays.None && months != Months.None)
                         _recur = new MonthlyByWeekdays(months, weekdays, week);
-                    else if (days > 1)
+                    else if (days > 1 && months != Months.None)
                         _recur = new MonthlyByDay(months, days);
                     else
                         throw new ArgumentOutOfRangeException("schedule", "schedule does not conform to the format");
@@ -186,6 +187,12 @@ namespace XecMe.Core.Tasks
             }
 
             _lastDateTime = new DateTime(_startDate.Year, _startDate.Month, _startDate.Day, _taskTime.Hours, _taskTime.Minutes, _taskTime.Seconds, DateTimeKind.Unspecified);
+
+            ///If not daily task, initialize to correct start marker i.e. next schedule to align with the configuration
+            ///If the task is configured for every Monday and this process starts on Thursday 
+            //if (recursion != Recursion.Daily)
+            //    _lastDateTime = Next(_lastDateTime);
+
         }
 
 
@@ -213,14 +220,14 @@ namespace XecMe.Core.Tasks
             {
                 if (_timer == null)
                 {
-                    _task = new TaskWrapper(this.GetTaskInstance(), new ExecutionContext(Parameters));
+                    _task = new TaskWrapper(this.GetTaskInstance(), new ExecutionContext(Parameters, this));
 
                     _timer = new Timer(new TimerCallback(RunTask), null, Timeout.Infinite, Timeout.Infinite);
-                    
+
                     ScheduleNextRun();
-                    
+
                     base.Start();
-                    Trace.TraceInformation("Scheduled Task \"{0}\" started", this.Name);
+                    TraceInformation("Started", this.Name);
                 }
             }
         }
@@ -236,7 +243,7 @@ namespace XecMe.Core.Tasks
                     _task.Release();
                     _task = null;
                     base.Stop();
-                    Trace.TraceInformation("Scheduled Task \"{0}\" stopped", this.Name);
+                    TraceInformation("Stopped", this.Name);
                 }
             }
         }
@@ -251,7 +258,7 @@ namespace XecMe.Core.Tasks
             if (!_skip)
             {
                 ExecutionState executionState = _task.RunTask();
-                Trace.TraceInformation("Scheduled Task \"{0}\" executed with return value {1}", this.Name, executionState);
+                TraceInformation("Executed with return value {0}", executionState);
 
                 switch (executionState)
                 {
@@ -271,15 +278,29 @@ namespace XecMe.Core.Tasks
             ScheduleNextRun();
         }
 
+        private DateTime Now
+        {
+            get
+            {
+                DateTime now;
+                if (_timeZoneInfo == null
+                    || _timeZoneInfo == TimeZoneInfo.Local)
+                    now = DateTime.Now;
+                else
+                    now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _timeZoneInfo);
+                TraceInformation("Now: {0}", now);
+                return now;
+            }
+        }
         private void ScheduleNextRun()
         {
-            DateTime now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _timeZoneInfo);
+            DateTime now = Now;
             while (_lastDateTime < now)
             {
-                //if it is the same day but past job time
-                if (_lastDateTime.Date == now.Date)
-                    _lastDateTime = _lastDateTime.AddDays(1);
                 _lastDateTime = Next(_lastDateTime);
+
+                ///If stuck in the past date advance the date
+                //_lastDateTime = dt == _lastDateTime ? _lastDateTime.AddDays(1) : dt;
             }
 
             TimeSpan delay = TimeZoneInfo.ConvertTimeToUtc(_lastDateTime, _timeZoneInfo) - TimeZoneInfo.ConvertTimeToUtc(now, _timeZoneInfo);
@@ -294,9 +315,9 @@ namespace XecMe.Core.Tasks
                 _skip = false;
                 _timer = new Timer(new TimerCallback(RunTask), null, delay, TimeSpan.FromMilliseconds(-1));
             }
-            Trace.TraceInformation("Scheduled Task \"{0}\" scheduled to run next at {1}", this.Name, _lastDateTime);
+            TraceInformation("Scheduled to run next at {0}", _lastDateTime);
         }
-        
+
         private DateTime Next(DateTime from)
         {
             return _recur.Next(from);
@@ -310,6 +331,7 @@ namespace XecMe.Core.Tasks
         DateTime Next(DateTime from);
     }
 
+    #region Daily
     internal class Daily : IRecur
     {
         int _repeat;
@@ -325,7 +347,10 @@ namespace XecMe.Core.Tasks
             return from.AddDays(_repeat);
         }
     }
+    #endregion
 
+
+    #region Weekly
     internal class Weekly : IRecur
     {
         int _repeat;
@@ -341,35 +366,52 @@ namespace XecMe.Core.Tasks
 
         DateTime IRecur.Next(DateTime from)
         {
-            Weekdays thisDay = Utils.GetWeekday(from.DayOfWeek);
-            if (_weekdays == Weekdays.All)
+            DateTime original = from;
+            while (true)
             {
-                if (thisDay == Weekdays.Saturday)
-                    from = from.AddDays((_repeat * 7) + 1);
+                Weekdays thisDay = Utils.GetWeekday(from.DayOfWeek);
+                ///If its all weekdays, just add the next day
+                if (_weekdays == Weekdays.All)
+                {
+                    if (thisDay == Weekdays.Saturday)
+                        from = from.AddDays((_repeat * 7) + 1);
+                    else
+                        from = from.AddDays(1);
+                }
                 else
+                {
+                    int d, i = (int)from.DayOfWeek;
+                    ///Find number of days for the next valid weekday
+                    for (d = 0; !Utils.HasWeekday(_weekdays, Utils.GetWeekday(i)); i++)
+                    {
+                        d++;
+                    }
+                    ///calculate next valid weekday to run the job
+                    i = (d + (int)from.DayOfWeek) % 7;
+
+                    ///if the next valid day is >= the from weekday simple add the day else going back to next week
+                    if (i >= (int)from.DayOfWeek)
+                    {
+                        from = from.AddDays(d);
+                    }
+                    else
+                    {
+                        from = from.AddDays(d + (_repeat * 7));
+                    }
+                }
+                ///If the date is same the one passed in the add a day
+                if (original == from)
+                {
                     from = from.AddDays(1);
+                    continue;
+                }
+                return from;
             }
-            else
-            {
-                int d, i = (int)from.DayOfWeek;
-                for (d = 0; !Utils.HasWeekday(_weekdays, Utils.WeekdayList[i]); i = ++i % 7)
-                {
-                    d++;
-                }
-                i = (d + (int)from.DayOfWeek) % 7;
-                if (i >= (int)from.DayOfWeek)
-                {
-                    from = from.AddDays(d);
-                }
-                else
-                {
-                    from = from.AddDays(d + (_repeat * 7));
-                }
-            }
-            return from;
         }
     }
+    #endregion
 
+    #region Monthly by weekdays
     internal class MonthlyByWeekdays : IRecur
     {
         Months _months;
@@ -385,21 +427,19 @@ namespace XecMe.Core.Tasks
 
         DateTime IRecur.Next(DateTime from)
         {
-            //DateTime original = from;
+            DateTime original = from;
             while (true)
             {
-                while (!Utils.HasMonth(_months, Utils.GetMonth(from.Month)))
-                {
-                    if (from.Day > 1)
-                        from = from.AddDays(from.Day - 1);
-                    from = from.AddMonths(1);
-                }
+                ///Set the valid month
+                from = Utils.GetValidMonth(_months, from);
+
                 //First week
                 if ((_weeks & Week.First) == Week.First)
                 {
                     while (from.Day < 8)
                     {
-                        if (Utils.HasWeekday(_weekdays, Utils.GetWeekday(from.DayOfWeek)))
+                        if (Utils.HasWeekday(_weekdays, Utils.GetWeekday(from.DayOfWeek))
+                            && from != original)
                         {
                             return from;
                         }
@@ -411,7 +451,8 @@ namespace XecMe.Core.Tasks
                 {
                     while (from.Day < 15 && from.Day > 7)
                     {
-                        if (Utils.HasWeekday(_weekdays, Utils.GetWeekday(from.DayOfWeek)))
+                        if (Utils.HasWeekday(_weekdays, Utils.GetWeekday(from.DayOfWeek))
+                            && from != original)
                         {
                             return from;
                         }
@@ -423,7 +464,8 @@ namespace XecMe.Core.Tasks
                 {
                     while (from.Day < 22 && from.Day > 14)
                     {
-                        if (Utils.HasWeekday(_weekdays, Utils.GetWeekday(from.DayOfWeek)))
+                        if (Utils.HasWeekday(_weekdays, Utils.GetWeekday(from.DayOfWeek))
+                            && from != original)
                         {
                             return from;
                         }
@@ -435,7 +477,8 @@ namespace XecMe.Core.Tasks
                 {
                     while (from.Day > 21)
                     {
-                        if (Utils.HasWeekday(_weekdays, Utils.GetWeekday(from.DayOfWeek)))
+                        if (Utils.HasWeekday(_weekdays, Utils.GetWeekday(from.DayOfWeek))
+                            && from != original)
                         {
                             return from;
                         }
@@ -449,7 +492,8 @@ namespace XecMe.Core.Tasks
                     {
                         while (from.Day < 29 && from.Day > 21)
                         {
-                            if (Utils.HasWeekday(_weekdays, Utils.GetWeekday(from.DayOfWeek)))
+                            if (Utils.HasWeekday(_weekdays, Utils.GetWeekday(from.DayOfWeek))
+                                && from != original)
                             {
                                 return from;
                             }
@@ -462,7 +506,8 @@ namespace XecMe.Core.Tasks
                         int lastWeekDay = GetLastWeekStartDay(from);
                         while (from.Day >= lastWeekDay)
                         {
-                            if (Utils.HasWeekday(_weekdays, Utils.GetWeekday(from.DayOfWeek)))
+                            if (Utils.HasWeekday(_weekdays, Utils.GetWeekday(from.DayOfWeek))
+                                && from != original)
                             {
                                 return from;
                             }
@@ -498,7 +543,10 @@ namespace XecMe.Core.Tasks
             }
         }
     }
+    #endregion
 
+
+    #region Monthly by day
     internal class MonthlyByDay : IRecur
     {
         const uint LAST = 0x80000000;
@@ -515,23 +563,24 @@ namespace XecMe.Core.Tasks
 
         DateTime IRecur.Next(DateTime from)
         {
+            DateTime original = from;
             while (true)
             {
-                while (!Utils.HasMonth(_months, Utils.GetMonth(from.Month)))
+                from = Utils.GetValidMonth(_months, from);
+
+                ///Save the month
+                int month = from.Month;
+                ///Iterate while the month is same
+                while (month == from.Month)
                 {
-                    if (from.Day > 1)
-                        from = from.AddDays(from.Day - 1);
-                    from = from.AddMonths(1);
-                }
-                int day = from.Day - 1;
-                while (day < from.Day)
-                {
-                    if (HasDay(from.Day))
+                    ///if its a valid day return and not same date
+                    if (HasDay(from.Day) && from != original)
                         return from;
-                    day = from.Day;
+
+                    ///Check the next day
                     from = from.AddDays(1);
                 }
-                //Month changed, so check the last day now
+                //Month changed, so check the last day now, else go for the next valid month
                 if ((_days & LAST) > 0)
                 {
                     return from.AddDays(-1);
@@ -546,79 +595,80 @@ namespace XecMe.Core.Tasks
             return (x & _days) > 0;
         }
     }
-
+    #endregion
     static class Utils
     {
-        public readonly static Weekdays[] WeekdayList;
-        public readonly static Months[] MonthList;
-
-        static Utils()
+        /// <summary>
+        /// Returns the input date time if current month is valid month else set to the 1st of the next valid month
+        /// </summary>
+        /// <param name="months">Valid months</param>
+        /// <param name="from">DateTime to be checked for valid months</param>
+        /// <returns></returns>
+        public static DateTime GetValidMonth(Months months, DateTime from)
         {
-            List<Weekdays> weekdayList = new List<Weekdays>(7);
-            weekdayList.Add(Weekdays.Sunday);
-            weekdayList.Add(Weekdays.Monday);
-            weekdayList.Add(Weekdays.Tuesday);
-            weekdayList.Add(Weekdays.Wednesday);
-            weekdayList.Add(Weekdays.Thursday);
-            weekdayList.Add(Weekdays.Friday);
-            weekdayList.Add(Weekdays.Saturday);
+            ///Check if this is a valid month else loop until you get to the valid month
+            while (!Utils.HasMonth(months, Utils.GetMonth(from.Month)))
+            {
+                ///If its not the first day of the month, the set the day to the first day of the month
+                if (from.Day > 1)
+                    from = from.AddDays(-from.Day + 1);//Get to the first of this month
 
-            WeekdayList = weekdayList.ToArray();
-
-            List<Months> monthList = new List<Months>(12);
-            monthList.Add(Months.January);
-            monthList.Add(Months.February);
-            monthList.Add(Months.March);
-            monthList.Add(Months.April);
-            monthList.Add(Months.May);
-            monthList.Add(Months.June);
-            monthList.Add(Months.July);
-            monthList.Add(Months.August);
-            monthList.Add(Months.September);
-            monthList.Add(Months.October);
-            monthList.Add(Months.November);
-            monthList.Add(Months.December);
-
-            MonthList = monthList.ToArray();
+                ///add a month until you get to the valid month
+                from = from.AddMonths(1);
+            }
+            return from;
         }
+        /// <summary>
+        /// Maps the month number to the month enum value of XecMe framework
+        /// </summary>
+        /// <param name="month">Enum value of the month</param>
+        /// <returns></returns>
         public static Months GetMonth(int month)
         {
             if (month < 1 || month > 12)
                 throw new ArgumentOutOfRangeException("month");
             month--;
-            //if (month == 0)
-            //    return Months.January;
+            
             return (Months)(1 << month);
         }
 
-        public static Weekdays GetWeekday(DayOfWeek dayOfWeek)
+        /// <summary>
+        /// Maps the numeric weekday value to the XecMe framework weekday
+        /// </summary>
+        /// <param name="dayOfWeek">numeric value of the weekday</param>
+        /// <returns>Weekday enum value</returns>
+        public static Weekdays GetWeekday(int dayOfWeek)
         {
-            switch (dayOfWeek)
-            {
-                case DayOfWeek.Friday:
-                    return Weekdays.Friday;
-                case DayOfWeek.Monday:
-                    return Weekdays.Monday;
-                case DayOfWeek.Saturday:
-                    return Weekdays.Saturday;
-                case DayOfWeek.Sunday:
-                    return Weekdays.Sunday;
-                case DayOfWeek.Thursday:
-                    return Weekdays.Thursday;
-                case DayOfWeek.Tuesday:
-                    return Weekdays.Tuesday;
-                case DayOfWeek.Wednesday:
-                    return Weekdays.Wednesday;
-                default:
-                    throw new InvalidOperationException();
-            }
+            return (Weekdays)(1 << (dayOfWeek % 7));
         }
 
+        /// <summary>
+        /// Maps the .NET weekday to the XecMe framework weekday
+        /// </summary>
+        /// <param name="dayOfWeek">.NET enum weekday value</param>
+        /// <returns>Weekday enum value</returns>
+        public static Weekdays GetWeekday(DayOfWeek dayOfWeek)
+        {
+            return (Weekdays)Enum.Parse(typeof(Weekdays), dayOfWeek.ToString());
+        }
+
+        /// <summary>
+        /// Returns true if the given month is in the months
+        /// </summary>
+        /// <param name="months">Configured months</param>
+        /// <param name="month">Specific month</param>
+        /// <returns>True, if the specific month is in the months</returns>
         public static bool HasMonth(Months months, Months month)
         {
             return month == (months & month);
         }
 
+        /// <summary>
+        /// Returns true if the given weekday is in the weekdays
+        /// </summary>
+        /// <param name="months">Configured weekdays</param>
+        /// <param name="month">Specific weekday</param>
+        /// <returns>True, if the specific weekday is in the weekdays</returns>
         public static bool HasWeekday(Weekdays weekdays, Weekdays weekday)
         {
             return weekday == (weekdays & weekday);

@@ -37,8 +37,8 @@ namespace XecMe.Core.Tasks
         private Queue<EventArgs> _queue = null;
         private bool _threadWorking = false;
         private int _timeout;
-        public EventTaskRunner(string name, Type taskType, StringDictionary parameters, string eventTopic, ThreadOption threadOption, int timeout) :
-            base(name, taskType, parameters)
+        public EventTaskRunner(string name, Type taskType, StringDictionary parameters, string eventTopic, ThreadOption threadOption, int timeout, TraceType traceType) :
+            base(name, taskType, parameters, traceType)
         {
             Guard.ArgumentNotNullOrEmptyString(eventTopic, "eventTopic");
             if (timeout < 1 || timeout > 10000)
@@ -71,7 +71,7 @@ namespace XecMe.Core.Tasks
             if (_threadOption != ThreadOption.Publisher)
                 base.Start();
             _task.OnStart(_executionContext);
-            Trace.TraceInformation("Event task \"{0}\" started", this.Name);
+            TraceInformation("Started");
         }
 
         public override void Stop()
@@ -90,14 +90,15 @@ namespace XecMe.Core.Tasks
                     {
                         try
                         {
+                            TraceError("Caught unhandled exception calling OnStop, calling OnUnhandledException: {0}", e);
                             _task.OnUnhandledException(e);
                         }
                         catch (Exception badEx)
                         {
-                            Trace.TraceError("Bad Error: {0}", badEx);
+                            TraceError("Bad Error: {0}", badEx);
                         }
                     }
-                    Trace.TraceInformation("Event task \"{0}\" stopped", this.Name);
+                    TraceInformation("Stopped");
                     base.Stop();
                 });
             }
@@ -111,14 +112,15 @@ namespace XecMe.Core.Tasks
                 {
                     try
                     {
+                        TraceError("Caught unhandled exception calling OnStop, calling OnUnhandledException: {0}", e);
                         _task.OnUnhandledException(e);
                     }
                     catch (Exception badEx)
                     {
-                        Trace.TraceError("Bad Error: {0}", badEx);
+                        TraceError("Bad Error: {0}", badEx);
                     }
                 }
-                Trace.TraceInformation("Event task \"{0}\" stopped", this.Name);
+                TraceInformation("Stopped", this.Name);
             }
         }
 
@@ -129,19 +131,24 @@ namespace XecMe.Core.Tasks
         {
             switch (_threadOption)
             {
+                    ///Runs the events on the backgroud thread but in the order the events are received one event at a time
                 case ThreadOption.BackgroundSerial:
                     lock (_queue)
                     {
+                        ///Add the event to the queue
                         _queue.Enqueue(args);
 
+                        ///If the thread is already processing the return
                         if (_threadWorking)
                         {
                             return;
                         }
 
+                        ///Indicate that this thread will process the events
                         _threadWorking = true;
                     }
 
+                    ///While there are items in the queue process
                     while (true)
                     {
                         lock (_queue)
@@ -152,6 +159,7 @@ namespace XecMe.Core.Tasks
                             }
                             else
                             {
+                                ///If there are no items in the queue mark that the thread is released and exit
                                 _threadWorking = false;
                                 break;
                             }
@@ -159,7 +167,7 @@ namespace XecMe.Core.Tasks
                         RunTask(args);
                     }
                     break;
-                default:
+                default:///Rest, Background Parallel and Publisher runs in a free threading more
                     RunTask(args);
                     break;
             }
@@ -195,11 +203,11 @@ namespace XecMe.Core.Tasks
             {
                 this.Wait();
                 ITask task = _task;
-                Trace.TraceInformation("Event task \"{0}\" is executing on Managed thread {1}",
-                    this.Name, Thread.CurrentThread.ManagedThreadId);
+                TraceInformation("Is executing on Managed thread {0}",Thread.CurrentThread.ManagedThreadId);
+                _stopwatch.Restart();
                 ExecutionState state = _task.OnExecute(ec);
-                Trace.TraceInformation("Event task \"{0}\" is executed with a return value {1} on Managed thread {2}",
-                    this.Name, state, Thread.CurrentThread.ManagedThreadId);
+                _stopwatch.Stop();
+                TraceInformation("Executed in {2} ms. with a return value {0} on Managed thread {1}", state, Thread.CurrentThread.ManagedThreadId, _stopwatch.ElapsedMilliseconds);
                 switch (state)
                 {
                     case ExecutionState.Stop:
@@ -221,11 +229,12 @@ namespace XecMe.Core.Tasks
                                 {
                                     try
                                     {
+                                        TraceError("Caught unhandled exception calling OnStop, calling OnUnhandledException: {0}", e);
                                         _task.OnUnhandledException(e);
                                     }
                                     catch (Exception badEx)
                                     {
-                                        Trace.TraceError("Bad Error: {0}", badEx);
+                                        TraceError("Bad Error: {0}", badEx);
                                     }
                                 }
                                 _task = this.GetTaskInstance();
@@ -240,13 +249,16 @@ namespace XecMe.Core.Tasks
             }
             catch (Exception ex)
             {
+                _stopwatch.Stop();
+                TraceInformation("Executed in {2} ms. with a return value {0} on Managed thread {1}", ExecutionState.Exception, Thread.CurrentThread.ManagedThreadId, _stopwatch.ElapsedMilliseconds);
                 try
                 {
+                    TraceError("Caught unhandled exception calling OnExecute, calling OnUnhandledException: {0}", ex);
                     _task.OnUnhandledException(ex);
                 }
                 catch (Exception badEx)
                 {
-                    Trace.TraceError("Bad Error: {0}", badEx);
+                    TraceError("Bad Error: {0}", badEx);
                 }
             }
         }

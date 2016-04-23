@@ -22,6 +22,7 @@ using System.Text;
 using XecMe.Core.Tasks;
 using System.Configuration;
 using System.Diagnostics;
+using XecMe.Core.Diagnostics;
 
 namespace XecMe.Core.Configuration
 {
@@ -115,12 +116,12 @@ namespace XecMe.Core.Configuration
                 }
                 catch(Exception e)
                 {
-                    Trace.TraceError("Error reading Timer Task: {0}", e);
-                    Trace.TraceError("Valid timeZones are ....");
+                    Log.Error(string.Format("Error reading Timer Task: {0}", e));
+                    Log.Error("Valid timeZones are ....");
                     Console.WriteLine("Valid timeZones are ....");
                     foreach (var tz in TimeZoneInfo.GetSystemTimeZones())
                     {
-                        Trace.TraceError("{0} - {1}", tz.Id, tz.StandardName);
+                        Log.Error(string.Format("{0} - {1}", tz.Id, tz.StandardName));
                         Console.WriteLine("{0} - {1}", tz.Id, tz.StandardName);
                     }
                     throw;
@@ -137,8 +138,8 @@ namespace XecMe.Core.Configuration
                 if (TS_MIN > value)
                     throw new ConfigurationErrorsException(string.Concat(DAY_START_TIME, " should be greater than 0 seconds"));
 
-                if (DayEndTime < value)
-                    throw new ConfigurationErrorsException(string.Concat(DAY_START_TIME, " is greater than ", DAY_END_TIME));
+                //if (DayEndTime < value)
+                //    throw new ConfigurationErrorsException(string.Concat(DAY_START_TIME, " is greater than ", DAY_END_TIME));
 
                 base[DAY_START_TIME] = value;
             }
@@ -153,8 +154,8 @@ namespace XecMe.Core.Configuration
                 if (TS_MAX < value)
                     throw new ConfigurationErrorsException(string.Concat(DAY_END_TIME, " should be less than 23:59:59"));
 
-                if (DayStartTime > value)
-                    throw new ConfigurationErrorsException(string.Concat(DAY_END_TIME, " is less than ", DAY_START_TIME));
+                //if (DayStartTime > value)
+                //    throw new ConfigurationErrorsException(string.Concat(DAY_END_TIME, " is less than ", DAY_START_TIME));
 
                 base[DAY_END_TIME] = value;
             }
@@ -168,7 +169,7 @@ namespace XecMe.Core.Configuration
             if (!string.IsNullOrEmpty(tzn))
                 tz = TimeZoneInfo.FindSystemTimeZoneById(tzn);
             return new TimerTaskRunner(this.Name, this.GetTaskType(), InternalParameters(), Interval, Recurrence, Weekdays,
-                    this.StartDateTime, this.EndDateTime, this.DayStartTime, this.DayEndTime, tz);
+                    this.StartDateTime, this.EndDateTime, this.DayStartTime, this.DayEndTime, tz, TraceFilter);
         }
     }
 }

@@ -37,6 +37,7 @@ namespace XecMe.Core.Tasks
         private DateTime _endDateTime = DateTime.MaxValue;
         private TimeSpan _dayStartTime = TimeSpan.FromSeconds(0);
         private TimeSpan _dayEndTime = TimeSpan.FromSeconds(86399);
+        private Weekdays _weekdays = Weekdays.All;
         private Timer _timer;
         private TaskWrapper _task;
         private TimeZoneInfo _timeZoneInfo;
@@ -47,10 +48,17 @@ namespace XecMe.Core.Tasks
             TS_MAX = TimeSpan.FromSeconds(86399.0);
         }
 
+
         public TimerTaskRunner(string name, Type taskType, StringDictionary parameters, long interval, long recurrence,
-            DateTime startDateTime, DateTime endDateTime, TimeSpan dayStartTime, TimeSpan dayEndTime, TimeZoneInfo timeZoneInfo) :
-            base(name, taskType, parameters)
+            Weekdays weekdays, DateTime startDateTime, DateTime endDateTime, TimeSpan dayStartTime, TimeSpan dayEndTime, 
+            TimeZoneInfo timeZoneInfo, TraceType traceType) :
+            base(name, taskType, parameters, traceType)
         {
+            /*}
+            public TimerTaskRunner(string name, Type taskType, StringDictionary parameters, long interval, long recurrence,
+                DateTime startDateTime, DateTime endDateTime, TimeSpan dayStartTime, TimeSpan dayEndTime, TimeZoneInfo timeZoneInfo) :
+                base(name, taskType, parameters)
+            {*/
             if (interval < 1)
                 throw new ArgumentOutOfRangeException("interval", "interval cannot be less than 1");
 
@@ -63,13 +71,20 @@ namespace XecMe.Core.Tasks
             if (dayStartTime < TS_MIN)
                 throw new ArgumentOutOfRangeException("dayStartTime", "dayStartTime cannot be negative");
 
+            if (dayEndTime < TS_MIN)
+                throw new ArgumentOutOfRangeException("dayEndTime", "dayEndTime cannot be negative");
+
+            if (dayStartTime > TS_MAX)
+                throw new ArgumentOutOfRangeException("dayStartTime", "dayStartTime should be less than 23:59:59");
+
             if (dayEndTime > TS_MAX)
                 throw new ArgumentOutOfRangeException("dayEndTime", "dayEndTime should be less than 23:59:59");
 
-            if (dayEndTime < dayStartTime)
-                throw new ArgumentOutOfRangeException("dayStartTime", "dayStartTime should be less than dayEndTime");
+            //if (dayEndTime < dayStartTime)
+            //    throw new ArgumentOutOfRangeException("dayStartTime", "dayStartTime should be less than dayEndTime");
 
-            _timeZoneInfo = timeZoneInfo;
+            _weekdays = weekdays;
+            _timeZoneInfo = timeZoneInfo ?? TimeZoneInfo.Local;
             _interval = interval;
             _recurrence = recurrence;
             _startDateTime = startDateTime;
@@ -139,10 +154,10 @@ namespace XecMe.Core.Tasks
             {
                 if (_timer == null)
                 {
-                    _task = new TaskWrapper(this.GetTaskInstance(), new ExecutionContext(Parameters));
+                    _task = new TaskWrapper(this.GetTaskInstance(), new ExecutionContext(Parameters, this));
                     _timer = new Timer(new TimerCallback(RunTask), null, Interval, Interval);
                     base.Start();
-                    Trace.TraceInformation("Timer Task \"{0}\" started", this.Name);
+                    TraceInformation("Started");
                 }
             }
         }
@@ -158,7 +173,7 @@ namespace XecMe.Core.Tasks
                     _task.Release();
                     _task = null;
                     base.Stop();
-                    Trace.TraceInformation("Timer Task \"{0}\" stopped", this.Name);
+                    TraceInformation("Stopped");
                 }
             }
         }
@@ -169,11 +184,13 @@ namespace XecMe.Core.Tasks
         {
             get
             {
+                DateTime now;
                 if (_timeZoneInfo == null
                     || _timeZoneInfo == TimeZoneInfo.Local)
-                    return DateTime.Now;
-                DateTime now = TimeZoneInfo.ConvertTime(DateTime.Now, _timeZoneInfo);
-                Trace.TraceInformation("Now: {0}", now);
+                    now = DateTime.Now;
+                else
+                    now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _timeZoneInfo);
+                TraceInformation("Now: {0}", now);
                 return now;
             }
         }
@@ -191,45 +208,39 @@ namespace XecMe.Core.Tasks
                 Stop();
                 return;
             }
-            ///Sleep until the 5 secs before start time
-            TimeSpan wait = _startDateTime.Subtract(today).Add(TimeSpan.FromMilliseconds(-_interval));
-            if (wait.TotalMilliseconds > 0)
-            {
-                Trace.TraceInformation("Timer task \"{0}\" will wait for {1} before it starts", this.Name, wait);
-                _timer.Change((long)wait.TotalMilliseconds, _interval);
-                return;
-            }
-            if (today < _startDateTime || today > _endDateTime)
-                return;
 
-
-            TimeSpan now = today.TimeOfDay;
-            ///Not in the range of time of the day
-            wait = _dayStartTime.Subtract(now);
-            if (wait.TotalMilliseconds > 0)
+            ///Sleep until the interval duration before start time
+            if (today < _startDateTime)
             {
-                Trace.TraceInformation("Timer task \"{0}\" will wait for {1} before it starts", this.Name, wait);
-                _timer.Change((long)wait.TotalMilliseconds, _interval);
-                return;
-            }
-            if (now > _dayEndTime)
-            {
-                wait = _dayStartTime.Subtract(now.Subtract(TimeSpan.FromSeconds(86405)));
-                Trace.TraceInformation("Timer task \"{0}\" will wait for {1} before it starts", this.Name, wait);
+                TimeSpan wait = TimeZoneInfo.ConvertTimeToUtc(_startDateTime, _timeZoneInfo).Subtract(TimeZoneInfo.ConvertTimeToUtc(today, _timeZoneInfo));
+                TraceInformation("will wait for {0} before it starts", wait);
                 _timer.Change((long)wait.TotalMilliseconds, _interval);
                 return;
             }
 
-            if (now < _dayStartTime || now > _dayEndTime)
+            ///Not in the range of time of the day or avalid weekday
+            if (TimeConditions.Disallow(today, _dayStartTime, _dayEndTime, _weekdays))
+            {
+                DateTime st = new DateTime(today.Year, today.Month, today.Day, _dayStartTime.Hours, _dayStartTime.Minutes, _dayStartTime.Seconds, DateTimeKind.Unspecified);
+
+                ///If its not an allowed weekday, wait until next start of day
+                if (!Utils.HasWeekday(_weekdays, Utils.GetWeekday(today.DayOfWeek)) || today > st)
+                    st = st.AddDays(1).Date;
+
+                ///Find the differene by converting to UTC time to make sure daylight cutover are accounted
+                TimeSpan wait = TimeZoneInfo.ConvertTimeToUtc(st, _timeZoneInfo) - TimeZoneInfo.ConvertTimeToUtc(today, _timeZoneInfo);
+
+                //TimeSpan wait = st.Subtract(now);
+                TraceInformation("will wait for {0} before it starts", wait);
+                _timer.Change((long)wait.TotalMilliseconds, _interval);
                 return;
+            }
 
             if (_recurrence > 0 || _recurrence == -1)
             {
                 ///Stop the timer
                 _timer.Change(Timeout.Infinite, _interval);
                 ExecutionState executionState = _task.RunTask();
-
-                Trace.TraceInformation("Timer Task \"{0}\" executed with return value {1}", this.Name, executionState);
 
                 switch (executionState)
                 {
@@ -255,7 +266,7 @@ namespace XecMe.Core.Tasks
             else
             {
                 Stop();
-                Trace.TraceInformation("Timer Task \"{0}\" is stopped because the reccurence is 0 ", this.Name);
+                TraceInformation("stopped because the reccurence is 0 ");
             }
         }
     }

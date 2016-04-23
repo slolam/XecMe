@@ -10,8 +10,8 @@ namespace XecMe.Core.Tasks
     {
         int _delay;
         TaskWrapper _task;
-        public RunOnceTaskRunner(string name, Type taskType, StringDictionary parameters, int delay)
-            : base(name, taskType, parameters)
+        public RunOnceTaskRunner(string name, Type taskType, StringDictionary parameters, int delay, TraceType traceType)
+            : base(name, taskType, parameters, traceType)
         {
             if (delay < 0)
                 throw new ArgumentOutOfRangeException("delay", "delay cannot be negative");
@@ -22,11 +22,12 @@ namespace XecMe.Core.Tasks
         {
             if (_task == null)
             {
-                _task = new TaskWrapper(this.GetTaskInstance(), new ExecutionContext(Parameters));
+                _task = new TaskWrapper(this.GetTaskInstance(), new ExecutionContext(Parameters, this));
                 ThreadPool.QueueUserWorkItem(new WaitCallback(delegate(object state)
                 {
+                    TraceInformation("will be run in {0}", TimeSpan.FromMilliseconds(_delay));
                     Thread.Sleep(_delay);
-                    _task.RunTask();
+                    ExecutionState executionState = _task.RunTask();
                 }));
             }
         }

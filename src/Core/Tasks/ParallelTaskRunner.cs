@@ -31,6 +31,8 @@ namespace XecMe.Core.Tasks
     /// </summary>
     public class ParallelTaskRunner : TaskRunner
     {
+        private static readonly TimeSpan TS_MIN;
+        private static readonly TimeSpan TS_MAX;
         /// <summary>
         /// This hold the list of the free TaskWrapper instances created.
         /// </summary>
@@ -83,14 +85,58 @@ namespace XecMe.Core.Tasks
         /// Indicates whether the attached task is singleton.
         /// </summary>
         //private TaskWrapper _singletonInstance;
+        /// <summary>
+        /// Day of the week when this task is allowed to run, it defaults to Weekdays.All i.e. all days of the week
+        /// </summary>
+        private Weekdays _weekdays = Weekdays.All;
+        /// <summary>
+        /// Start time of the task in a given valid day before which the task cannot run
+        /// </summary>
+        private TimeSpan _dayStartTime = TimeSpan.FromSeconds(0);
+        /// <summary>
+        /// End time on a given valid day after which the task cannot run
+        /// </summary>
+        private TimeSpan _dayEndTime = TimeSpan.FromSeconds(86400);
+        /// <summary>
+        /// Time zone reference to be used for all the time calculations. Very useful for all cloud based use.
+        /// </summary>
+        private TimeZoneInfo _timeZoneInfo;
 
-        public ParallelTaskRunner(string name, Type taskType, StringDictionary parameters, int min, int max, long idlePollingPeriod) :
-            base(name, taskType, parameters)
+        static ParallelTaskRunner()
+        {
+            TS_MIN = TimeSpan.FromSeconds(0);
+            TS_MAX = TimeSpan.FromSeconds(86400);
+        }
+
+        public ParallelTaskRunner(string name, Type taskType, StringDictionary parameters, int min, int max, long idlePollingPeriod,
+            TimeSpan startTime, TimeSpan endTime, Weekdays weekdays, TimeZoneInfo timeZoneInfo, TraceType traceType) :
+            base(name, taskType, parameters, traceType)
         {
             if (min < 1 || max < min)
                 throw new ArgumentOutOfRangeException("min", "min and max should be greater than 1 and min should be less than or equal to max");
+
             if (idlePollingPeriod < 100)
                 throw new ArgumentOutOfRangeException("max", "idlePollingPeriod should be at least 100ms.");
+
+            //if (endTime < startTime)
+            //    throw new ArgumentOutOfRangeException("startTime", "startDateTime should be less than endDateTime");
+
+            if (startTime < TS_MIN)
+                throw new ArgumentOutOfRangeException("dayStartTime", "dayStartTime cannot be negative");
+
+            if (endTime < TS_MIN)
+                throw new ArgumentOutOfRangeException("dayEndTime", "dayEndTime cannot be negative");
+            
+            if (startTime > TS_MAX)
+                throw new ArgumentOutOfRangeException("dayStartTime", "dayStartTime should be less than 23:59:59");
+
+            if (endTime > TS_MAX)
+                throw new ArgumentOutOfRangeException("dayEndTime", "dayEndTime should be less than 23:59:59");
+
+            _dayStartTime = startTime;
+            _dayEndTime = endTime;
+            _weekdays = weekdays;
+            _timeZoneInfo = timeZoneInfo??TimeZoneInfo.Local;
             _minInstances = min;
             _maxInstances = max;
             _idlePollingPeriod = idlePollingPeriod;
@@ -146,7 +192,7 @@ namespace XecMe.Core.Tasks
                     _parallelInstances = 0;
                     QueueTask();
                     base.Start();
-                    Trace.TraceInformation("Parallel task \"{0}\" has started", this.Name);
+                    TraceInformation("Started");
                 }
             }
         }
@@ -176,12 +222,27 @@ namespace XecMe.Core.Tasks
                     _parallelInstances = 0;
                     _isStarted = false;
                     base.Stop();
-                    Trace.TraceInformation("Parallel task \"{0}\" has stopped", this.Name);
+                    TraceInformation("Stopped", this.Name);
                 }
             }
         }
 
         #endregion
+
+        private DateTime Now
+        {
+            get
+            {
+                DateTime now;
+                if (_timeZoneInfo == null
+                    || _timeZoneInfo == TimeZoneInfo.Local)
+                    now = DateTime.Now;
+                else
+                    now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _timeZoneInfo);
+                TraceInformation("Now: {0}", now);
+                return now;
+            }
+        }
 
         private void RunTask(object state)
         {
@@ -193,12 +254,69 @@ namespace XecMe.Core.Tasks
             {
                 // if this is coming as part of the timer trigger close down the timer
                 if (_timer != null)
+                {
+                    TraceInformation("Disabling the timer");
                     _timer.Change(Timeout.Infinite, Timeout.Infinite);
+                }
 
                 _jobsInQueue--;
 
+                DateTime today = Now;
+                TimeSpan now = today.TimeOfDay;
+
+                ///Check whether it is within the allowed time
+                if (TimeConditions.Disallow(today, _dayStartTime, _dayEndTime, _weekdays))
+                {
+                    TraceInformation("Not allowed to run at this time");
+
+                    ///If there are more queued items, release this thread task
+                    if (_jobsInQueue > 0)
+                    {
+                        TraceInformation("Have more items in queue");
+                        return;
+                    }
+
+                    ///If the number of thread running is more that minimum thread, remove 1 and return;
+                    if (_freeTaskPool.Count > 0 && _allTasks.Count > MinInstances)
+                    {
+                        TraceInformation("Releasing a task");
+                        taskWrapper = _freeTaskPool[0];
+                        taskWrapper.Release();
+                        _freeTaskPool.Remove(taskWrapper);
+                        _allTasks.Remove(taskWrapper);
+                    }
+
+
+                    if (_timer == null)
+                    {
+                        TraceInformation("Timer created");
+                        _timer = new Timer(new TimerCallback(RunTask), null, Timeout.Infinite, Timeout.Infinite);
+                    }
+                    
+                    ///Do it only for the last thread.
+                    if (_parallelInstances == 0 && _allTasks.Count == MinInstances)
+                    {
+                        DateTime st = new DateTime(today.Year, today.Month, today.Day, _dayStartTime.Hours, _dayStartTime.Minutes, _dayStartTime.Seconds, DateTimeKind.Unspecified);
+
+                        ///if today is not allowed weekday, move it to next start of the day
+                        if (!Utils.HasWeekday(_weekdays, Utils.GetWeekday(today.DayOfWeek)) || today > st)
+                            st = st.AddDays(1).Date; //Setting it to next day 12:00 AM
+                        
+                        ///Find the differene by converting to UTC time to make sure daylight cutover are accounted
+                        TimeSpan wait = TimeZoneInfo.ConvertTimeToUtc(st, _timeZoneInfo) - TimeZoneInfo.ConvertTimeToUtc(today, _timeZoneInfo);
+                        
+                        ///This is for the timer job
+                        _jobsInQueue++;
+                        _timer.Change((long)wait.TotalMilliseconds, Timeout.Infinite);
+                        //_timer.Change(_idlePollingPeriod, Timeout.Infinite);
+                        TraceInformation("wait for {0} before it starts", wait);
+                    }
+                    return;
+                }
+
                 if (_freeTaskPool.Count == 0)
                     AddTask(1);
+
                 if (_freeTaskPool.Count > 0)
                 {
                     taskWrapper = _freeTaskPool[0];
@@ -207,18 +325,15 @@ namespace XecMe.Core.Tasks
                 else
                 {
                     ///There are no parallel capacity so exit
+                    TraceInformation("There is no more thread capacity for this task runner");
                     return;
                 }
+
                 _parallelInstances++;
             }
-
-            Trace.TraceInformation("Parallel task \"{0}\" is executing on Managed Thread {2} running {1} threads", 
-                this.Name, _parallelInstances, Thread.CurrentThread.ManagedThreadId);
+            TraceInformation("Free Task {0}, All Task {1}, Parallel Instanse {2}, Queue {3}", _freeTaskPool.Count, _allTasks.Count, _parallelInstances, _jobsInQueue);
 
             ExecutionState executionState = taskWrapper.RunTask();
-
-            Trace.TraceInformation("Parallel task \"{0}\" has executed with return value {1} on Managed thread {2}",
-                this.Name, executionState, Thread.CurrentThread.ManagedThreadId);
 
             switch (executionState)
             {
@@ -233,7 +348,7 @@ namespace XecMe.Core.Tasks
                         //Since executed successfully it should go back for execution
                         QueueTask();
                         //there is more capacity possible, put one more to work
-                        if (_jobsInQueue < this.MaxInstances)
+                        if (_jobsInQueue + _parallelInstances < this.MaxInstances)
                         {
                             QueueTask();
                         }
@@ -248,6 +363,7 @@ namespace XecMe.Core.Tasks
                         _parallelInstances--;
                         _allTasks.Remove(taskWrapper);
                         _freeTaskPool.Remove(taskWrapper);
+                        ///If that the last instance then stop the task
                         if (_jobsInQueue == 0 && _parallelInstances == 1)
                             Stop();
                     }
@@ -271,7 +387,7 @@ namespace XecMe.Core.Tasks
                     {
                         ///Reduce the number of instances
                         _parallelInstances--;
-                        
+
                         ///Put back the task into the free pool
                         _freeTaskPool.Add(taskWrapper);
                         //There are other items in the queue do nothing come out.
@@ -291,14 +407,14 @@ namespace XecMe.Core.Tasks
                         ///get work reset it to 5 secs
                         if (_timer == null)
                             _timer = new Timer(new TimerCallback(RunTask), null, Timeout.Infinite, Timeout.Infinite);
-                        ///Wait for 5 seconds to see whether there is something to do
-                        ///Do it only for the last thread.
-                        if (_parallelInstances == 0)
+                        ///Wait for idle period to see whether there is something to do
+                        ///Do it only for the last thread and there is no job in the queue
+                        if (_parallelInstances == 0 && _jobsInQueue == 0)
                         {
                             ///This is for the timer job
                             _jobsInQueue++;
                             _timer.Change(_idlePollingPeriod, Timeout.Infinite);
-                            Trace.TraceInformation("Parallel task \"{0}\" in timer mode",this.Name);
+                            TraceInformation("Is in timer mode");
                         }
                     }
                     break;

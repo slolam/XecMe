@@ -22,6 +22,7 @@ using System.Threading;
 using XecMe.Core.Configuration;
 using System.Diagnostics;
 using SimpleInjector;
+using XecMe.Core.Diagnostics;
 
 namespace XecMe.Core.Tasks
 {
@@ -71,7 +72,7 @@ namespace XecMe.Core.Tasks
             {
                 _taskRunners[runnerIndex].Start();
             }
-            Trace.TraceInformation("Task Manager started");
+            Log.Information("Task Manager started");
         }
 
         public static void Stop()
@@ -81,7 +82,7 @@ namespace XecMe.Core.Tasks
                 _taskRunners[0].Stop();
                 _taskRunners.RemoveAt(0);
             }
-            Trace.TraceInformation("Task Manager stopped");
+            Log.Information("Task Manager stopped");
         }
 
         public static void WaitTasksToComplete(int milliSeconds = -1)
@@ -89,7 +90,7 @@ namespace XecMe.Core.Tasks
             if (_taskRunners.Count == 0)
                 return;
 
-            Trace.TraceInformation("Task Manager waiting for {0}", milliSeconds);
+            Log.Information(string.Format("Task Manager waiting for {0}", milliSeconds));
 
             WaitHandle[] handles = new WaitHandle[_taskRunners.Count];
             for (int i = 0; i < _taskRunners.Count; i++)
