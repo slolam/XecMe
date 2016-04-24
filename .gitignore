@@ -4,6 +4,6 @@ $tf*
 [Oo][Bb][Jj]
 *.user
 .vs
-packages\
+packages
 *.vspscc
 *.suo
