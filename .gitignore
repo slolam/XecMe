@@ -7,3 +7,5 @@ $tf*
 packages
 *.vspscc
 *.suo
+*.nupkg
+*.exe

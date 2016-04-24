@@ -1,6 +1,35 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <OutputPath>bin\Release\$(Framework)</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Framework)' == 'net40' And '$(Configuration)' == 'Release' ">
+    <SimpleInjectorReference>net40-client</SimpleInjectorReference>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Framework)' == 'net40-client' And '$(Configuration)' == 'Release' ">
+    <SimpleInjectorReference>net40-client</SimpleInjectorReference>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>client</TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Framework)' == 'net45' And '$(Configuration)' == 'Release' ">
+    <SimpleInjectorReference>net45</SimpleInjectorReference>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Framework)' == 'net46' And '$(Configuration)' == 'Release' ">
+    <SimpleInjectorReference>net45</SimpleInjectorReference>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'Release' And ('$(ProjectName)' == 'XecMeHost' Or '$(ProjectName)' == 'XecMe.Core')" >
+    <Reference Include="SimpleInjector, Version=3.1.3.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
+      <HintPath>..\packages\SimpleInjector.3.1.3\lib\$(SimpleInjectorReference)\SimpleInjector.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
   <Target Name="AfterBuild">
     <!-- This just allows us to drop a note in the build output -->
     <Message Text="Enter After Build TargetFrameworkVersion:$(TargetFrameworkVersion) Framework:$(Framework)" Importance="high" />
@@ -8,6 +37,10 @@
     <MSBuild Condition=" '$(Framework)' == 'net40' And '$(Configuration)' == 'Release'" Projects="$(MSBuildProjectFile)" Properties="Framework=net40-client" RunEachTargetSeparately="true" />
     <MSBuild Condition=" '$(Framework)' == 'net40-client' And '$(Configuration)' == 'Release'" Projects="$(MSBuildProjectFile)" Properties="Framework=net45" RunEachTargetSeparately="true" />
     <MSBuild Condition=" '$(Framework)' == 'net45' And '$(Configuration)' == 'Release'" Projects="$(MSBuildProjectFile)" Properties="Framework=net46" RunEachTargetSeparately="true" />
+    <!-- Ensure the Package directory exists for this project -->
+    <!-- Package the project -->
+    <Exec WorkingDirectory="$(BuildDir)" Command="$(SolutionDir)nuget\NuGet.exe pack $(ProjectPath) -Verbosity detailed -OutputDir &quot;$(SolutionDir)nuget&quot; -Properties &quot;Configuration=$(Configuration)&quot; -IncludeReferencedProjects"
+          Condition="'$(Framework)' == 'net46' And '$(Configuration)' == 'Release' And '$(ProjectName)' == 'XecMeHost'"/>
     <!-- You could repeat the above node again here and target another framework if there was a property group that would evaluate to true-->
     <!-- Just more logging -->
     <Message Text="Exiting After Build TargetFrameworkVersion:$(TargetFrameworkVersion) Framework:$(Framework)" Importance="high" />
