@@ -95,7 +95,7 @@ namespace XecMe.Core.Tasks
         /// <param name="taskRunner">TaskRunner executing the current task</param>
         public ExecutionContext(StringDictionary parameter, TaskRunner taskRunner)
         {
-            Guard.ArgumentNotNull(parameter, "parameter");
+            parameter.NotNull(nameof(parameter));
             _parameters = parameter;
             _taskRunner = taskRunner;
         }

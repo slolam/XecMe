@@ -30,7 +30,7 @@ namespace XecMe.Common.Data
 
         public ValueReader(IDataReader reader)
         {
-            Guard.ArgumentNotNull(reader, "reader");
+            reader.NotNull(nameof(reader));
             this._reader = reader;
             this._ordinal = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
             this.LoadColumnOrdinals();

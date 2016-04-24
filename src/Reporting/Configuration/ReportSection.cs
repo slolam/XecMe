@@ -41,7 +41,7 @@ namespace XecMe.Core.Reporting.Configuration
         {
             get
             {
-                return (ReportsSection)AxpFxSectionGroup.ThisSection.Sections[REPORTS_SECTION];
+                return (ReportsSection)XecMeSectionGroup.ThisSection.Sections[REPORTS_SECTION];
             }
         }
     }

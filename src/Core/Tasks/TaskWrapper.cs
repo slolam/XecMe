@@ -33,8 +33,8 @@ namespace XecMe.Core.Tasks
         private Stopwatch _stopwatch = new Stopwatch();
         public TaskWrapper(ITask task, ExecutionContext executionContext)
         {
-            Guard.ArgumentNotNull(task, "task");
-            Guard.ArgumentNotNull(executionContext, "executionContext");
+            task.NotNull(nameof(task));
+            executionContext.NotNull(nameof(executionContext));
             _executionContext = executionContext;
             _task = task;
         }

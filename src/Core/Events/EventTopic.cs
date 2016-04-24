@@ -180,8 +180,8 @@ namespace XecMe.Core.Events
             /// <param name="threadOption">ThreadOption for processing the event</param>
             public Subscriber(EventTopic topic, object target, MethodInfo info, ThreadOption threadOption)
             {
-                Guard.ArgumentNotNull(target, "target");
-                Guard.ArgumentNotNull(info, "info");
+                target.NotNull(nameof(target));
+                info.NotNull(nameof(info));
                 _wrSubscriber = new WeakReference(target);
                 _threadOption = threadOption;
                 _topic = topic;

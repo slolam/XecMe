@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Target Name="AfterBuild">
+    <!-- This just allows us to drop a note in the build output -->
+    <Message Text="Enter After Build TargetFrameworkVersion:$(TargetFrameworkVersion) Framework:$(Framework)" Importance="high" />
+    <!-- This is the key to the whole process. The second build happens here.  We set our 'Framework' variable allowing the above PropertyGroups to run more frameworks.  -->
+    <MSBuild Condition=" '$(Framework)' == 'net40' And '$(Configuration)' == 'Release'" Projects="$(MSBuildProjectFile)" Properties="Framework=net40-client" RunEachTargetSeparately="true" />
+    <MSBuild Condition=" '$(Framework)' == 'net40-client' And '$(Configuration)' == 'Release'" Projects="$(MSBuildProjectFile)" Properties="Framework=net45" RunEachTargetSeparately="true" />
+    <MSBuild Condition=" '$(Framework)' == 'net45' And '$(Configuration)' == 'Release'" Projects="$(MSBuildProjectFile)" Properties="Framework=net46" RunEachTargetSeparately="true" />
+    <!-- You could repeat the above node again here and target another framework if there was a property group that would evaluate to true-->
+    <!-- Just more logging -->
+    <Message Text="Exiting After Build TargetFrameworkVersion:$(TargetFrameworkVersion) Framework:$(Framework)" Importance="high" />
+  </Target>
+</Project>

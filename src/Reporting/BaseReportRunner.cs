@@ -5,6 +5,7 @@ using System.Text;
 using System.Reflection;
 using System.Collections.Specialized;
 using System.IO;
+using System.IO.Compression;
 using XecMe.Common;
 using XecMe.Core.Reporting.Configuration;
 using XecMe.Configuration;
@@ -33,7 +34,9 @@ namespace XecMe.Core.Reporting
             return null;
         }
         string retVal = Path.GetTempFileName();
-        ZipHelper.AddFilesToZip(retVal, fileList);
+        ZipArchive z = new ZipArchive(null);
+        
+        //ZipHelper.AddFilesToZip(retVal, fileList);
         return retVal;
     }
 

@@ -101,7 +101,7 @@ namespace XecMe.Core.Events
         /// <param name="item">Object to be registered</param>
         public static void Register(object item)
         {
-            Guard.ArgumentNotNull(item, "item");
+            item.NotNull(nameof(item));
             ProcessPublishers(item, true);
             ProcessSubscribers(item, true);
         }
@@ -112,7 +112,7 @@ namespace XecMe.Core.Events
         /// <param name="item">Object to be unregistered</param>
         public static void Unregister(object item)
         {
-            Guard.ArgumentNotNull(item, "item");
+            item.NotNull(nameof(item));
             ProcessPublishers(item, false);
             ProcessSubscribers(item, false);
         }
@@ -190,9 +190,9 @@ namespace XecMe.Core.Events
         /// <param name="register">Register if true, else false</param>
         private static void ProcessPublisher(string topic, object item, string eventName, bool register)
         {
-            Guard.ArgumentNotNullOrEmptyString(topic, "topic");
-            Guard.ArgumentNotNull(item, "item");
-            Guard.ArgumentNotNullOrEmptyString(eventName, "eventName");
+            topic.NotNullOrEmpty(nameof(topic));
+            item.NotNull(nameof(item));
+            eventName.NotNullOrEmpty(nameof(eventName));
             EventTopic eventTopic = CreateOrGetEventTopic(topic);
             EventInfo info = item.GetType().GetEvent(eventName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             if (info == null)
@@ -234,9 +234,9 @@ namespace XecMe.Core.Events
         /// <param name="register">Register if true, else false</param>
         private static void ProcessSubscriber(string topic, object item, string methodName, ThreadOption threadOption, bool register)
         {
-            Guard.ArgumentNotNullOrEmptyString(topic, "topic");
-            Guard.ArgumentNotNull(item, "item");
-            Guard.ArgumentNotNullOrEmptyString(methodName, "methodName");
+            topic.NotNullOrEmpty(nameof(topic));
+            item.NotNull(nameof(item));
+            methodName.NotNullOrEmpty(nameof(methodName));
             EventTopic eventTopic = CreateOrGetEventTopic(topic);
             MethodInfo info = item.GetType().GetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             if (info == null)

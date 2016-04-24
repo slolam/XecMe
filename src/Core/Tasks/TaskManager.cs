@@ -43,7 +43,12 @@ namespace XecMe.Core.Tasks
 
             Container container = new Container();
 
+            if (Bootstrap != null)
+                Bootstrap(container);
+
             ///Play safe with the duplicate tasks
+            var orig = container.Options.AllowOverridingRegistrations;
+
             container.Options.AllowOverridingRegistrations = true;
 
             for (int runnerIndex = 0; runnerIndex < _taskRunners.Count; runnerIndex++)
@@ -51,11 +56,9 @@ namespace XecMe.Core.Tasks
                 container.Register(_taskRunners[runnerIndex].TaskType);
             }
             ///Restore it back for the developer
-            container.Options.AllowOverridingRegistrations = false;
+            container.Options.AllowOverridingRegistrations = orig;
 
-            if (Bootstrap != null)
-                Bootstrap(container);
-
+            
             try
             {
                 container.Verify();

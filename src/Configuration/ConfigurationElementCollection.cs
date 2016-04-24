@@ -54,7 +54,7 @@ namespace XecMe.Configuration
         /// <returns></returns>
         protected override object GetElementKey(ConfigurationElement element)
         {
-            Guard.ArgumentNotNull(element, "element");
+            element.NotNull(nameof(element));
 
             foreach (PropertyInformation information in element.ElementInformation.Properties)
             {

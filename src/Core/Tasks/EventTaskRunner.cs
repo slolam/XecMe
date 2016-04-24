@@ -77,7 +77,7 @@ namespace XecMe.Core.Tasks
         public EventTaskRunner(string name, Type taskType, StringDictionary parameters, string eventTopic, ThreadOption threadOption, int timeout, TraceType traceType) :
             base(name, taskType, parameters, traceType)
         {
-            Guard.ArgumentNotNullOrEmptyString(eventTopic, "eventTopic");
+            eventTopic.NotNullOrEmpty(nameof(eventTopic));
             if (timeout < 1 || timeout > 10000)
                 throw new ArgumentOutOfRangeException("timeout", "timeout should be between 1 and 10,000 ms (10 sec)");
 

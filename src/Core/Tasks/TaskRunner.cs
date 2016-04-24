@@ -52,9 +52,9 @@ namespace XecMe.Core.Tasks
         public event Events.EventHandler<ExecutionContext> Completed;
         public TaskRunner(string name, Type taskType, StringDictionary parameters, TraceType traceType)
         {
-            Guard.ArgumentNotNullOrEmptyString(name, "name");
-            Guard.ArgumentNotNull(taskType, "taskType");
-            Guard.ArgumentNotNull(parameters, "parameters");
+            name.NotNullOrEmpty(nameof(name));
+            taskType.NotNull(nameof(taskType));
+            parameters.NotNull(nameof(parameters));
             _name = name;
             _taskType = taskType;
             _parameters = parameters;

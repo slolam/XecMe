@@ -36,8 +36,8 @@ namespace XecMe.Core.Services
         private IService _service;
         public ServiceHost(string serviceName, IService service)
         {
-            Guard.ArgumentNotNullOrEmptyString(serviceName, "serviceName");
-            Guard.ArgumentNotNull(service, "service");
+            serviceName.NotNullOrEmpty(nameof(serviceName));
+            service.NotNull(nameof(service));
             this.AutoLog = true;
             this.ServiceName = serviceName;
             this._service = service;
