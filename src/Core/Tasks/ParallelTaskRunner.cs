@@ -31,8 +31,6 @@ namespace XecMe.Core.Tasks
     /// </summary>
     public class ParallelTaskRunner : TaskRunner
     {
-        private static readonly TimeSpan TS_MIN;
-        private static readonly TimeSpan TS_MAX;
         /// <summary>
         /// This hold the list of the free TaskWrapper instances created.
         /// </summary>
@@ -44,27 +42,27 @@ namespace XecMe.Core.Tasks
         /// <summary>
         /// Total no. of jobs in the queue waiting to be executed.
         /// </summary>
-        private int _jobsInQueue;
+        private uint _jobsInQueue;
         /// <summary>
         /// Minimum no. of tasks that should run in parallel
         /// </summary>
         /// <remarks>Although this is the configuration, the actual no. of tasks running 
         /// depends on lot of other factors</remarks>
-        private int _minInstances;
+        private uint _minInstances;
         /// <summary>
         /// Maximum no. of tasks that should run in parallel
         /// </summary>
         /// <remarks>Although this is the configuration, the actual no. of tasks running 
         /// depends on lot of other factors</remarks>
-        private int _maxInstances;
+        private uint _maxInstances;
         /// <summary>
         /// This is the time in milliseconds the thread will sleep when there is no work
         /// </summary>
-        private long _idlePollingPeriod;
+        private ulong _idlePollingPeriod;
         /// <summary>
         /// This indicate the total no. of task actually running in parallel at a given instance.
         /// </summary>
-        private int _parallelInstances;
+        private uint _parallelInstances;
         /// <summary>
         /// Indicator to indicate whether the ParallelTaskRunner is running or not.
         /// </summary>
@@ -102,13 +100,7 @@ namespace XecMe.Core.Tasks
         /// </summary>
         private TimeZoneInfo _timeZoneInfo;
 
-        static ParallelTaskRunner()
-        {
-            TS_MIN = TimeSpan.FromSeconds(0);
-            TS_MAX = TimeSpan.FromSeconds(86400);
-        }
-
-        public ParallelTaskRunner(string name, Type taskType, StringDictionary parameters, int min, int max, long idlePollingPeriod,
+        public ParallelTaskRunner(string name, Type taskType, Dictionary<string, object> parameters, uint min, uint max, ulong idlePollingPeriod,
             TimeSpan startTime, TimeSpan endTime, Weekdays weekdays, TimeZoneInfo timeZoneInfo, TraceType traceType) :
             base(name, taskType, parameters, traceType)
         {
@@ -121,16 +113,16 @@ namespace XecMe.Core.Tasks
             //if (endTime < startTime)
             //    throw new ArgumentOutOfRangeException("startTime", "startDateTime should be less than endDateTime");
 
-            if (startTime < TS_MIN)
+            if (startTime < Time.DayMinTime)
                 throw new ArgumentOutOfRangeException("dayStartTime", "dayStartTime cannot be negative");
 
-            if (endTime < TS_MIN)
+            if (endTime < Time.DayMinTime)
                 throw new ArgumentOutOfRangeException("dayEndTime", "dayEndTime cannot be negative");
             
-            if (startTime > TS_MAX)
+            if (startTime > Time.DayMaxTime)
                 throw new ArgumentOutOfRangeException("dayStartTime", "dayStartTime should be less than 23:59:59");
 
-            if (endTime > TS_MAX)
+            if (endTime > Time.DayMaxTime)
                 throw new ArgumentOutOfRangeException("dayEndTime", "dayEndTime should be less than 23:59:59");
 
             _dayStartTime = startTime;
@@ -147,7 +139,7 @@ namespace XecMe.Core.Tasks
         /// Idle polling period in millisecond, this is the time the thread will sleep before attempting next time.
         /// </summary>
         /// <remarks>This is to reduce the load on the process when there is no work</remarks>
-        public long IdlePollingPeriod
+        public ulong IdlePollingPeriod
         {
             get { return _idlePollingPeriod; }
         }
@@ -155,7 +147,7 @@ namespace XecMe.Core.Tasks
         /// <summary>
         /// This is the minimum number of instances that will work in parallel
         /// </summary>
-        public int MinInstances
+        public uint MinInstances
         {
             get { return _minInstances; }
         }
@@ -165,7 +157,7 @@ namespace XecMe.Core.Tasks
         /// </summary>
         /// <remarks>Although this defines the maximum parallel instance, but it depends on other factors
         /// like load, cpu utilization, cpu allocation to the process etc.</remarks>
-        public int MaxInstances
+        public uint MaxInstances
         {
             get { return _maxInstances; }
         }
@@ -173,7 +165,7 @@ namespace XecMe.Core.Tasks
         /// <summary>
         /// Gets the number of instances that are running in parallel.
         /// </summary>
-        public int ParallelInstances
+        public uint ParallelInstances
         {
             get { return _parallelInstances; }
         }
@@ -265,7 +257,7 @@ namespace XecMe.Core.Tasks
                 TimeSpan now = today.TimeOfDay;
 
                 ///Check whether it is within the allowed time
-                if (TimeConditions.Disallow(today, _dayStartTime, _dayEndTime, _weekdays))
+                if (Time.Disallow(today, _dayStartTime, _dayEndTime, _weekdays))
                 {
                     TraceInformation("Not allowed to run at this time");
 
@@ -414,7 +406,7 @@ namespace XecMe.Core.Tasks
                         {
                             ///This is for the timer job
                             _jobsInQueue++;
-                            _timer.Change(_idlePollingPeriod, Timeout.Infinite);
+                            _timer.Change((long)_idlePollingPeriod, Timeout.Infinite);
                             TraceInformation("Is in timer mode");
                         }
                     }
@@ -449,7 +441,7 @@ namespace XecMe.Core.Tasks
         /// Adds the <c>count</c> number of Task instances to the pool
         /// </summary>
         /// <param name="count">number of ITask instances to be added</param>
-        private void AddTask(int count)
+        private void AddTask(uint count)
         {
             lock (_sync)
             {

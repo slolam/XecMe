@@ -43,14 +43,15 @@ namespace XecMe.Core.Tasks
     public abstract class TaskRunner
     {
         private Type _taskType;
-        private StringDictionary _parameters;
+        private TaskWrapper _taskWrapper;
+        private Dictionary<string, object> _parameters;
         private EventWaitHandle _waitHandle;
         private string _name;
         private bool isErrorTrace, isWarningTrace, isInfoTrace; 
         private string _taskRunnerTypeName;
         protected readonly Stopwatch _stopwatch = new Stopwatch();
         public event Events.EventHandler<ExecutionContext> Completed;
-        public TaskRunner(string name, Type taskType, StringDictionary parameters, TraceType traceType)
+        public TaskRunner(string name, Type taskType, Dictionary<string, object> parameters, TraceType traceType)
         {
             name.NotNullOrEmpty(nameof(name));
             taskType.NotNull(nameof(taskType));
@@ -75,14 +76,13 @@ namespace XecMe.Core.Tasks
             get { return _name; }
         }
 
-        protected StringDictionary Parameters
+        protected Dictionary<string, object> Parameters
         {
             get { return _parameters; }
         }
 
         protected ITask GetTaskInstance()
         {
-            //ITask task = Reflection.CreateInstance<ITask>(_taskType);
             ITask task = ExecutionContext.InternalContainer.GetInstance(_taskType) as ITask;
             EventManager.Register(task);
             return task;

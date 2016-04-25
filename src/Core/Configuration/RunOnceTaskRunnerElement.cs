@@ -37,9 +37,9 @@ namespace XecMe.Core.Configuration
         /// Gets or sets the delay
         /// </summary>
         [ConfigurationProperty(DELAY, DefaultValue=1000), IntegerValidator(MinValue=0)]
-        public int Delay
+        public uint Delay
         {
-            get { return (int)base[DELAY]; }
+            get { return (uint)base[DELAY]; }
             set { base[DELAY] = value; }
         }
 

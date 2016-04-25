@@ -16,8 +16,8 @@ namespace XecMe.Test
         {
             if (_count < 0)
             {
-                int.TryParse(context.Parameters["count"], out _count);
-                int.TryParse(context.Parameters["delay"], out _delay);
+                int.TryParse(context.Parameters["count"]?.ToString(), out _count);
+                int.TryParse(context.Parameters["delay"]?.ToString(), out _delay);
             }
         }
 

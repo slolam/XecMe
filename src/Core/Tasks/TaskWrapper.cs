@@ -39,6 +39,14 @@ namespace XecMe.Core.Tasks
             _task = task;
         }
 
+        public ITask TaskType
+        {
+            get
+            {
+                return _task;
+            }
+        }
+
         public ExecutionState RunTask()
         {
             if (!_initialized)

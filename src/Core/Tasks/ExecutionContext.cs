@@ -37,7 +37,7 @@ namespace XecMe.Core.Tasks
         /// <summary>
         /// Parameters for this task from configuration
         /// </summary>
-        private StringDictionary _parameters;
+        private Dictionary<string, object> _parameters;
         /// <summary>
         /// Simple injector container for DI
         /// </summary>
@@ -45,7 +45,7 @@ namespace XecMe.Core.Tasks
         /// <summary>
         /// Parameters initialized in the config
         /// </summary>
-        public StringDictionary Parameters
+        public Dictionary<string, object> Parameters
         {
             get { return _parameters; }
         }
@@ -85,7 +85,7 @@ namespace XecMe.Core.Tasks
         /// Constructor to create ExecutionContext from parameters
         /// </summary>
         /// <param name="parameter">Parameters initialized from the config</param>
-        public ExecutionContext(StringDictionary parameter):this(parameter, null)
+        public ExecutionContext(Dictionary<string, object> parameter):this(parameter, null)
         {
         }
         /// <summary>
@@ -93,7 +93,7 @@ namespace XecMe.Core.Tasks
         /// </summary>
         /// <param name="parameter">Parameters initialized from the config</param>
         /// <param name="taskRunner">TaskRunner executing the current task</param>
-        public ExecutionContext(StringDictionary parameter, TaskRunner taskRunner)
+        public ExecutionContext(Dictionary<string, object> parameter, TaskRunner taskRunner)
         {
             parameter.NotNull(nameof(parameter));
             _parameters = parameter;

@@ -35,13 +35,19 @@ namespace XecMe.Core.Tasks
             _taskRunners = new List<TaskRunner>();
         }
 
+
         public static void Start(ITaskManagerConfig config)
+        {
+            Container container = new Container();
+            container.Options.DefaultScopedLifestyle = Lifestyle.Scoped;
+            Start(config, container);
+        }
+
+        public static void Start(ITaskManagerConfig config, Container container)
         {
             Stop();
 
             _taskRunners.AddRange(config.Runners);
-
-            Container container = new Container();
 
             if (Bootstrap != null)
                 Bootstrap(container);
@@ -57,7 +63,6 @@ namespace XecMe.Core.Tasks
             }
             ///Restore it back for the developer
             container.Options.AllowOverridingRegistrations = orig;
-
             
             try
             {
@@ -65,7 +70,7 @@ namespace XecMe.Core.Tasks
             }
             catch(Exception e)
             {
-                Trace.WriteLine(string.Format("Error while verifying the container - {0}", e));
+                Log.Error(string.Format("Error while verifying the container - {0}", e));
                 throw;
             }
 

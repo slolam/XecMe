@@ -90,9 +90,9 @@ namespace XecMe.Core.Configuration
         /// Returns the parameters dictionary for this instances
         /// </summary>
         /// <returns></returns>
-        protected StringDictionary InternalParameters()
+        protected Dictionary<string, object> InternalParameters()
         {
-            StringDictionary param = new StringDictionary();
+            Dictionary<string, object> param = new Dictionary<string, object>();
             foreach (XecMe.Configuration.KeyValueConfigurationElement item in Parameters)
             {
                 param.Add(item.Name, item.Value);

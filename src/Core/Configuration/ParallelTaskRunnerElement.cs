@@ -66,9 +66,9 @@ namespace XecMe.Core.Configuration
         /// Gets or sets the idle polling period when there is not task to execute
         /// </summary>
         [ConfigurationProperty(IDLE_POLLING_PERIOD, DefaultValue=300000L), LongValidator(MinValue=100)]
-        public long IdlePollingPeriod
+        public ulong IdlePollingPeriod
         {
-            get { return (long)base[IDLE_POLLING_PERIOD]; }
+            get { return (ulong)base[IDLE_POLLING_PERIOD]; }
             set { base[IDLE_POLLING_PERIOD] = value; }
         }
 
@@ -158,9 +158,9 @@ namespace XecMe.Core.Configuration
         /// Gets or sets the minimum number threads that should be reserved for this task. 
         /// </summary>
         [ConfigurationProperty(MIN_INSTANCE, IsRequired = true, DefaultValue = 1), IntegerValidator(MinValue = 1)]
-        public int MinInstances
+        public uint MinInstances
         {
-            get { return (int)base[MIN_INSTANCE]; }
+            get { return (uint)base[MIN_INSTANCE]; }
             set { base[MIN_INSTANCE] = value; }
         }
 
@@ -169,9 +169,9 @@ namespace XecMe.Core.Configuration
         /// Gets or sets the maximum number of threads that this instance will run on
         /// </summary>
         [ConfigurationProperty(MAX_INSTANCE, IsRequired = true, DefaultValue=1), IntegerValidator(MinValue=1)]
-        public int MaxInstances
+        public uint MaxInstances
         {
-            get { return (int)base[MAX_INSTANCE]; }
+            get { return (uint)base[MAX_INSTANCE]; }
             set { base[MAX_INSTANCE] = value; }
         }
 

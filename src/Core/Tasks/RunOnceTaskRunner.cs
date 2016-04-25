@@ -8,9 +8,9 @@ namespace XecMe.Core.Tasks
 {
     public class RunOnceTaskRunner : TaskRunner
     {
-        int _delay;
+        uint _delay;
         TaskWrapper _task;
-        public RunOnceTaskRunner(string name, Type taskType, StringDictionary parameters, int delay, TraceType traceType)
+        public RunOnceTaskRunner(string name, Type taskType, Dictionary<string, object> parameters, uint delay, TraceType traceType)
             : base(name, taskType, parameters, traceType)
         {
             if (delay < 0)
@@ -26,7 +26,7 @@ namespace XecMe.Core.Tasks
                 ThreadPool.QueueUserWorkItem(new WaitCallback(delegate(object state)
                 {
                     TraceInformation("will be run in {0}", TimeSpan.FromMilliseconds(_delay));
-                    Thread.Sleep(_delay);
+                    Thread.Sleep((int)_delay);
                     ExecutionState executionState = _task.RunTask();
                 }));
             }

@@ -110,6 +110,13 @@
     <Compile Include="Events\EventPublicationAttribute.cs" />
     <Compile Include="Events\EventSubscriptionAttribute.cs" />
     <Compile Include="Events\EventTopic.cs" />
+    <Compile Include="Fluent\CronTaskBuilder.cs" />
+    <Compile Include="Fluent\EventTaskBuilder.cs" />
+    <Compile Include="Fluent\ParallelTaskBuilder.cs" />
+    <Compile Include="Fluent\RunOnceTaskBuilder.cs" />
+    <Compile Include="Fluent\ScheduledTaskBuilder.cs" />
+    <Compile Include="Fluent\TaskBuilder.cs" />
+    <Compile Include="Fluent\FlowConfiguration.cs" />
     <Compile Include="Services\IService.cs" />
     <Compile Include="Services\TaskManagerService.cs" />
     <Compile Include="Tasks\EventTaskRunner.cs" />
@@ -134,7 +141,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\CrossDomainEventBroker.cs" />
     <Compile Include="Utils\ServiceInfo.cs" />
-    <Compile Include="Utils\TimeConditions.cs" />
+    <Compile Include="Utils\Time.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Services\ServiceHost.resx">

@@ -8,8 +8,15 @@ using Util = XecMe.Core.Tasks.Utils;
 
 namespace XecMe.Core.Utils
 {
-    static class TimeConditions
+    static class Time
     {
+        public static readonly TimeSpan DayMinTime;
+        public static readonly TimeSpan DayMaxTime;
+        static Time()
+        {
+            DayMinTime = TimeSpan.FromSeconds(0);
+            DayMaxTime = TimeSpan.FromSeconds(86399);
+        }
         internal static bool Disallow(DateTime today, TimeSpan startTime, TimeSpan endTime, Weekdays weekdays)
         {
             TimeSpan now = today.TimeOfDay;

@@ -23,6 +23,8 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Threading;
 using System.Diagnostics;
+using XecMe.Core.Utils;
+using XecMe.Common;
 
 namespace XecMe.Core.Tasks
 {
@@ -72,8 +74,6 @@ namespace XecMe.Core.Tasks
 
     public class ScheduledTaskRunner : TaskRunner
     {
-        private static readonly TimeSpan TS_MIN;
-        private static readonly TimeSpan TS_MAX;
         private string _schedule;
         private DateTime _startDate, _lastDateTime;
         private TimeSpan _taskTime;
@@ -86,19 +86,15 @@ namespace XecMe.Core.Tasks
 
         private TimeZoneInfo _timeZoneInfo;
 
-        static ScheduledTaskRunner()
-        {
-            TS_MIN = TimeSpan.FromSeconds(0);
-            TS_MAX = TimeSpan.FromSeconds(86400);
-        }
-
-        public ScheduledTaskRunner(string name, Type taskType, StringDictionary parameters, int repeat, Recursion recursion, string schedule,
+        
+        public ScheduledTaskRunner(string name, Type taskType, Dictionary<string, object> parameters, int repeat, Recursion recursion, string schedule,
             DateTime startDate, TimeSpan taskTime, TimeZoneInfo timeZoneInfo, TraceType traceType) :
             base(name, taskType, parameters, traceType)
         {
+
             if (repeat < 1)
-                throw new ArgumentOutOfRangeException("repeat", "repeat should be greater than 0");
-            if (taskTime < TS_MIN || taskTime > TS_MAX)
+                throw new ArgumentOutOfRangeException("repeat", "repeat should be positive number for number of times to be repeated or 0 for infinite number of times");
+            if (taskTime < Time.DayMinTime || taskTime > Time.DayMaxTime)
                 throw new ArgumentOutOfRangeException("taskTime", "Task time should be between 00:00:00 and 23:59:59");
             if (schedule == null)
                 throw new ArgumentNullException("schedule", "schedule cannot be null");
@@ -111,7 +107,6 @@ namespace XecMe.Core.Tasks
             _repeat = repeat;
             _taskTime = taskTime;
             _timeZoneInfo = timeZoneInfo ?? TimeZoneInfo.Local;
-
 
             switch (recursion)
             {
@@ -195,6 +190,23 @@ namespace XecMe.Core.Tasks
 
         }
 
+        public ScheduledTaskRunner(string name, Type taskType, Dictionary<string, object> parameters, int repeat, IRecur recur,
+            DateTime startDate, TimeSpan taskTime, TimeZoneInfo timeZoneInfo, TraceType traceType) :
+            base(name, taskType, parameters, traceType)
+        {
+            recur.NotNull(nameof(recur));
+            if (repeat < 1)
+                throw new ArgumentOutOfRangeException("repeat", "repeat should be positive number for number of times to be repeated or 0 for infinite number of times");
+            if (taskTime < Time.DayMinTime || taskTime > Time.DayMaxTime)
+                throw new ArgumentOutOfRangeException("taskTime", "Task time should be between 00:00:00 and 23:59:59");
+            if (startDate > DateTime.Now)
+                throw new ArgumentNullException("startDate should be less than now");
+            ///If the start time is not configured set it to Sunday of this week
+            _startDate = startDate == DateTime.MinValue ? DateTime.Now.AddDays(-(int)DateTime.Now.DayOfWeek) : startDate;
+            _recur = recur;
+            _taskTime = taskTime;
+            _timeZoneInfo = timeZoneInfo ?? TimeZoneInfo.Local;
+        }
 
         public int Repeat
         {

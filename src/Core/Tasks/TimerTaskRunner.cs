@@ -29,8 +29,6 @@ namespace XecMe.Core.Tasks
 {
     public class TimerTaskRunner : TaskRunner
     {
-        private static readonly TimeSpan TS_MIN;
-        private static readonly TimeSpan TS_MAX;
         private long _interval;
         private long _recurrence;
         private DateTime _startDateTime = DateTime.MinValue;
@@ -42,14 +40,8 @@ namespace XecMe.Core.Tasks
         private TaskWrapper _task;
         private TimeZoneInfo _timeZoneInfo;
 
-        static TimerTaskRunner()
-        {
-            TS_MIN = TimeSpan.FromSeconds(0.0);
-            TS_MAX = TimeSpan.FromSeconds(86399.0);
-        }
-
-
-        public TimerTaskRunner(string name, Type taskType, StringDictionary parameters, long interval, long recurrence,
+        
+        public TimerTaskRunner(string name, Type taskType, Dictionary<string, object> parameters, long interval, long recurrence,
             Weekdays weekdays, DateTime startDateTime, DateTime endDateTime, TimeSpan dayStartTime, TimeSpan dayEndTime, 
             TimeZoneInfo timeZoneInfo, TraceType traceType) :
             base(name, taskType, parameters, traceType)
@@ -68,16 +60,16 @@ namespace XecMe.Core.Tasks
             if (endDateTime < startDateTime)
                 throw new ArgumentOutOfRangeException("startDateTime", "startDateTime should be less than endDateTime");
 
-            if (dayStartTime < TS_MIN)
+            if (dayStartTime < Time.DayMinTime)
                 throw new ArgumentOutOfRangeException("dayStartTime", "dayStartTime cannot be negative");
 
-            if (dayEndTime < TS_MIN)
+            if (dayEndTime < Time.DayMinTime)
                 throw new ArgumentOutOfRangeException("dayEndTime", "dayEndTime cannot be negative");
 
-            if (dayStartTime > TS_MAX)
+            if (dayStartTime > Time.DayMaxTime)
                 throw new ArgumentOutOfRangeException("dayStartTime", "dayStartTime should be less than 23:59:59");
 
-            if (dayEndTime > TS_MAX)
+            if (dayEndTime > Time.DayMaxTime)
                 throw new ArgumentOutOfRangeException("dayEndTime", "dayEndTime should be less than 23:59:59");
 
             //if (dayEndTime < dayStartTime)
@@ -219,7 +211,7 @@ namespace XecMe.Core.Tasks
             }
 
             ///Not in the range of time of the day or avalid weekday
-            if (TimeConditions.Disallow(today, _dayStartTime, _dayEndTime, _weekdays))
+            if (Time.Disallow(today, _dayStartTime, _dayEndTime, _weekdays))
             {
                 DateTime st = new DateTime(today.Year, today.Month, today.Day, _dayStartTime.Hours, _dayStartTime.Minutes, _dayStartTime.Seconds, DateTimeKind.Unspecified);
 

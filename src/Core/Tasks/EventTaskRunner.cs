@@ -74,7 +74,7 @@ namespace XecMe.Core.Tasks
         /// <param name="threadOption">ThreadOption for the task</param>
         /// <param name="timeout">Timeout of the runner before it stops</param>
         /// <param name="traceType">TraceType filter for this runner</param>
-        public EventTaskRunner(string name, Type taskType, StringDictionary parameters, string eventTopic, ThreadOption threadOption, int timeout, TraceType traceType) :
+        public EventTaskRunner(string name, Type taskType, Dictionary<string, object> parameters, string eventTopic, ThreadOption threadOption, int timeout, TraceType traceType) :
             base(name, taskType, parameters, traceType)
         {
             eventTopic.NotNullOrEmpty(nameof(eventTopic));
