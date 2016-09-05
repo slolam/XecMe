@@ -24,6 +24,7 @@ using XecMe.Common;
 using System.Reflection;
 using System.Threading;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace XecMe.Core.Tasks
 {
@@ -36,6 +37,10 @@ namespace XecMe.Core.Tasks
         /// Instance of the task
         /// </summary>
         private ITask _task;
+        /// <summary>
+        /// The task wrapper
+        /// </summary>
+        private TaskWrapper _taskWrapper;
         /// <summary>
         /// Execution context for the task
         /// </summary>
@@ -55,7 +60,7 @@ namespace XecMe.Core.Tasks
         /// <summary>
         /// Event arguments queued for execution
         /// </summary>
-        private Queue<EventArgs> _queue = null;
+        private Queue<ExecutionContext> _queue = null;
         /// <summary>
         /// Indicate whether a thread is processing
         /// </summary>
@@ -73,9 +78,9 @@ namespace XecMe.Core.Tasks
         /// <param name="eventTopic">Name of the event topic</param>
         /// <param name="threadOption">ThreadOption for the task</param>
         /// <param name="timeout">Timeout of the runner before it stops</param>
-        /// <param name="traceType">TraceType filter for this runner</param>
-        public EventTaskRunner(string name, Type taskType, Dictionary<string, object> parameters, string eventTopic, ThreadOption threadOption, int timeout, TraceType traceType) :
-            base(name, taskType, parameters, traceType)
+        /// <param name="logType">TraceType filter for this runner</param>
+        public EventTaskRunner(string name, Type taskType, Dictionary<string, object> parameters, string eventTopic, ThreadOption threadOption, int timeout, LogType logType) :
+            base(name, taskType, parameters, logType)
         {
             eventTopic.NotNullOrEmpty(nameof(eventTopic));
             if (timeout < 1 || timeout > 10000)
@@ -86,13 +91,15 @@ namespace XecMe.Core.Tasks
             _threadOption = threadOption;
             _executionContext = new ExecutionContext(this.Parameters, this);
 
-            if (threadOption != ThreadOption.BackgroundSerial)
-                _syncEvent = new ManualResetEvent(true);
-
             if (threadOption == ThreadOption.BackgroundSerial)
-                _queue = new Queue<EventArgs>();
+            {
+                _queue = new Queue<ExecutionContext>();
+            }
+            else
+            {
+                _syncEvent = new ManualResetEvent(true);
+            }
         }
-
 
         #region TaskRunner Members
         /// <summary>
@@ -121,9 +128,10 @@ namespace XecMe.Core.Tasks
             EventManager.RemoveSubscriber(_eventTopic, this, "EventSink");
             if (_threadOption != ThreadOption.Publisher)
             {
-                ThreadPool.QueueUserWorkItem(delegate(object o)
+                ThreadPool.QueueUserWorkItem(async (o) =>
                 {
-                    Thread.Sleep(_timeout);
+                    await Task.Delay(_timeout);
+                    _taskWrapper.Release();
                     try
                     {
                         _task.OnStop(_executionContext);
@@ -176,57 +184,6 @@ namespace XecMe.Core.Tasks
         /// <param name="args">EventArg of published by publisher</param>
         private void EventSink(object sender, EventArgs args)
         {
-            switch (_threadOption)
-            {
-                    ///Runs the events on the backgroud thread but in the order the events are received one event at a time
-                case ThreadOption.BackgroundSerial:
-                    lock (_queue)
-                    {
-                        ///Add the event to the queue
-                        _queue.Enqueue(args);
-
-                        ///If the thread is already processing the return
-                        if (_threadWorking)
-                        {
-                            return;
-                        }
-
-                        ///Indicate that this thread will process the events
-                        _threadWorking = true;
-                    }
-
-                    ///While there are items in the queue process
-                    while (true)
-                    {
-                        lock (_queue)
-                        {
-                            if (_queue.Count > 0)
-                            {
-                                args = _queue.Dequeue();
-                            }
-                            else
-                            {
-                                ///If there are no items in the queue mark that the thread is released and exit
-                                _threadWorking = false;
-                                break;
-                            }
-                        }
-                        RunTask(args);
-                    }
-                    break;
-                default:///Rest, Background Parallel and Publisher runs in a free threading more
-                    RunTask(args);
-                    break;
-            }
-
-        }
-
-        /// <summary>
-        /// Runs the underlying task
-        /// </summary>
-        /// <param name="args">EventArg published by publisher</param>
-        private void RunTask(EventArgs args)
-        {
             ExecutionContext ec = null;
 
             if (args is EventArgs<ExecutionContext>)
@@ -251,6 +208,57 @@ namespace XecMe.Core.Tasks
             }
             ec.TaskRunner = this;
 
+            switch (_threadOption)
+            {
+                    ///Runs the events on the backgroud thread but in the order the events are received one event at a time
+                case ThreadOption.BackgroundSerial:
+                    lock (_queue)
+                    {
+                        ///Add the event to the queue
+                        _queue.Enqueue(ec);
+
+                        ///If the thread is already processing the return
+                        if (_threadWorking)
+                        {
+                            return;
+                        }
+
+                        ///Indicate that this thread will process the events
+                        _threadWorking = true;
+                    }
+
+                    ///While there are items in the queue process
+                    while (true)
+                    {
+                        lock (_queue)
+                        {
+                            if (_queue.Count > 0)
+                            {
+                                ec = _queue.Dequeue();
+                            }
+                            else
+                            {
+                                ///If there are no items in the queue mark that the thread is released and exit
+                                _threadWorking = false;
+                                break;
+                            }
+                        }
+                        RunTask(ec);
+                    }
+                    break;
+                default:///Rest, Background Parallel and Publisher runs in a free threading more
+                    RunTask(ec);
+                    break;
+            }
+
+        }
+
+        /// <summary>
+        /// Runs the underlying task
+        /// </summary>
+        /// <param name="args">EventArg published by publisher</param>
+        private void RunTask(ExecutionContext ec)
+        {
             try
             {
                 this.Wait();
@@ -264,7 +272,8 @@ namespace XecMe.Core.Tasks
                 {
                     case ExecutionState.Stop:
                         ///Stop listening to the event in future
-                        this.Stop();
+                        _taskWrapper.Release(ec);
+                        //this.Stop();
                         break;
                     case ExecutionState.Recycle:
                         Reset();
@@ -295,7 +304,7 @@ namespace XecMe.Core.Tasks
                         Set();
                         ///Since this is Event based we will end up losing the event
                         ///hence call the task again
-                        RunTask(args);
+                        RunTask(ec);
                         break;
                 }
             }

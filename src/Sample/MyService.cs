@@ -5,6 +5,7 @@ using System.Text;
 using XecMe.Core.Services;
 using XecMe.Core.Utils;
 using XecMe.Core.Tasks;
+using XecMe.Core.Fluent;
 
 namespace Sample
 {
@@ -52,6 +53,13 @@ namespace Sample
         void IService.OnStart()
         {
             Console.WriteLine("Service starting");
+            FlowConfiguration config = new FlowConfiguration();
+            config.ScheduledTask<MyTask>("scheduled")
+                .RunByDaysOfTheMonths(Months.All)
+                .OnDays(1, 3, 5, 32)
+                .RunsAt(TimeSpan.Parse("12:00"))
+                .OfLocalTimeZone()
+                .Add();
             TaskManager.Start( new TaskManagerConfig());
         }
     }

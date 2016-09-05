@@ -22,111 +22,186 @@ using XecMe.Core.Utils;
 using XecMe.Common;
 using System.Diagnostics;
 using System.Threading;
+using XecMe.Core.Events;
 
 namespace XecMe.Core.Tasks
 {
+    /// <summary>
+    /// Task wrapper that abstracts the task from runner
+    /// </summary>
     internal class TaskWrapper
     {
-        private ITask _task;
-        private ExecutionContext _executionContext;
+
+        /// <summary>
+        /// 
+        /// </summary>
         private bool _initialized;
+        /// <summary>
+        /// Stop watch to monitor the execurion time
+        /// </summary>
         private Stopwatch _stopwatch = new Stopwatch();
-        public TaskWrapper(ITask task, ExecutionContext executionContext)
+
+        /// <summary>
+        /// The container scope
+        /// </summary>
+        private IDisposable _containerScope;
+
+        /// <summary>
+        /// Creates instance of this class
+        /// </summary>
+        /// <param name="taskType">Instance of the task implementing ITask interface</param>
+        /// <param name="executionContext">Execution context</param>
+        public TaskWrapper(Type taskType, ExecutionContext executionContext)
         {
-            task.NotNull(nameof(task));
+            taskType.NotNull(nameof(taskType));
             executionContext.NotNull(nameof(executionContext));
-            _executionContext = executionContext;
-            _task = task;
+            Context = executionContext;
+            TaskType = taskType;
         }
 
-        public ITask TaskType
-        {
-            get
-            {
-                return _task;
-            }
-        }
 
-        public ExecutionState RunTask()
+        public Type TaskType { get; private set; }
+
+        /// <summary>
+        /// Instance of the task.
+        /// </summary>
+        /// <value>
+        /// The task.
+        /// </value>
+        public ITask Task { get; private set; }
+
+        /// <summary>
+        /// Initializes the specified execution context.
+        /// </summary>
+        /// <param name="executionContext">The execution context.</param>
+        private void Initialize(ExecutionContext executionContext = null)
         {
             if (!_initialized)
             {
                 try
                 {
-                    _task.OnStart(_executionContext);
+                    Task = executionContext.Container.GetInstance(TaskType) as ITask;
+                    Task.OnStart(executionContext);
                     _initialized = true;
-                    _executionContext.TaskRunner.TraceInformation("Started");
+                    executionContext.TaskRunner.TraceInformation("Started");
                 }
                 catch (Exception e)
                 {
                     try
                     {
-                        _executionContext.TaskRunner.TraceError("Caught unhandled exception in OnStart, calling OnUnhandledException: {0}", e);
-                        _task.OnUnhandledException(e);
+                        executionContext.TaskRunner.TraceError("Caught unhandled exception in OnStart, calling OnUnhandledException: {0}", e);
+                        Task.OnUnhandledException(e);
                     }
                     catch (Exception badEx)
                     {
-                        _executionContext.TaskRunner.TraceError("Bad Error: {0}", badEx);
+                        executionContext.TaskRunner.TraceError("Bad Error: {0}", badEx);
                     }
                 }
             }
-            try
+        }
+
+        /// <summary>
+        /// Runs the task. If the task is not initialized, it will intialize the task and then run it
+        /// </summary>
+        /// <param name="executionContext">The execution context.</param>
+        /// <returns></returns>
+        public ExecutionState RunTask(ExecutionContext executionContext = null)
+        {
+            if (executionContext == null)
+                executionContext = Context;
+
+            using (var scope = executionContext.Container.BeginScope())
             {
-                _executionContext.TaskRunner.TraceInformation("Executing on Managed thread {0}",Thread.CurrentThread.ManagedThreadId);
-                _stopwatch.Restart();
-                ExecutionState state = _task.OnExecute(_executionContext);
-                _stopwatch.Stop();
-                _executionContext.TaskRunner.TraceInformation("Executed in {2} ms. with a return value {0} on Managed thread {1}", state, Thread.CurrentThread.ManagedThreadId, _stopwatch.ElapsedMilliseconds);
-                if (state == ExecutionState.Recycle
-                    || state == ExecutionState.Stop)
-                {
-                    Release();
-                }
-                return state;
-            }
-            catch (Exception ex)
-            {
-                _stopwatch.Stop();
-                _executionContext.TaskRunner.TraceInformation("Executed in {2} ms. with a return value {0} on Managed thread {1}", ExecutionState.Exception, Thread.CurrentThread.ManagedThreadId, _stopwatch.ElapsedMilliseconds);
+                Initialize(executionContext);
                 try
                 {
-                    _executionContext.TaskRunner.TraceError("Caught unhandled exception in OnExecute, calling OnUnhandledException: {0}", ex);
-                    _task.OnUnhandledException(ex);
+                    executionContext.TaskRunner.TraceInformation("Executing on Managed thread {0}", Thread.CurrentThread.ManagedThreadId);
+                    _stopwatch.Restart();
+                    ExecutionState state = ExecutionState.Idle;
+                    state = Task.OnExecute(executionContext);
+                    _stopwatch.Stop();
+                    executionContext.TaskRunner.TraceInformation("Executed in {2} ms. with a return value {0} on Managed thread {1}", state, Thread.CurrentThread.ManagedThreadId, _stopwatch.ElapsedMilliseconds);
+                    if (state == ExecutionState.Recycle
+                        || state == ExecutionState.Stop)
+                    {
+                        InternalRelease();
+                    }
+                    return state;
                 }
-                catch (Exception badEx)
+                catch (Exception ex)
                 {
-                    _executionContext.TaskRunner.TraceError("Bad Error: {0}", badEx);
+                    _stopwatch.Stop();
+                    executionContext.TaskRunner.TraceInformation("Executed in {2} ms. with a return value {0} on Managed thread {1}", ExecutionState.Exception, Thread.CurrentThread.ManagedThreadId, _stopwatch.ElapsedMilliseconds);
+                    try
+                    {
+                        executionContext.TaskRunner.TraceError("Caught unhandled exception in OnExecute, calling OnUnhandledException: {0}", ex);
+                        Task.OnUnhandledException(ex);
+                    }
+                    catch (Exception badEx)
+                    {
+                        executionContext.TaskRunner.TraceError("Bad Error: {0}", badEx);
+                    }
+                    return ExecutionState.Exception;
                 }
-                return ExecutionState.Exception;
             }
         }
 
-        public void Release()
+        /// <summary>
+        /// Releases this instance.
+        /// </summary>
+        public void Release(ExecutionContext executionContext = null)
+        {
+            if (executionContext == null)
+                executionContext = Context;
+
+            using (var scope = executionContext.Container.BeginScope())
+            {
+                InternalRelease(executionContext);
+            }
+        }
+
+        /// <summary>
+        /// Internal release the instances.
+        /// </summary>
+        /// <param name="executionContext">The execution context.</param>
+        private void InternalRelease(ExecutionContext executionContext = null)
         {
             try
             {
                 if (_initialized)
-                    _task.OnStop(_executionContext);
-                _executionContext.TaskRunner.TraceInformation("Stopped successfully");
+                    Task.OnStop(executionContext);
+                executionContext.TaskRunner.TraceInformation("Stopped successfully");
             }
             catch (Exception e)
             {
                 try
                 {
-                    _executionContext.TaskRunner.TraceError("Caught unhandled exception in OnStop, calling OnUnhandledException: {0}", e);
-                    _task.OnUnhandledException(e);
+                    executionContext.TaskRunner.TraceError("Caught unhandled exception in OnStop, calling OnUnhandledException: {0}", e);
+                    Task.OnUnhandledException(e);
                 }
                 catch (Exception badEx)
                 {
-                    _executionContext.TaskRunner.TraceError("Bad Error: {0}", badEx);
+                    executionContext.TaskRunner.TraceError("Bad Error: {0}", badEx);
                 }
             }
+            _containerScope?.Dispose();
+            _containerScope = null;
             _initialized = false;
         }
 
-        public ExecutionContext Context
+        private ITask GetTaskInstance()
         {
-            get { return _executionContext; }
+            ITask task = ExecutionContext.InternalContainer.GetInstance(TaskType) as ITask;
+            EventManager.Register(task);
+            return task;
         }
+
+        /// <summary>
+        /// Gets the context.
+        /// </summary>
+        /// <value>
+        /// The context.
+        /// </value>
+        public ExecutionContext Context { get; private set; }
     }
 }

@@ -43,7 +43,7 @@ namespace XecMe.Core.Tasks
         
         public TimerTaskRunner(string name, Type taskType, Dictionary<string, object> parameters, long interval, long recurrence,
             Weekdays weekdays, DateTime startDateTime, DateTime endDateTime, TimeSpan dayStartTime, TimeSpan dayEndTime, 
-            TimeZoneInfo timeZoneInfo, TraceType traceType) :
+            TimeZoneInfo timeZoneInfo, LogType traceType) :
             base(name, taskType, parameters, traceType)
         {
             /*}
@@ -52,25 +52,28 @@ namespace XecMe.Core.Tasks
                 base(name, taskType, parameters)
             {*/
             if (interval < 1)
-                throw new ArgumentOutOfRangeException("interval", "interval cannot be less than 1");
+                throw new ArgumentOutOfRangeException(nameof(interval), $"{nameof(interval)} cannot be less than 1");
 
             if (recurrence != -1 && recurrence < 1)
-                throw new ArgumentOutOfRangeException("recurrence", "recurrence has to be greater than 0 or euqal to -1");
+                throw new ArgumentOutOfRangeException(nameof(recurrence), $"{nameof(recurrence)} has to be greater than 0 or euqal to -1");
 
             if (endDateTime < startDateTime)
-                throw new ArgumentOutOfRangeException("startDateTime", "startDateTime should be less than endDateTime");
+                throw new ArgumentOutOfRangeException(nameof(startDateTime), $"{nameof(startDateTime)} should be less than {nameof(endDateTime)}");
 
             if (dayStartTime < Time.DayMinTime)
-                throw new ArgumentOutOfRangeException("dayStartTime", "dayStartTime cannot be negative");
+                throw new ArgumentOutOfRangeException(nameof(dayStartTime), $"{nameof(dayStartTime)} cannot be negative");
 
             if (dayEndTime < Time.DayMinTime)
-                throw new ArgumentOutOfRangeException("dayEndTime", "dayEndTime cannot be negative");
+                throw new ArgumentOutOfRangeException(nameof(dayEndTime), $"{nameof(dayEndTime)} cannot be negative");
 
             if (dayStartTime > Time.DayMaxTime)
-                throw new ArgumentOutOfRangeException("dayStartTime", "dayStartTime should be less than 23:59:59");
+                throw new ArgumentOutOfRangeException(nameof(dayStartTime), $"{nameof(dayStartTime)} should be less than 23:59:59");
 
             if (dayEndTime > Time.DayMaxTime)
-                throw new ArgumentOutOfRangeException("dayEndTime", "dayEndTime should be less than 23:59:59");
+                throw new ArgumentOutOfRangeException(nameof(dayEndTime), $"{nameof(dayEndTime)} should be less than 23:59:59");
+
+            if (weekdays == Weekdays.None)
+                throw new ArgumentOutOfRangeException(nameof(weekdays), "No weekday is selected to run the task");
 
             //if (dayEndTime < dayStartTime)
             //    throw new ArgumentOutOfRangeException("dayStartTime", "dayStartTime should be less than dayEndTime");
@@ -146,7 +149,7 @@ namespace XecMe.Core.Tasks
             {
                 if (_timer == null)
                 {
-                    _task = new TaskWrapper(this.GetTaskInstance(), new ExecutionContext(Parameters, this));
+                    _task = new TaskWrapper(this.TaskType, new ExecutionContext(Parameters, this));
                     _timer = new Timer(new TimerCallback(RunTask), null, Interval, Interval);
                     base.Start();
                     TraceInformation("Started");
@@ -245,7 +248,7 @@ namespace XecMe.Core.Tasks
                         return;
                     case ExecutionState.Recycle:
                         _task.Release();
-                        _task = new TaskWrapper(this.GetTaskInstance(), new ExecutionContext(Parameters, this));
+                        _task = new TaskWrapper(this.TaskType, new ExecutionContext(Parameters, this));
                         break;
                 }
 

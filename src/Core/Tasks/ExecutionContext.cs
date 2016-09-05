@@ -15,20 +15,16 @@
 /// Created         01-2013             Shailesh Lolam
 
 #endregion
-using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Collections.Specialized;
-using XecMe.Core.Utils;
 using XecMe.Common;
-using SimpleInjector;
+using XecMe.Common.Injection;
 
 namespace XecMe.Core.Tasks
 {
     /// <summary>
     /// Instance of this type hold the execution context of the tasks
     /// </summary>
-    public class ExecutionContext : Dictionary<string, object>
+    public sealed class ExecutionContext : Dictionary<string, object>
     {
         /// <summary>
         /// TaskRunner for this task
@@ -41,7 +37,7 @@ namespace XecMe.Core.Tasks
         /// <summary>
         /// Simple injector container for DI
         /// </summary>
-        private static Container _container;
+        private static IContainer _container;
         /// <summary>
         /// Parameters initialized in the config
         /// </summary>
@@ -53,7 +49,7 @@ namespace XecMe.Core.Tasks
         /// <summary>
         /// Internal Simple Injector container to be used in the Task
         /// </summary>
-        internal static Container InternalContainer
+        internal static IContainer InternalContainer
         {
             get { return _container; }
             set { _container = value; }
@@ -62,7 +58,7 @@ namespace XecMe.Core.Tasks
         /// <summary>
         /// Simple Injector container
         /// </summary>
-        public Container Container
+        public IContainer Container
         {
             get { return _container; }
         }

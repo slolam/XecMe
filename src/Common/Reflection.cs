@@ -45,5 +45,9 @@ namespace XecMe.Common
         {
             return (T)Activator.CreateInstance(type, parameters);
         }
+        public static object CreateInstance(Type type, params object[] parameters)
+        {
+            return Activator.CreateInstance(type, parameters);
+        }
     }
 }

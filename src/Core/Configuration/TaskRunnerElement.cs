@@ -60,10 +60,10 @@ namespace XecMe.Core.Configuration
         /// <summary>
         /// Gets or sets the trace configuration for this task runner
         /// </summary>
-        [ConfigurationProperty(TRACE, DefaultValue=TraceType.All)]
-        public TraceType TraceFilter
+        [ConfigurationProperty(TRACE, DefaultValue=LogType.All)]
+        public LogType TraceFilter
         {
-            get { return (TraceType)base[TRACE]; }
+            get { return (LogType)base[TRACE]; }
             set { base[TRACE] = value; }
         }
 

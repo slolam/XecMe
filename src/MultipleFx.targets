@@ -1,38 +1,76 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--<PropertyGroup>
+    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="project.json" />
+  </ItemGroup>-->
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <AutoGenerateBindingRedirects>True</AutoGenerateBindingRedirects>
+    <Framework Condition=" '$(Framework)' == '' ">net40</Framework>
+    <OutputPath>bin\Release\$(Framework)</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Framework)' == '' And '$(Configuration)' == 'Release' ">
+    <Framework>net40</Framework>
+    <SIReference>net40-client</SIReference>
+    <SIScopeReference>net45</SIScopeReference>
+    <NjReference>net40</NjReference>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
     <OutputPath>bin\Release\$(Framework)</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Framework)' == 'net40' And '$(Configuration)' == 'Release' ">
-    <SimpleInjectorReference>net40-client</SimpleInjectorReference>
+    <SIReference>net40-client</SIReference>
+    <SIScopeReference>net45</SIScopeReference>
+    <NjReference>net40</NjReference>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile />
+    <OutputPath>bin\Release\$(Framework)</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Framework)' == 'net40-client' And '$(Configuration)' == 'Release' ">
-    <SimpleInjectorReference>net40-client</SimpleInjectorReference>
+    <SIReference>net40-client</SIReference>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <SIScopeReference>net45</SIScopeReference>
+    <NjReference>net40</NjReference>
     <TargetFrameworkProfile>client</TargetFrameworkProfile>
+    <OutputPath>bin\Release\$(Framework)</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Framework)' == 'net45' And '$(Configuration)' == 'Release' ">
-    <SimpleInjectorReference>net45</SimpleInjectorReference>
+    <SIReference>net45</SIReference>
+    <SIScopeReference>net45</SIScopeReference>
+    <NjReference>net45-full</NjReference>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFrameworkProfile />
+    <OutputPath>bin\Release\$(Framework)</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Framework)' == 'net46' And '$(Configuration)' == 'Release' ">
-    <SimpleInjectorReference>net45</SimpleInjectorReference>
+    <SIReference>net45</SIReference>
+    <SIScopeReference>net45</SIScopeReference>
+    <NjReference>net45-full</NjReference>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <TargetFrameworkProfile />
+    <OutputPath>bin\Release\$(Framework)</OutputPath>
   </PropertyGroup>
-  <ItemGroup Condition="'$(Configuration)' == 'Release' And ('$(ProjectName)' == 'XecMeHost' Or '$(ProjectName)' == 'XecMe.Core')" >
-    <Reference Include="SimpleInjector, Version=3.1.3.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
-      <HintPath>..\packages\SimpleInjector.3.1.3\lib\$(SimpleInjectorReference)\SimpleInjector.dll</HintPath>
-      <Private>False</Private>
+  <ItemGroup Condition="'$(Configuration)' == 'Release' And '$(ProjectName)' == 'XecMe.DI.SimpleInjector'" >
+    <Reference Include="SimpleInjector, Version=3.2.2.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
+      <HintPath>..\packages\SimpleInjector.3.2.2\lib\$(SIReference)\SimpleInjector.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SimpleInjector.Extensions.ExecutionContextScoping, Version=3.2.2.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
+      <HintPath>..\packages\SimpleInjector.Extensions.ExecutionContextScoping.3.2.2\lib\$(SIScopeReference)\SimpleInjector.Extensions.ExecutionContextScoping.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'Release' And '$(ProjectName)' == 'XecMe.DI.Ninject'" >
+    <Reference Include="Ninject, Version=3.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ninject.3.2.2.0\lib\$(NjReference)\Ninject.dll</HintPath>
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <Target Name="AfterBuild">
     <!-- This just allows us to drop a note in the build output -->
-    <Message Text="Enter After Build TargetFrameworkVersion:$(TargetFrameworkVersion) Framework:$(Framework)" Importance="high" />
+    <Message Text="Entering After Build Output:$(OutputPath) Project:$(ProjectName) TargetFrameworkVersion:$(TargetFrameworkVersion) Framework:$(Framework) SimpleInjector:$(SIReference)" Importance="high" />
     <!-- This is the key to the whole process. The second build happens here.  We set our 'Framework' variable allowing the above PropertyGroups to run more frameworks.  -->
     <MSBuild Condition=" '$(Framework)' == 'net40' And '$(Configuration)' == 'Release'" Projects="$(MSBuildProjectFile)" Properties="Framework=net40-client" RunEachTargetSeparately="true" />
     <MSBuild Condition=" '$(Framework)' == 'net40-client' And '$(Configuration)' == 'Release'" Projects="$(MSBuildProjectFile)" Properties="Framework=net45" RunEachTargetSeparately="true" />
@@ -40,9 +78,19 @@
     <!-- Ensure the Package directory exists for this project -->
     <!-- Package the project -->
     <Exec WorkingDirectory="$(BuildDir)" Command="$(SolutionDir)nuget\NuGet.exe pack $(ProjectPath) -Verbosity detailed -OutputDir &quot;$(SolutionDir)nuget&quot; -Properties &quot;Configuration=$(Configuration)&quot; -IncludeReferencedProjects"
-          Condition="'$(Framework)' == 'net46' And '$(Configuration)' == 'Release' And '$(ProjectName)' == 'XecMeHost'"/>
+          Condition="'$(Framework)' == 'net46' And '$(Configuration)' == 'Release' And ('$(ProjectName)' == 'XecMe' Or '$(ProjectName)' == 'XecMe.DI.Ninject' Or '$(ProjectName)' == 'XecMe.DI.SimpleInjector')"/>
+
+    <Exec WorkingDirectory="$(BuildDir)" Command="$(SolutionDir)nuget\NuGet.exe pack $(ProjectPath) -Verbosity detailed -OutputDir &quot;$(SolutionDir)nuget&quot; -Properties &quot;Configuration=$(Configuration)&quot;"
+      Condition="'$(Framework)' == 'net46' And '$(Configuration)' == 'Release' And ('$(ProjectName)' == 'XecMe.DI.Ninject' Or '$(ProjectName)' == 'XecMe.DI.SimpleInjector')"/>
     <!-- You could repeat the above node again here and target another framework if there was a property group that would evaluate to true-->
     <!-- Just more logging -->
-    <Message Text="Exiting After Build TargetFrameworkVersion:$(TargetFrameworkVersion) Framework:$(Framework)" Importance="high" />
+    <Message Text="Exiting After Build Output:$(OutputPath) Project:$(ProjectName) TargetFrameworkVersion:$(TargetFrameworkVersion) Framework:$(Framework) SimpleInjector:$(SIReference)" Importance="high" />
+  </Target>
+  <Target Name="BeforeBuild">
+    <Message Text="Starting Build for Project -> $(ProjectName)" Importance="high" />
+    <Message Text="                TargetFrameworkVersion -> $(TargetFrameworkVersion)" Importance="high" />
+    <Message Text="                Framework -> $(Framework)" Importance="high" />
+    <Message Text="                Output -> $(OutputPath)" Importance="high" />
+    <Message Text="                Target -> $(TargetPath)" Importance="high" />
   </Target>
 </Project>

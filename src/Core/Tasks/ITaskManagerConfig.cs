@@ -24,6 +24,6 @@ namespace XecMe.Core.Tasks
 {
     public interface ITaskManagerConfig
     {
-        ICollection<TaskRunner> Runners { get; }
+        IEnumerable<TaskRunner> Runners { get; }
     }
 }

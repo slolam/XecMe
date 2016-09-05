@@ -16,7 +16,7 @@ namespace XecMe.Test
             Log.WarningSink = Console.WriteLine;
             Log.InformationSink = Console.WriteLine;
             Log.ErrorSink = Console.WriteLine;
-            TaskManager.Bootstrap = c => c.Verify();
+            //TaskManager.Bootstrap = c => c.Verify();
             TaskManager.Start(new TaskManagerConfig());
             TaskManager.WaitTasksToComplete();
         }

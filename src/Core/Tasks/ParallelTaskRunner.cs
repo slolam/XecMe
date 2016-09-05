@@ -101,29 +101,29 @@ namespace XecMe.Core.Tasks
         private TimeZoneInfo _timeZoneInfo;
 
         public ParallelTaskRunner(string name, Type taskType, Dictionary<string, object> parameters, uint min, uint max, ulong idlePollingPeriod,
-            TimeSpan startTime, TimeSpan endTime, Weekdays weekdays, TimeZoneInfo timeZoneInfo, TraceType traceType) :
-            base(name, taskType, parameters, traceType)
+            TimeSpan startTime, TimeSpan endTime, Weekdays weekdays, TimeZoneInfo timeZoneInfo, LogType logType) :
+            base(name, taskType, parameters, logType)
         {
             if (min < 1 || max < min)
-                throw new ArgumentOutOfRangeException("min", "min and max should be greater than 1 and min should be less than or equal to max");
+                throw new ArgumentOutOfRangeException(nameof(min), "min and max should be greater than 1 and min should be less than or equal to max");
 
             if (idlePollingPeriod < 100)
-                throw new ArgumentOutOfRangeException("max", "idlePollingPeriod should be at least 100ms.");
+                throw new ArgumentOutOfRangeException(nameof(idlePollingPeriod), $"{nameof(idlePollingPeriod)} should be at least 100ms.");
 
             //if (endTime < startTime)
             //    throw new ArgumentOutOfRangeException("startTime", "startDateTime should be less than endDateTime");
 
             if (startTime < Time.DayMinTime)
-                throw new ArgumentOutOfRangeException("dayStartTime", "dayStartTime cannot be negative");
+                throw new ArgumentOutOfRangeException(nameof(startTime), $"{nameof(startTime)} cannot be negative");
 
             if (endTime < Time.DayMinTime)
-                throw new ArgumentOutOfRangeException("dayEndTime", "dayEndTime cannot be negative");
+                throw new ArgumentOutOfRangeException(nameof(endTime), $"{nameof(endTime)} cannot be negative");
             
             if (startTime > Time.DayMaxTime)
-                throw new ArgumentOutOfRangeException("dayStartTime", "dayStartTime should be less than 23:59:59");
+                throw new ArgumentOutOfRangeException(nameof(startTime), $"{nameof(startTime)} should be less than 23:59:59");
 
             if (endTime > Time.DayMaxTime)
-                throw new ArgumentOutOfRangeException("dayEndTime", "dayEndTime should be less than 23:59:59");
+                throw new ArgumentOutOfRangeException(nameof(endTime), $"{nameof(endTime)} should be less than 23:59:59");
 
             _dayStartTime = startTime;
             _dayEndTime = endTime;
@@ -208,7 +208,7 @@ namespace XecMe.Core.Tasks
                         _allTasks.RemoveAt(0);
                         taskWrapper.Release();
                     }
-                    using (_timer) ;
+                    using (_timer);
                     _timer = null;
                     _jobsInQueue = 0;
                     _parallelInstances = 0;
@@ -450,7 +450,7 @@ namespace XecMe.Core.Tasks
                         && _allTasks.Count < this.MaxInstances;
                     instanceIndex++)
                 {
-                    TaskWrapper task = new TaskWrapper(this.GetTaskInstance(), _sharedExecutionContext);
+                    TaskWrapper task = new TaskWrapper(this.TaskType, _sharedExecutionContext);
                     _allTasks.Add(task);
                     _freeTaskPool.Add(task);
                 }

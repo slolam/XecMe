@@ -85,9 +85,9 @@ namespace XecMe.Core.Configuration
         /// </summary>
         [ConfigurationProperty(REPEAT, IsRequired = false, DefaultValue = 1)]
         [IntegerValidator(MinValue = 1, MaxValue = short.MaxValue)]
-        public int Repeat
+        public uint Repeat
         {
-            get { return (int)base[REPEAT]; }
+            get { return (uint)base[REPEAT]; }
             set { base[REPEAT] = value; }
         }
 

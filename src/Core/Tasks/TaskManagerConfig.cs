@@ -36,7 +36,7 @@ namespace XecMe.Core.Tasks
 
         #region ITaskManagerConfig Members
 
-        ICollection<TaskRunner> ITaskManagerConfig.Runners
+        IEnumerable<TaskRunner> ITaskManagerConfig.Runners
         {
             get { return _runners.AsReadOnly(); }
         }

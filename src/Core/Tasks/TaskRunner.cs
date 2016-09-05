@@ -28,123 +28,169 @@ using XecMe.Common.Diagnostics;
 
 namespace XecMe.Core.Tasks
 {
-    public enum TraceType
+    /// <summary>
+    /// Log type of the logging
+    /// </summary>
+    public enum LogType
     {
+        /// <summary>
+        /// No logging at all
+        /// </summary>
         None = 0,
+        /// <summary>
+        /// Log only errors
+        /// </summary>
         Error = 1,
+        /// <summary>
+        /// Log errors and warnings
+        /// </summary>
         Warning = Error * 2,
+        /// <summary>
+        /// Log informations, warnings and errors
+        /// </summary>
         Information = Warning * 2,
+        /// <summary>
+        /// Log everything
+        /// </summary>
         All = (Information * 2) - 1
     }
     /// <summary>
     /// TaskRunner is the base class for all TaskRunners, this class will serve as base class for 
-    /// all the 
+    /// all the concrete runner implementations
     /// </summary>
     public abstract class TaskRunner
     {
-        private Type _taskType;
-        private TaskWrapper _taskWrapper;
-        private Dictionary<string, object> _parameters;
-        private EventWaitHandle _waitHandle;
-        private string _name;
+        //private Type _taskType;
+        //private TaskWrapper _taskWrapper;
         private bool isErrorTrace, isWarningTrace, isInfoTrace; 
         private string _taskRunnerTypeName;
         protected readonly Stopwatch _stopwatch = new Stopwatch();
         public event Events.EventHandler<ExecutionContext> Completed;
-        public TaskRunner(string name, Type taskType, Dictionary<string, object> parameters, TraceType traceType)
+
+        /// <summary>
+        /// Initializes the task runner
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="taskType"></param>
+        /// <param name="parameters"></param>
+        /// <param name="logType"></param>
+        public TaskRunner(string name, Type taskType, Dictionary<string, object> parameters, LogType logType)
         {
             name.NotNullOrEmpty(nameof(name));
             taskType.NotNull(nameof(taskType));
             parameters.NotNull(nameof(parameters));
-            _name = name;
-            _taskType = taskType;
-            _parameters = parameters;
-            isErrorTrace = (TraceType.Error & traceType) == TraceType.Error;
-            isInfoTrace = (TraceType.Information & traceType) == TraceType.Information;
-            isWarningTrace = (TraceType.Warning & traceType) == TraceType.Warning;
-            _waitHandle = new EventWaitHandle(true, EventResetMode.ManualReset);
-            EventManager.AddPublisher(string.Concat("Task.", _name, ".Completed"), this, "Completed");
+
+            if(!typeof(ITask).IsAssignableFrom(taskType))
+            {
+                throw new ArgumentException($"Type {taskType} does not implement the type {typeof(ITask)}", nameof(taskType));
+            }
+
+            if(taskType.IsAbstract)
+            {
+                throw new ArgumentException($"Type {taskType} cannot be an abstract type", nameof(taskType));
+            }
+
+            Name = name;
+            TaskType = taskType;
+            Parameters = parameters;
+            isErrorTrace = (LogType.Error & logType) == LogType.Error;
+            isInfoTrace = (LogType.Information & logType) == LogType.Information;
+            isWarningTrace = (LogType.Warning & logType) == LogType.Warning;
+            WaitHandle = new EventWaitHandle(true, EventResetMode.ManualReset);
+            EventManager.AddPublisher(string.Concat("Task.", name, ".Completed"), this, "Completed");
             _taskRunnerTypeName = this.GetType().Name;
         }
 
-        internal Type TaskType
-        {
-            get { return _taskType; }
-        }
-        public string Name
-        {
-            get { return _name; }
-        }
+        /// <summary>
+        /// Task type
+        /// </summary>
+        internal Type TaskType { get; private set;  }
 
-        protected Dictionary<string, object> Parameters
-        {
-            get { return _parameters; }
-        }
+        /// <summary>
+        /// Name of the task
+        /// </summary>
+        public string Name { get; private set; }
+
+        /// <summary>
+        /// Gets the parameters
+        /// </summary>
+        protected Dictionary<string, object> Parameters { get; private set; }
 
         protected ITask GetTaskInstance()
         {
-            ITask task = ExecutionContext.InternalContainer.GetInstance(_taskType) as ITask;
+            ITask task = ExecutionContext.InternalContainer.GetInstance(TaskType) as ITask;
             EventManager.Register(task);
             return task;
         }
 
-        internal WaitHandle WaitHandle
-        {
-            get { return _waitHandle; }
-        }
+        /// <summary>
+        /// Wait handle for this task runner
+        /// </summary>
+        internal WaitHandle WaitHandle { get; private set; }
 
         public virtual void Start()
         {
-            _waitHandle.Reset();
+            ((EventWaitHandle)WaitHandle).Reset();
         }
 
         public virtual void Stop()
         {
-            _waitHandle.Set();
+            ((EventWaitHandle)WaitHandle).Set();
         }
 
         protected void RaiseComplete(ExecutionContext context)
         {
             Completed(this, new EventArgs<ExecutionContext>(context.Copy()));
-            TraceInformation("Task completed and raised the event");
-            
+            TraceInformation($"{Name} task completed and raised the event");
         }
 
         
         protected internal void TraceInformation(string format, params object[] args)
         {
             if (isInfoTrace)
-                Information(string.Format(string.Concat(_taskRunnerTypeName, " Task \"",_name,"\" : ",format),(object[]) args));
+            {
+                Information(string.Format(string.Concat(_taskRunnerTypeName, " Task \"",Name,"\" : ",format),(object[]) args));
+            }
         }
 
         protected internal void TraceInformation(string msg)
         {
             if (isInfoTrace)
-                Information(string.Format(string.Concat(_taskRunnerTypeName, " Task \"", _name, "\" : ", msg)));
+            {
+                Information(string.Format(string.Concat(_taskRunnerTypeName, " Task \"", Name, "\" : ", msg)));
+            }
         }
 
         protected internal void TraceWarning(string format, params object[] args)
         {
             if (isInfoTrace)
-                Warning(string.Format(string.Concat(_taskRunnerTypeName, " Task \"", _name, "\" : ", format), (object[]) args));
+            {
+                Warning(string.Format(string.Concat(_taskRunnerTypeName, " Task \"", Name, "\" : ", format), (object[])args));
+            }
         }
 
         protected internal void TraceWarning(string msg)
         {
             if (isWarningTrace)
-                Warning(string.Format(string.Concat(_taskRunnerTypeName, " Task \"", _name, "\" : ", msg)));
+            {
+                Warning(string.Format(string.Concat(_taskRunnerTypeName, " Task \"", Name, "\" : ", msg)));
+            }
         }
 
         protected internal void TraceError(string format, params object[] args)
         {
             if (isErrorTrace)
-                Error(string.Format(string.Concat(_taskRunnerTypeName, " Task \"", _name, "\" : ", format), (object[])args));
+            {
+                Error(string.Format(string.Concat(_taskRunnerTypeName, " Task \"", Name, "\" : ", format), (object[])args));
+            }
         }
 
         protected internal void TraceError(string msg)
         {
             if (isErrorTrace)
-                Error(string.Format(string.Concat(_taskRunnerTypeName, " Task \"", _name, "\" : ", msg)));
+            {
+                Error(string.Format(string.Concat(_taskRunnerTypeName, " Task \"", Name, "\" : ", msg)));
+            }
         }
 
         private void Information(string log)

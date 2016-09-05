@@ -36,24 +36,20 @@
     <file src="bin\Release\net40\XecMe.Common.dll" target="lib\net40\XecMe.Common.dll" />
     <file src="bin\Release\net40\XecMe.Configuration.dll" target="lib\net40\XecMe.Configuration.dll" />
     <file src="bin\Release\net40\XecMe.Core.dll" target="lib\net40\XecMe.Core.dll" />
-    <file src="bin\Release\net40\XecMeHost.exe" target="lib\net40\XecMeHost.exe" />
 
     <file src="bin\Release\net40-client\XecMe.Common.dll" target="lib\net40-client\XecMe.Common.dll" />
     <file src="bin\Release\net40-client\XecMe.Configuration.dll" target="lib\net40-client\XecMe.Configuration.dll" />
     <file src="bin\Release\net40-client\XecMe.Core.dll" target="lib\net40-client\XecMe.Core.dll" />
-    <file src="bin\Release\net40-client\XecMeHost.exe" target="lib\net40-client\XecMeHost.exe" />
 
 
     <file src="bin\Release\net45\XecMe.Common.dll" target="lib\net45\XecMe.Common.dll" />
     <file src="bin\Release\net45\XecMe.Configuration.dll" target="lib\net45\XecMe.Configuration.dll" />
     <file src="bin\Release\net45\XecMe.Core.dll" target="lib\net45\XecMe.Core.dll" />
-    <file src="bin\Release\net45\XecMeHost.exe" target="lib\net45\XecMeHost.exe" />
 
 
     <file src="bin\Release\net46\XecMe.Common.dll" target="lib\net46\XecMe.Common.dll" />
     <file src="bin\Release\net46\XecMe.Configuration.dll" target="lib\net46\XecMe.Configuration.dll" />
     <file src="bin\Release\net46\XecMe.Core.dll" target="lib\net46\XecMe.Core.dll" />
-    <file src="bin\Release\net46\XecMeHost.exe" target="lib\net46\XecMeHost.exe" />
 
 
     <file src="bin\Release\net40\XecMe.Common.dll" target="tools\net40\XecMe.Common.dll" />

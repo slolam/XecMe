@@ -21,8 +21,9 @@ using System.Text;
 using System.Threading;
 using XecMe.Core.Configuration;
 using System.Diagnostics;
-using SimpleInjector;
 using XecMe.Common.Diagnostics;
+using XecMe.Common.Injection;
+using XecMe.Core.Injection;
 
 namespace XecMe.Core.Tasks
 {
@@ -38,41 +39,43 @@ namespace XecMe.Core.Tasks
 
         public static void Start(ITaskManagerConfig config)
         {
-            Container container = new Container();
-            container.Options.DefaultScopedLifestyle = Lifestyle.Scoped;
+            IContainer container = new DefaultContainer();
             Start(config, container);
         }
 
-        public static void Start(ITaskManagerConfig config, Container container)
+        public static void Start(ITaskManagerConfig config, IContainer container)
         {
             Stop();
 
             _taskRunners.AddRange(config.Runners);
 
-            if (Bootstrap != null)
-                Bootstrap(container);
 
-            ///Play safe with the duplicate tasks
-            var orig = container.Options.AllowOverridingRegistrations;
+            /////Play safe with the duplicate tasks
+            //var orig = container.Options.AllowOverridingRegistrations;
 
-            container.Options.AllowOverridingRegistrations = true;
+            //container.Options.AllowOverridingRegistrations = true;
 
             for (int runnerIndex = 0; runnerIndex < _taskRunners.Count; runnerIndex++)
             {
                 container.Register(_taskRunners[runnerIndex].TaskType);
             }
-            ///Restore it back for the developer
-            container.Options.AllowOverridingRegistrations = orig;
-            
-            try
-            {
-                container.Verify();
-            }
-            catch(Exception e)
-            {
-                Log.Error(string.Format("Error while verifying the container - {0}", e));
-                throw;
-            }
+
+            if (Bootstrap != null)
+                Bootstrap(container);
+
+
+            /////Restore it back for the developer
+            //container.Options.AllowOverridingRegistrations = orig;
+
+            //try
+            //{
+            //    container.Verify();
+            //}
+            //catch(Exception e)
+            //{
+            //    Log.Error(string.Format("Error while verifying the container - {0}", e));
+            //    throw;
+            //}
 
             ExecutionContext.InternalContainer = container;
 
@@ -110,7 +113,7 @@ namespace XecMe.Core.Tasks
                 WaitHandle.WaitAll(handles, milliSeconds);
         }
 
-        public static Action<Container> Bootstrap
+        public static Action<IContainer> Bootstrap
         { get; set; }
 
     }

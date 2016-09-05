@@ -28,50 +28,186 @@ using XecMe.Common;
 
 namespace XecMe.Core.Tasks
 {
-    public enum Recursion { Daily, Weekly, Monthly }
-
-    public enum Week
+    /// <summary>
+    /// Recursion for the schedule
+    /// </summary>
+    public enum Recursion
     {
+        /// <summary>
+        /// The daily
+        /// </summary>
+        Daily,
+        /// <summary>
+        /// The weekly
+        /// </summary>
+        Weekly,
+        /// <summary>
+        /// The monthly
+        /// </summary>
+        Monthly
+    }
+
+
+    /// <summary>
+    /// Scheduled by days
+    /// </summary>
+    public enum Days: uint
+    {
+        /// <summary>
+        /// LAst day of the month
+        /// </summary>
+        Last = 0x80000000,
+        /// <summary>
+        /// All days of the month
+        /// </summary>
+        All = 0x7FFFFFFF
+    }
+
+    /// <summary>
+    /// Weeks of the month
+    /// </summary>
+    public enum Weeks
+    {
+        /// <summary>
+        /// The none
+        /// </summary>
         None = 0,
+        /// <summary>
+        /// The first week
+        /// </summary>
         First = 1,
+        /// <summary>
+        /// The second week
+        /// </summary>
         Second = First * 2,
+        /// <summary>
+        /// The third week
+        /// </summary>
         Third = Second * 2,
+        /// <summary>
+        /// The fourth week
+        /// </summary>
         Fourth = Third * 2,
+        /// <summary>
+        /// The last week
+        /// </summary>
         Last = Fourth * 2,
+        /// <summary>
+        /// All weeks
+        /// </summary>
         All = (Last * 2) - 1
     }
 
+    /// <summary>
+    /// Week days
+    /// </summary>
     public enum Weekdays
     {
+        /// <summary>
+        /// The none
+        /// </summary>
         None = 0,
+        /// <summary>
+        /// The Sunday
+        /// </summary>
         Sunday = 1,
+        /// <summary>
+        /// The Monday
+        /// </summary>
         Monday = Sunday * 2,
+        /// <summary>
+        /// The Tuesday
+        /// </summary>
         Tuesday = Monday * 2,
+        /// <summary>
+        /// The Wednesday
+        /// </summary>
         Wednesday = Tuesday * 2,
+        /// <summary>
+        /// The Thursday
+        /// </summary>
         Thursday = Wednesday * 2,
+        /// <summary>
+        /// The Friday
+        /// </summary>
         Friday = Thursday * 2,
+        /// <summary>
+        /// The Saturday
+        /// </summary>
         Saturday = Friday * 2,
+        /// <summary>
+        /// All weekdays
+        /// </summary>
         All = (Saturday * 2) - 1
     }
 
+    /// <summary>
+    /// The Months
+    /// </summary>
     public enum Months : short
     {
+        /// <summary>
+        /// The none
+        /// </summary>
         None = 0,
+        /// <summary>
+        /// The January
+        /// </summary>
         January = 1,
+        /// <summary>
+        /// The February
+        /// </summary>
         February = January * 2,
+        /// <summary>
+        /// The March
+        /// </summary>
         March = February * 2,
+        /// <summary>
+        /// The April
+        /// </summary>
         April = March * 2,
+        /// <summary>
+        /// The May
+        /// </summary>
         May = April * 2,
+        /// <summary>
+        /// The June
+        /// </summary>
         June = May * 2,
+        /// <summary>
+        /// The July
+        /// </summary>
         July = June * 2,
+        /// <summary>
+        /// The August
+        /// </summary>
         August = July * 2,
+        /// <summary>
+        /// The September
+        /// </summary>
         September = August * 2,
+        /// <summary>
+        /// The October
+        /// </summary>
         October = September * 2,
+        /// <summary>
+        /// The November
+        /// </summary>
         November = October * 2,
+        /// <summary>
+        /// The December
+        /// </summary>
         December = November * 2,
+        /// <summary>
+        /// All months
+        /// </summary>
         All = December * 2 - 1
     }
 
+    /// <summary>
+    /// Runner that executes the task at scheduled time.
+    /// </summary>
+    /// <seealso cref="TaskRunner" />
     public class ScheduledTaskRunner : TaskRunner
     {
         private string _schedule;
@@ -79,27 +215,67 @@ namespace XecMe.Core.Tasks
         private TimeSpan _taskTime;
         private Recursion _recursion;
         private IRecur _recur;
-        private int _repeat;
+        private uint _repeat;
         private Timer _timer;
-        private TaskWrapper _task;
+        private TaskWrapper _taskWrapper;
         private bool _skip;
 
         private TimeZoneInfo _timeZoneInfo;
 
-        
-        public ScheduledTaskRunner(string name, Type taskType, Dictionary<string, object> parameters, int repeat, Recursion recursion, string schedule,
-            DateTime startDate, TimeSpan taskTime, TimeZoneInfo timeZoneInfo, TraceType traceType) :
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ScheduledTaskRunner" /> class.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="taskType">Type of the task.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <param name="repeat">The repeat.</param>
+        /// <param name="recursion">The recursion.</param>
+        /// <param name="schedule">The schedule.</param>
+        /// <param name="startDate">The start date.</param>
+        /// <param name="taskTime">The task time.</param>
+        /// <param name="timeZoneInfo">The time zone information.</param>
+        /// <param name="traceType">Type of the trace.</param>
+        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// Repeat should be positive number for number of times to be repeated or 0 for infinite number of times
+        /// or
+        /// Task time should be between 00:00:00 and 23:59:59
+        /// or
+        /// Start date should be less than now
+        /// or
+        /// Schedule does not have the weekdays defined for the Weekly tasks
+        /// or
+        /// Schedule does not have the weekdays defined for the Weekly tasks
+        /// or
+        /// Schedule does not conform to the format
+        /// or
+        /// Schedule does not have the months defined for the Monthly tasks
+        /// or
+        /// Schedule does not have the weeks defined for the Monthly tasks
+        /// or
+        /// Schedule does not have the weekdays defined for the Monthly tasks
+        /// or
+        /// Schedule does not have the day defined for the Monthly tasks in a valid range
+        /// or
+        /// Schedule does not conform to the format
+        /// or
+        /// Schedule does not conform to the format
+        /// or
+        /// Schedule does not conform to the format
+        /// </exception>
+        /// <exception cref="System.ArgumentNullException">Schedule cannot be null</exception>
+        public ScheduledTaskRunner(string name, Type taskType, Dictionary<string, object> parameters, uint repeat, Recursion recursion, string schedule,
+            DateTime startDate, TimeSpan taskTime, TimeZoneInfo timeZoneInfo, LogType traceType) :
             base(name, taskType, parameters, traceType)
         {
 
             if (repeat < 1)
-                throw new ArgumentOutOfRangeException("repeat", "repeat should be positive number for number of times to be repeated or 0 for infinite number of times");
+                throw new ArgumentOutOfRangeException(nameof(repeat), "Repeat should be positive number for number of times to be repeated or 0 for infinite number of times");
             if (taskTime < Time.DayMinTime || taskTime > Time.DayMaxTime)
-                throw new ArgumentOutOfRangeException("taskTime", "Task time should be between 00:00:00 and 23:59:59");
+                throw new ArgumentOutOfRangeException(nameof(taskTime), "Task time should be between 00:00:00 and 23:59:59");
             if (schedule == null)
-                throw new ArgumentNullException("schedule", "schedule cannot be null");
+                throw new ArgumentNullException(nameof(schedule), "Schedule cannot be null");
             if (startDate > DateTime.Now)
-                throw new ArgumentNullException("startDate should be less than now");
+                throw new ArgumentOutOfRangeException(nameof(startDate), "Start date should be less than now");
             _schedule = schedule.ToUpper();
             _recursion = recursion;
             ///If the start time is not configured set it to Sunday of this week
@@ -117,10 +293,10 @@ namespace XecMe.Core.Tasks
                     //WD:Tuesday, Friday, Monday
                     Weekdays weekdays = Weekdays.None;
                     if (schedule.Length < 3 || schedule.Substring(0, 3) != "WD:")
-                        throw new ArgumentOutOfRangeException("schedule", "schedule does not have the weekdays defined for the Weekly tasks");
+                        throw new ArgumentOutOfRangeException(nameof(schedule), "Schedule does not have the weekdays defined for the Weekly tasks");
 
                     if (!Enum.TryParse<Weekdays>(schedule.Substring(3), true, out weekdays) || weekdays == Weekdays.None)
-                        throw new ArgumentOutOfRangeException("schedule", "schedule does not have the weekdays defined for the Weekly tasks");
+                        throw new ArgumentOutOfRangeException(nameof(schedule), "Schedule does not have the weekdays defined for the Weekly tasks");
 
                     _recur = new Weekly(repeat, weekdays);
                     break;
@@ -129,25 +305,25 @@ namespace XecMe.Core.Tasks
                     //"MN:January,March,December|DY:1,2,3,Last"
                     Months months = Months.None;
                     weekdays = Weekdays.None;
-                    Week week = Week.None;
+                    Weeks week = Weeks.None;
                     uint days = 0;
                     foreach (var item in schedule.Split('|'))
                     {
                         if (item.Length < 4)
-                            throw new ArgumentOutOfRangeException("schedule", "schedule does not conform to the format");
+                            throw new ArgumentOutOfRangeException(nameof(schedule), "Schedule does not conform to the format");
                         switch (item.Substring(0, 3))
                         {
                             case "MN:":
                                 if (!Enum.TryParse<Months>(item.Substring(3), true, out months) || months == Months.None)
-                                    throw new ArgumentOutOfRangeException("schedule", "schedule does not have the months defined for the Monthly tasks");
+                                    throw new ArgumentOutOfRangeException(nameof(schedule), "Schedule does not have the months defined for the Monthly tasks");
                                 break;
                             case "WK:":
-                                if (!Enum.TryParse<Week>(item.Substring(3), true, out week) || week == Week.None)
-                                    throw new ArgumentOutOfRangeException("schedule", "schedule does not have the weeks defined for the Monthly tasks");
+                                if (!Enum.TryParse<Weeks>(item.Substring(3), true, out week) || week == Weeks.None)
+                                    throw new ArgumentOutOfRangeException(nameof(schedule), "Schedule does not have the weeks defined for the Monthly tasks");
                                 break;
                             case "WD:":
                                 if (!Enum.TryParse<Weekdays>(item.Substring(3), true, out weekdays) || weekdays == Weekdays.None)
-                                    throw new ArgumentOutOfRangeException("schedule", "schedule does not have the weekdays defined for the Monthly tasks");
+                                    throw new ArgumentOutOfRangeException(nameof(schedule), "Schedule does not have the weekdays defined for the Monthly tasks");
                                 break;
                             case "DY:":
                                 foreach (var d in item.Substring(3).Split(','))
@@ -160,25 +336,25 @@ namespace XecMe.Core.Tasks
                                     else if (d == "ALL")
                                         days |= 0x7FFFFFFF;//This is for all 1-31 days
                                     else if (!int.TryParse(d, out x) || x < 1 || x > 31)
-                                        throw new ArgumentOutOfRangeException("schedule", "schedule does not have the day defined for the Monthly tasks in a valid range");
+                                        throw new ArgumentOutOfRangeException(nameof(schedule), "Schedule does not have the day defined for the Monthly tasks in a valid range");
                                     else
                                         days |= day << (x - 1);
                                 }
                                 break;
                             default:
-                                throw new ArgumentOutOfRangeException("schedule", "schedule does not conform to the format");
+                                throw new ArgumentOutOfRangeException(nameof(schedule), "Schedule does not conform to the format");
                         }
                     }
 
-                    if (week != Week.None && weekdays != Weekdays.None && months != Months.None)
+                    if (week != Weeks.None && weekdays != Weekdays.None && months != Months.None)
                         _recur = new MonthlyByWeekdays(months, weekdays, week);
                     else if (days > 1 && months != Months.None)
                         _recur = new MonthlyByDay(months, days);
                     else
-                        throw new ArgumentOutOfRangeException("schedule", "schedule does not conform to the format");
+                        throw new ArgumentOutOfRangeException(nameof(schedule), "Schedule does not conform to the format");
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException("schedule", "schedule does not conform to the format");
+                    throw new ArgumentOutOfRangeException(nameof(schedule), "Schedule does not conform to the format");
             }
 
             _lastDateTime = new DateTime(_startDate.Year, _startDate.Month, _startDate.Day, _taskTime.Hours, _taskTime.Minutes, _taskTime.Seconds, DateTimeKind.Unspecified);
@@ -190,17 +366,28 @@ namespace XecMe.Core.Tasks
 
         }
 
-        public ScheduledTaskRunner(string name, Type taskType, Dictionary<string, object> parameters, int repeat, IRecur recur,
-            DateTime startDate, TimeSpan taskTime, TimeZoneInfo timeZoneInfo, TraceType traceType) :
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ScheduledTaskRunner" /> class.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="taskType">Type of the task.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <param name="recur">The recur.</param>
+        /// <param name="startDate">The start date.</param>
+        /// <param name="taskTime">The task time.</param>
+        /// <param name="timeZoneInfo">The time zone information.</param>
+        /// <param name="traceType">Type of the trace.</param>
+        /// <exception cref="System.ArgumentOutOfRangeException">Task time should be between 00:00:00 and 23:59:59</exception>
+        /// <exception cref="System.ArgumentNullException">startDate should be less than now</exception>
+        public ScheduledTaskRunner(string name, Type taskType, Dictionary<string, object> parameters, IRecur recur,
+            DateTime startDate, TimeSpan taskTime, TimeZoneInfo timeZoneInfo, LogType traceType) :
             base(name, taskType, parameters, traceType)
         {
             recur.NotNull(nameof(recur));
-            if (repeat < 1)
-                throw new ArgumentOutOfRangeException("repeat", "repeat should be positive number for number of times to be repeated or 0 for infinite number of times");
             if (taskTime < Time.DayMinTime || taskTime > Time.DayMaxTime)
-                throw new ArgumentOutOfRangeException("taskTime", "Task time should be between 00:00:00 and 23:59:59");
+                throw new ArgumentOutOfRangeException(nameof(taskTime), "Task time should be between 00:00:00 and 23:59:59");
             if (startDate > DateTime.Now)
-                throw new ArgumentNullException("startDate should be less than now");
+                throw new ArgumentNullException("Start Date should be less than now");
             ///If the start time is not configured set it to Sunday of this week
             _startDate = startDate == DateTime.MinValue ? DateTime.Now.AddDays(-(int)DateTime.Now.DayOfWeek) : startDate;
             _recur = recur;
@@ -208,31 +395,18 @@ namespace XecMe.Core.Tasks
             _timeZoneInfo = timeZoneInfo ?? TimeZoneInfo.Local;
         }
 
-        public int Repeat
-        {
-            get
-            {
-                return _repeat;
-            }
-        }
 
-        public string Schedule
-        {
-            get
-            {
-                return _schedule;
-            }
-        }
-
-        #region TaskRunner Members
-
+        #region TaskRunner Members        
+        /// <summary>
+        /// Starts this instance of task runner
+        /// </summary>
         public override void Start()
         {
             lock (this)
             {
                 if (_timer == null)
                 {
-                    _task = new TaskWrapper(this.GetTaskInstance(), new ExecutionContext(Parameters, this));
+                    _taskWrapper = new TaskWrapper(this.TaskType, new ExecutionContext(Parameters, this));
 
                     _timer = new Timer(new TimerCallback(RunTask), null, Timeout.Infinite, Timeout.Infinite);
 
@@ -244,6 +418,9 @@ namespace XecMe.Core.Tasks
             }
         }
 
+        /// <summary>
+        /// Stops this instance of task runner
+        /// </summary>
         public override void Stop()
         {
             lock (this)
@@ -252,14 +429,18 @@ namespace XecMe.Core.Tasks
                 {
                     using (_timer) ;
                     _timer = null;
-                    _task.Release();
-                    _task = null;
+                    _taskWrapper.Release();
+                    _taskWrapper = null;
                     base.Stop();
                     TraceInformation("Stopped", this.Name);
                 }
             }
         }
 
+        /// <summary>
+        /// This method execute the task
+        /// </summary>
+        /// <param name="state"></param>
         #endregion
         private void RunTask(object state)
         {
@@ -269,20 +450,20 @@ namespace XecMe.Core.Tasks
 
             if (!_skip)
             {
-                ExecutionState executionState = _task.RunTask();
+                ExecutionState executionState = _taskWrapper.RunTask();
                 TraceInformation("Executed with return value {0}", executionState);
 
                 switch (executionState)
                 {
                     case ExecutionState.Executed:
-                        RaiseComplete(_task.Context);
+                        RaiseComplete(_taskWrapper.Context);
                         break;
                     case ExecutionState.Stop:
                         Stop();
                         return;
                     case ExecutionState.Recycle:
-                        _task.Release();
-                        _task = new TaskWrapper(this.GetTaskInstance(), new ExecutionContext(Parameters, this));
+                        _taskWrapper.Release();
+                        _taskWrapper = new TaskWrapper(this.TaskType, new ExecutionContext(Parameters, this));
                         break;
                 }
             }
@@ -290,6 +471,12 @@ namespace XecMe.Core.Tasks
             ScheduleNextRun();
         }
 
+        /// <summary>
+        /// Gets the current date time for the configured time zone
+        /// </summary>
+        /// <value>
+        /// The now.
+        /// </value>
         private DateTime Now
         {
             get
@@ -304,6 +491,10 @@ namespace XecMe.Core.Tasks
                 return now;
             }
         }
+
+        /// <summary>
+        /// Schedules the next run.
+        /// </summary>
         private void ScheduleNextRun()
         {
             DateTime now = Now;
@@ -330,6 +521,11 @@ namespace XecMe.Core.Tasks
             TraceInformation("Scheduled to run next at {0}", _lastDateTime);
         }
 
+        /// <summary>
+        /// Nexts the specified from given date time
+        /// </summary>
+        /// <param name="from">From.</param>
+        /// <returns></returns>
         private DateTime Next(DateTime from)
         {
             return _recur.Next(from);
@@ -337,23 +533,44 @@ namespace XecMe.Core.Tasks
     }
 
 
-
+    /// <summary>
+    /// Interface to define the recurrence for the schedule task
+    /// </summary>
     public interface IRecur
     {
+        /// <summary>
+        /// Returns the nexts scedule from the specified date time
+        /// </summary>
+        /// <param name="from">From date time</param>
+        /// <returns></returns>
         DateTime Next(DateTime from);
     }
 
-    #region Daily
+    #region Daily    
+    /// <summary>
+    /// This is the recurrence for daily running tasks
+    /// </summary>
+    /// <seealso cref="XecMe.Core.Tasks.IRecur" />
     internal class Daily : IRecur
     {
-        int _repeat;
+        uint _repeat;
 
-        public Daily(int repeat)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Daily"/> class.
+        /// </summary>
+        /// <param name="repeat">The repeat every other day</param>
+        public Daily(uint repeat)
         {
             if (repeat < 1)
-                throw new ArgumentOutOfRangeException("repeat");
+                throw new ArgumentOutOfRangeException(nameof(repeat));
             _repeat = repeat;
         }
+
+        /// <summary>
+        /// Returns the nexts scedule from the specified date time
+        /// </summary>
+        /// <param name="from">From date time</param>
+        /// <returns></returns>
         DateTime IRecur.Next(DateTime from)
         {
             return from.AddDays(_repeat);
@@ -362,20 +579,41 @@ namespace XecMe.Core.Tasks
     #endregion
 
 
-    #region Weekly
+    #region Weekly    
+    /// <summary>
+    /// This is the recurrence for the weekly running date time
+    /// </summary>
+    /// <seealso cref="XecMe.Core.Tasks.IRecur" />
     internal class Weekly : IRecur
     {
-        int _repeat;
+        uint _repeat;
         Weekdays _weekdays;
-        public Weekly(int repeat, Weekdays weekdays)
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Weekly"/> class.
+        /// </summary>
+        /// <param name="repeat">The repeat.</param>
+        /// <param name="weekdays">The weekdays.</param>
+        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// Should be a positive number
+        /// or
+        /// Should have at least a weekday defined for the task
+        /// </exception>
+        public Weekly(uint repeat, Weekdays weekdays)
         {
             if (repeat < 1)
-                throw new ArgumentOutOfRangeException("repeat");
+                throw new ArgumentOutOfRangeException(nameof(repeat), "Should be a positive number");
+            if (weekdays == Weekdays.None)
+                throw new ArgumentOutOfRangeException(nameof(weekdays), "Should have at least a weekday defined for the task");
             _repeat = repeat - 1;//Multiplying with 7(week) becomes easy when we do it here
             _weekdays = weekdays;
         }
 
-
+        /// <summary>
+        /// Returns the nexts scedule from the specified date time
+        /// </summary>
+        /// <param name="from">From date time</param>
+        /// <returns></returns>
         DateTime IRecur.Next(DateTime from)
         {
             DateTime original = from;
@@ -423,15 +661,41 @@ namespace XecMe.Core.Tasks
     }
     #endregion
 
-    #region Monthly by weekdays
+    #region Monthly by weekdays    
+    /// <summary>
+    /// This is the recurrence pattern for monthly run tasks
+    /// </summary>
+    /// <seealso cref="IRecur" />
     internal class MonthlyByWeekdays : IRecur
     {
         Months _months;
         Weekdays _weekdays;
-        Week _weeks;
+        Weeks _weeks;
 
-        public MonthlyByWeekdays(Months months, Weekdays weekdays, Week weeks)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MonthlyByWeekdays"/> class.
+        /// </summary>
+        /// <param name="months">The months.</param>
+        /// <param name="weekdays">The weekdays.</param>
+        /// <param name="weeks">The weeks.</param>
+        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// Should have at least a month defined for the task
+        /// or
+        /// Should have at least a weekday defined for the task
+        /// or
+        /// Should have at least a week defined for the task
+        /// </exception>
+        public MonthlyByWeekdays(Months months, Weekdays weekdays, Weeks weeks)
         {
+            if (months == Months.None)
+                throw new ArgumentOutOfRangeException(nameof(months), "Should have at least a month defined for the task");
+
+            if (weekdays == Weekdays.None)
+                throw new ArgumentOutOfRangeException(nameof(weekdays), "Should have at least a weekday defined for the task");
+
+            if (weeks == Weeks.None)
+                throw new ArgumentOutOfRangeException(nameof(weekdays), "Should have at least a week defined for the task");
+
             _months = months;
             _weekdays = weekdays;
             _weeks = weeks;
@@ -446,7 +710,7 @@ namespace XecMe.Core.Tasks
                 from = Utils.GetValidMonth(_months, from);
 
                 //First week
-                if ((_weeks & Week.First) == Week.First)
+                if ((_weeks & Weeks.First) == Weeks.First)
                 {
                     while (from.Day < 8)
                     {
@@ -459,7 +723,7 @@ namespace XecMe.Core.Tasks
                     }
                 }
                 //Second week
-                if ((_weeks & Week.Second) == Week.Second)
+                if ((_weeks & Weeks.Second) == Weeks.Second)
                 {
                     while (from.Day < 15 && from.Day > 7)
                     {
@@ -472,7 +736,7 @@ namespace XecMe.Core.Tasks
                     }
                 }
                 //Third week
-                if ((_weeks & Week.Third) == Week.Third)
+                if ((_weeks & Weeks.Third) == Weeks.Third)
                 {
                     while (from.Day < 22 && from.Day > 14)
                     {
@@ -485,7 +749,7 @@ namespace XecMe.Core.Tasks
                     }
                 }
                 //Both Fourth & Last week
-                if ((_weeks & (Week.Fourth | Week.Last)) == (Week.Fourth | Week.Last))
+                if ((_weeks & (Weeks.Fourth | Weeks.Last)) == (Weeks.Fourth | Weeks.Last))
                 {
                     while (from.Day > 21)
                     {
@@ -500,7 +764,7 @@ namespace XecMe.Core.Tasks
                 else
                 {
                     //Fourth week
-                    if ((_weeks & Week.Fourth) == Week.Fourth)
+                    if ((_weeks & Weeks.Fourth) == Weeks.Fourth)
                     {
                         while (from.Day < 29 && from.Day > 21)
                         {
@@ -513,7 +777,7 @@ namespace XecMe.Core.Tasks
                         }
                     }
                     //Last
-                    if ((_weeks & Week.Last) == Week.Last)
+                    if ((_weeks & Weeks.Last) == Weeks.Last)
                     {
                         int lastWeekDay = GetLastWeekStartDay(from);
                         while (from.Day >= lastWeekDay)
@@ -531,6 +795,12 @@ namespace XecMe.Core.Tasks
             }
         }
 
+        /// <summary>
+        /// Gets the last week start day.
+        /// </summary>
+        /// <param name="date">The date.</param>
+        /// <returns></returns>
+        /// <exception cref="System.ArgumentOutOfRangeException"></exception>
         private int GetLastWeekStartDay(DateTime date)
         {
             switch (date.Month)
@@ -558,21 +828,42 @@ namespace XecMe.Core.Tasks
     #endregion
 
 
-    #region Monthly by day
+    #region Monthly by day    
+    /// <summary>
+    /// This is the recurrence pattern that schedules the task monthly by day
+    /// </summary>
+    /// <seealso cref="IRecur" />
     internal class MonthlyByDay : IRecur
     {
         const uint LAST = 0x80000000;
         Months _months;
         uint _days;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MonthlyByDay"/> class.
+        /// </summary>
+        /// <param name="months">The months.</param>
+        /// <param name="days">The days.</param>
+        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// Should have at least a month defined for the task
+        /// </exception>
         public MonthlyByDay(Months months, uint days)
         {
-            if (days < 1 && days > 961)
-                throw new ArgumentOutOfRangeException("days");
+            if (days < 1 || days > 0xFFFFFFFF)
+                throw new ArgumentOutOfRangeException(nameof(days));
+
+            if (months == Months.None)
+                throw new ArgumentOutOfRangeException(nameof(months), "Should have at least a month defined for the task");
+
             _days = days;
             _months = months;
         }
 
+        /// <summary>
+        /// Returns the nexts scedule from the specified date time
+        /// </summary>
+        /// <param name="from">From date time</param>
+        /// <returns></returns>
         DateTime IRecur.Next(DateTime from)
         {
             DateTime original = from;
@@ -600,6 +891,13 @@ namespace XecMe.Core.Tasks
             }
         }
 
+        /// <summary>
+        /// Determines whether the specified day has day.
+        /// </summary>
+        /// <param name="day">The day.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified day has day; otherwise, <c>false</c>.
+        /// </returns>
         private bool HasDay(int day)
         {
             uint x = 1;
@@ -608,6 +906,9 @@ namespace XecMe.Core.Tasks
         }
     }
     #endregion
+    /// <summary>
+    /// Helper functions for the date time calculations
+    /// </summary>
     static class Utils
     {
         /// <summary>
