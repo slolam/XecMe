@@ -210,16 +210,46 @@ namespace XecMe.Core.Tasks
     /// <seealso cref="TaskRunner" />
     public class ScheduledTaskRunner : TaskRunner
     {
+        /// <summary>
+        /// The schedule
+        /// </summary>
         private string _schedule;
+        /// <summary>
+        /// The start date
+        /// </summary>
         private DateTime _startDate, _lastDateTime;
+        /// <summary>
+        /// The task time
+        /// </summary>
         private TimeSpan _taskTime;
+        /// <summary>
+        /// The recursion
+        /// </summary>
         private Recursion _recursion;
+        /// <summary>
+        /// The recur
+        /// </summary>
         private IRecur _recur;
+        /// <summary>
+        /// The repeat
+        /// </summary>
         private uint _repeat;
+        /// <summary>
+        /// The timer
+        /// </summary>
         private Timer _timer;
+        /// <summary>
+        /// The task wrapper
+        /// </summary>
         private TaskWrapper _taskWrapper;
+        /// <summary>
+        /// The skip
+        /// </summary>
         private bool _skip;
 
+        /// <summary>
+        /// The time zone information
+        /// </summary>
         private TimeZoneInfo _timeZoneInfo;
 
         /// <summary>

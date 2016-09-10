@@ -61,10 +61,22 @@ namespace XecMe.Core.Tasks
     public abstract class TaskRunner
     {
         //private Type _taskType;
-        //private TaskWrapper _taskWrapper;
-        private bool isErrorTrace, isWarningTrace, isInfoTrace; 
+        //private TaskWrapper _taskWrapper;        
+        /// <summary>
+        /// The is error trace
+        /// </summary>
+        private bool isErrorTrace, isWarningTrace, isInfoTrace;
+        /// <summary>
+        /// The task runner type name
+        /// </summary>
         private string _taskRunnerTypeName;
+        /// <summary>
+        /// The stopwatch
+        /// </summary>
         protected readonly Stopwatch _stopwatch = new Stopwatch();
+        /// <summary>
+        /// Occurs when [completed].
+        /// </summary>
         public event Events.EventHandler<ExecutionContext> Completed;
 
         /// <summary>
@@ -116,6 +128,10 @@ namespace XecMe.Core.Tasks
         /// </summary>
         protected Dictionary<string, object> Parameters { get; private set; }
 
+        /// <summary>
+        /// Gets the task instance.
+        /// </summary>
+        /// <returns></returns>
         protected ITask GetTaskInstance()
         {
             ITask task = ExecutionContext.InternalContainer.GetInstance(TaskType) as ITask;
@@ -128,23 +144,37 @@ namespace XecMe.Core.Tasks
         /// </summary>
         internal WaitHandle WaitHandle { get; private set; }
 
+        /// <summary>
+        /// Starts this instance.
+        /// </summary>
         public virtual void Start()
         {
             ((EventWaitHandle)WaitHandle).Reset();
         }
 
+        /// <summary>
+        /// Stops this instance.
+        /// </summary>
         public virtual void Stop()
         {
             ((EventWaitHandle)WaitHandle).Set();
         }
 
+        /// <summary>
+        /// Raises the complete.
+        /// </summary>
+        /// <param name="context">The context.</param>
         protected void RaiseComplete(ExecutionContext context)
         {
             Completed(this, new EventArgs<ExecutionContext>(context.Copy()));
             TraceInformation($"{Name} task completed and raised the event");
         }
 
-        
+        /// <summary>
+        /// Traces the information.
+        /// </summary>
+        /// <param name="format">The format.</param>
+        /// <param name="args">The arguments.</param>
         protected internal void TraceInformation(string format, params object[] args)
         {
             if (isInfoTrace)
@@ -153,6 +183,10 @@ namespace XecMe.Core.Tasks
             }
         }
 
+        /// <summary>
+        /// Traces the information.
+        /// </summary>
+        /// <param name="msg">The MSG.</param>
         protected internal void TraceInformation(string msg)
         {
             if (isInfoTrace)
@@ -161,6 +195,11 @@ namespace XecMe.Core.Tasks
             }
         }
 
+        /// <summary>
+        /// Traces the warning.
+        /// </summary>
+        /// <param name="format">The format.</param>
+        /// <param name="args">The arguments.</param>
         protected internal void TraceWarning(string format, params object[] args)
         {
             if (isInfoTrace)
@@ -169,6 +208,10 @@ namespace XecMe.Core.Tasks
             }
         }
 
+        /// <summary>
+        /// Traces the warning.
+        /// </summary>
+        /// <param name="msg">The message.</param>
         protected internal void TraceWarning(string msg)
         {
             if (isWarningTrace)
@@ -177,6 +220,11 @@ namespace XecMe.Core.Tasks
             }
         }
 
+        /// <summary>
+        /// Traces the error.
+        /// </summary>
+        /// <param name="format">The format.</param>
+        /// <param name="args">The arguments.</param>
         protected internal void TraceError(string format, params object[] args)
         {
             if (isErrorTrace)
@@ -185,6 +233,10 @@ namespace XecMe.Core.Tasks
             }
         }
 
+        /// <summary>
+        /// Traces the error.
+        /// </summary>
+        /// <param name="msg">The MSG.</param>
         protected internal void TraceError(string msg)
         {
             if (isErrorTrace)
@@ -193,15 +245,28 @@ namespace XecMe.Core.Tasks
             }
         }
 
+        /// <summary>
+        /// Informations the specified log.
+        /// </summary>
+        /// <param name="log">The log.</param>
         private void Information(string log)
         {
             Log.Information(log);
         }
 
+        /// <summary>
+        /// Errors the specified log.
+        /// </summary>
+        /// <param name="log">The log.</param>
         private void Error(string log)
         {
             Log.Error(log);
         }
+
+        /// <summary>
+        /// Warnings the specified log.
+        /// </summary>
+        /// <param name="log">The log.</param>
         private void Warning(string log)
         {
             Log.Warning(log);

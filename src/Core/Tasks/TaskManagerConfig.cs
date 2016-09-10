@@ -22,9 +22,20 @@ using XecMe.Core.Configuration;
 
 namespace XecMe.Core.Tasks
 {
+    /// <summary>
+    /// Configuration based task configurations
+    /// </summary>
+    /// <seealso cref="XecMe.Core.Tasks.ITaskManagerConfig" />
     public class TaskManagerConfig : ITaskManagerConfig
     {
+        /// <summary>
+        /// The runners
+        /// </summary>
         List<TaskRunner> _runners;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TaskManagerConfig"/> class.
+        /// </summary>
         public TaskManagerConfig()
         {
             _runners = new List<TaskRunner>();
@@ -34,8 +45,14 @@ namespace XecMe.Core.Tasks
             }
         }
 
-        #region ITaskManagerConfig Members
+        #region ITaskManagerConfig Members        
 
+        /// <summary>
+        /// Gets the runners.
+        /// </summary>
+        /// <value>
+        /// The runners.
+        /// </value>
         IEnumerable<TaskRunner> ITaskManagerConfig.Runners
         {
             get { return _runners.AsReadOnly(); }

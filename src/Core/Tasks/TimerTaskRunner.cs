@@ -27,20 +27,86 @@ using System.Diagnostics;
 
 namespace XecMe.Core.Tasks
 {
+    /// <summary>
+    /// Timer task runner
+    /// </summary>
+    /// <seealso cref="XecMe.Core.Tasks.TaskRunner" />
     public class TimerTaskRunner : TaskRunner
     {
+        /// <summary>
+        /// The interval
+        /// </summary>
         private long _interval;
+        /// <summary>
+        /// The recurrence/
+        /// </summary>
         private long _recurrence;
+        /// <summary>
+        /// The start date time
+        /// </summary>
         private DateTime _startDateTime = DateTime.MinValue;
+        /// <summary>
+        /// The end date time
+        /// </summary>
         private DateTime _endDateTime = DateTime.MaxValue;
+        /// <summary>
+        /// The day start time
+        /// </summary>
         private TimeSpan _dayStartTime = TimeSpan.FromSeconds(0);
+        /// <summary>
+        /// The day end time
+        /// </summary>
         private TimeSpan _dayEndTime = TimeSpan.FromSeconds(86399);
+        /// <summary>
+        /// The weekdays
+        /// </summary>
         private Weekdays _weekdays = Weekdays.All;
+        /// <summary>
+        /// The timer
+        /// </summary>
         private Timer _timer;
+        /// <summary>
+        /// The task
+        /// </summary>
         private TaskWrapper _task;
+        /// <summary>
+        /// The time zone information
+        /// </summary>
         private TimeZoneInfo _timeZoneInfo;
 
-        
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TimerTaskRunner"/> class.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="taskType">Type of the task.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <param name="interval">The interval.</param>
+        /// <param name="recurrence">The recurrence.</param>
+        /// <param name="weekdays">The weekdays.</param>
+        /// <param name="startDateTime">The start date time.</param>
+        /// <param name="endDateTime">The end date time.</param>
+        /// <param name="dayStartTime">The day start time.</param>
+        /// <param name="dayEndTime">The day end time.</param>
+        /// <param name="timeZoneInfo">The time zone information.</param>
+        /// <param name="traceType">Type of the trace.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Interval cannot be less than 1
+        /// or
+        /// Recurrence has to be greater than 0 or euqal to -1
+        /// or
+        /// Start date time should be less than End date time
+        /// or
+        /// Start time cannot be negative
+        /// or
+        /// End time cannot be negative
+        /// or
+        /// Start time should be less than 23:59:59
+        /// or
+        /// End time should be less than 23:59:59
+        /// or
+        /// No weekday is selected to run the task
+        /// </exception>
         public TimerTaskRunner(string name, Type taskType, Dictionary<string, object> parameters, long interval, long recurrence,
             Weekdays weekdays, DateTime startDateTime, DateTime endDateTime, TimeSpan dayStartTime, TimeSpan dayEndTime, 
             TimeZoneInfo timeZoneInfo, LogType traceType) :
@@ -52,31 +118,28 @@ namespace XecMe.Core.Tasks
                 base(name, taskType, parameters)
             {*/
             if (interval < 1)
-                throw new ArgumentOutOfRangeException(nameof(interval), $"{nameof(interval)} cannot be less than 1");
+                throw new ArgumentOutOfRangeException(nameof(interval), "Interval cannot be less than 1");
 
             if (recurrence != -1 && recurrence < 1)
-                throw new ArgumentOutOfRangeException(nameof(recurrence), $"{nameof(recurrence)} has to be greater than 0 or euqal to -1");
+                throw new ArgumentOutOfRangeException(nameof(recurrence), "Recurrence has to be greater than 0 or euqal to -1");
 
             if (endDateTime < startDateTime)
-                throw new ArgumentOutOfRangeException(nameof(startDateTime), $"{nameof(startDateTime)} should be less than {nameof(endDateTime)}");
+                throw new ArgumentOutOfRangeException(nameof(startDateTime), "Start date time should be less than End date time");
 
             if (dayStartTime < Time.DayMinTime)
-                throw new ArgumentOutOfRangeException(nameof(dayStartTime), $"{nameof(dayStartTime)} cannot be negative");
+                throw new ArgumentOutOfRangeException(nameof(dayStartTime), "Start time cannot be negative");
 
             if (dayEndTime < Time.DayMinTime)
-                throw new ArgumentOutOfRangeException(nameof(dayEndTime), $"{nameof(dayEndTime)} cannot be negative");
+                throw new ArgumentOutOfRangeException(nameof(dayEndTime), "End time cannot be negative");
 
             if (dayStartTime > Time.DayMaxTime)
-                throw new ArgumentOutOfRangeException(nameof(dayStartTime), $"{nameof(dayStartTime)} should be less than 23:59:59");
+                throw new ArgumentOutOfRangeException(nameof(dayStartTime), "Start time should be less than 23:59:59");
 
             if (dayEndTime > Time.DayMaxTime)
-                throw new ArgumentOutOfRangeException(nameof(dayEndTime), $"{nameof(dayEndTime)} should be less than 23:59:59");
+                throw new ArgumentOutOfRangeException(nameof(dayEndTime), "End time should be less than 23:59:59");
 
             if (weekdays == Weekdays.None)
                 throw new ArgumentOutOfRangeException(nameof(weekdays), "No weekday is selected to run the task");
-
-            //if (dayEndTime < dayStartTime)
-            //    throw new ArgumentOutOfRangeException("dayStartTime", "dayStartTime should be less than dayEndTime");
 
             _weekdays = weekdays;
             _timeZoneInfo = timeZoneInfo ?? TimeZoneInfo.Local;
@@ -88,6 +151,12 @@ namespace XecMe.Core.Tasks
             _dayEndTime = dayEndTime;
         }
 
+        /// <summary>
+        /// Gets the interval.
+        /// </summary>
+        /// <value>
+        /// The interval.
+        /// </value>
         public long Interval
         {
             get
@@ -95,6 +164,13 @@ namespace XecMe.Core.Tasks
                 return _interval;
             }
         }
+
+        /// <summary>
+        /// Gets the recurrence.
+        /// </summary>
+        /// <value>
+        /// The recurrence.
+        /// </value>
         public long Recurrence
         {
             get
@@ -102,6 +178,13 @@ namespace XecMe.Core.Tasks
                 return _recurrence;
             }
         }
+
+        /// <summary>
+        /// Gets the start date time.
+        /// </summary>
+        /// <value>
+        /// The start date time.
+        /// </value>
         public DateTime StartDateTime
         {
             get
@@ -110,6 +193,12 @@ namespace XecMe.Core.Tasks
             }
         }
 
+        /// <summary>
+        /// Gets the end date time.
+        /// </summary>
+        /// <value>
+        /// The end date time.
+        /// </value>
         public DateTime EndDateTime
         {
             get
@@ -118,6 +207,12 @@ namespace XecMe.Core.Tasks
             }
         }
 
+        /// <summary>
+        /// Gets the day start time.
+        /// </summary>
+        /// <value>
+        /// The day start time.
+        /// </value>
         public TimeSpan DayStartTime
         {
             get
@@ -125,6 +220,13 @@ namespace XecMe.Core.Tasks
                 return _dayStartTime;
             }
         }
+
+        /// <summary>
+        /// Gets the day end time.
+        /// </summary>
+        /// <value>
+        /// The day end time.
+        /// </value>
         public TimeSpan DayEndTime
         {
             get
@@ -132,6 +234,13 @@ namespace XecMe.Core.Tasks
                 return _dayEndTime;
             }
         }
+
+        /// <summary>
+        /// Gets the time zone.
+        /// </summary>
+        /// <value>
+        /// The time zone.
+        /// </value>
         public TimeZoneInfo TimeZone
         {
             get
@@ -141,8 +250,10 @@ namespace XecMe.Core.Tasks
         }
 
 
-        #region TaskRunner Members
-
+        #region TaskRunner Members        
+        /// <summary>
+        /// Starts this instance.
+        /// </summary>
         public override void Start()
         {
             lock (this)
@@ -157,6 +268,9 @@ namespace XecMe.Core.Tasks
             }
         }
 
+        /// <summary>
+        /// Stops this instance.
+        /// </summary>
         public override void Stop()
         {
             lock (this)
@@ -173,8 +287,13 @@ namespace XecMe.Core.Tasks
             }
         }
 
-        #endregion
-
+        #endregion        
+        /// <summary>
+        /// Gets the now.
+        /// </summary>
+        /// <value>
+        /// The now.
+        /// </value>
         private DateTime Now
         {
             get
@@ -190,6 +309,10 @@ namespace XecMe.Core.Tasks
             }
         }
 
+        /// <summary>
+        /// Runs the task.
+        /// </summary>
+        /// <param name="state">The state.</param>
         private void RunTask(object state)
         {
             ///Task not started, call should never come here

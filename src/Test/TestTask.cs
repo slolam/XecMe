@@ -17,7 +17,7 @@ namespace XecMe.Test
             if (_count < 0)
             {
                 int.TryParse(context.Parameters["count"]?.ToString(), out _count);
-                int.TryParse(context.Parameters["delay"]?.ToString(), out _delay);
+                //int.TryParse(context.Parameters["delay"]?.ToString(), out _delay);
             }
         }
 
@@ -33,16 +33,19 @@ namespace XecMe.Test
 
         ExecutionState ITask.OnExecute(ExecutionContext context)
         {
-            System.Threading.Thread.Sleep(_delay);
-            lock(_sync)
+            try
             {
+                //var val = (int)context["EventArgs"];
                 _count--;
-                Console.WriteLine(string.Format("Executing {0}", _count));
+                System.Threading.Thread.Sleep(10);
+                Console.WriteLine($"Value {_count}");
+
+                return _count < 0 ? ExecutionState.Stop : _count % 10 == 0? ExecutionState.Recycle :  ExecutionState.Executed;
             }
-
-            if (_count < 0)
-                return ExecutionState.Idle;
-
+            catch(Exception ex)
+            {
+                Console.WriteLine($"{ex}");
+            }
             return ExecutionState.Executed;
         }
     }

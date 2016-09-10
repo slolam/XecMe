@@ -92,8 +92,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="bin\Debug\CusoDocxRequest.xml" />
-    <Content Include="bin\Debug\DoX_4506-T_Response.xml" />
     <Content Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>

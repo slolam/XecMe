@@ -59,7 +59,12 @@ namespace XecMe.Core.Tasks
             TaskType = taskType;
         }
 
-
+        /// <summary>
+        /// Gets the type of the task.
+        /// </summary>
+        /// <value>
+        /// The type of the task.
+        /// </value>
         public Type TaskType { get; private set; }
 
         /// <summary>
@@ -124,7 +129,7 @@ namespace XecMe.Core.Tasks
                     if (state == ExecutionState.Recycle
                         || state == ExecutionState.Stop)
                     {
-                        InternalRelease();
+                        InternalRelease(executionContext);
                     }
                     return state;
                 }
@@ -189,6 +194,10 @@ namespace XecMe.Core.Tasks
             _initialized = false;
         }
 
+        /// <summary>
+        /// Gets the task instance.
+        /// </summary>
+        /// <returns></returns>
         private ITask GetTaskInstance()
         {
             ITask task = ExecutionContext.InternalContainer.GetInstance(TaskType) as ITask;

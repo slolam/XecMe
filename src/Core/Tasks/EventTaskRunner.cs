@@ -36,7 +36,7 @@ namespace XecMe.Core.Tasks
         /// <summary>
         /// Instance of the task
         /// </summary>
-        private ITask _task;
+        //private ITask _task;
         /// <summary>
         /// The task wrapper
         /// </summary>
@@ -44,7 +44,7 @@ namespace XecMe.Core.Tasks
         /// <summary>
         /// Execution context for the task
         /// </summary>
-        private ExecutionContext _executionContext;
+        //private ExecutionContext _executionContext;
         /// <summary>
         /// Name of the event topic this runner is subscribed to
         /// </summary>
@@ -89,7 +89,7 @@ namespace XecMe.Core.Tasks
             _timeout = timeout;
             _eventTopic = eventTopic;
             _threadOption = threadOption;
-            _executionContext = new ExecutionContext(this.Parameters, this);
+            _taskWrapper = new TaskWrapper(taskType, new ExecutionContext(this.Parameters, this));
 
             if (threadOption == ThreadOption.BackgroundSerial)
             {
@@ -107,16 +107,9 @@ namespace XecMe.Core.Tasks
         /// </summary>
         public override void Start()
         {
-            lock (this)
-            {
-                if (_task == null)
-                    _task = this.GetTaskInstance();
-            }
-
             EventManager.AddSubscriber(_eventTopic, this, "EventSink", _threadOption);
             if (_threadOption != ThreadOption.Publisher)
                 base.Start();
-            _task.OnStart(_executionContext);
             TraceInformation("Started");
         }
 
@@ -132,44 +125,13 @@ namespace XecMe.Core.Tasks
                 {
                     await Task.Delay(_timeout);
                     _taskWrapper.Release();
-                    try
-                    {
-                        _task.OnStop(_executionContext);
-                    }
-                    catch (Exception e)
-                    {
-                        try
-                        {
-                            TraceError("Caught unhandled exception calling OnStop, calling OnUnhandledException: {0}", e);
-                            _task.OnUnhandledException(e);
-                        }
-                        catch (Exception badEx)
-                        {
-                            TraceError("Bad Error: {0}", badEx);
-                        }
-                    }
                     TraceInformation("Stopped");
                     base.Stop();
                 });
             }
             else
             {
-                try
-                {
-                    _task.OnStop(_executionContext);
-                }
-                catch (Exception e)
-                {
-                    try
-                    {
-                        TraceError("Caught unhandled exception calling OnStop, calling OnUnhandledException: {0}", e);
-                        _task.OnUnhandledException(e);
-                    }
-                    catch (Exception badEx)
-                    {
-                        TraceError("Bad Error: {0}", badEx);
-                    }
-                }
+                _taskWrapper.Release();
                 TraceInformation("Stopped", this.Name);
             }
         }
@@ -195,7 +157,7 @@ namespace XecMe.Core.Tasks
                 Type argType = args.GetType();
                 if (argType.IsGenericType)
                 {
-                    ec = _executionContext.Copy();
+                    ec = _taskWrapper.Context.Copy();
                     if (argType.GetGenericTypeDefinition() == typeof(EventArgs<>))
                     {
                         ec["EventArgs"] = argType.InvokeMember("Value", BindingFlags.Instance | BindingFlags.GetProperty | BindingFlags.Public, null, args, null);
@@ -210,14 +172,14 @@ namespace XecMe.Core.Tasks
 
             switch (_threadOption)
             {
-                    ///Runs the events on the backgroud thread but in the order the events are received one event at a time
+                ///Runs the events on the backgroud thread but in the order the events are received one event at a time
                 case ThreadOption.BackgroundSerial:
                     lock (_queue)
                     {
                         ///Add the event to the queue
                         _queue.Enqueue(ec);
 
-                        ///If the thread is already processing the return
+                        ///If the thread is already processing then return
                         if (_threadWorking)
                         {
                             return;
@@ -259,69 +221,35 @@ namespace XecMe.Core.Tasks
         /// <param name="args">EventArg published by publisher</param>
         private void RunTask(ExecutionContext ec)
         {
-            try
+            this.Wait();
+            // Hold the reference of the current task instance
+            ITask task = _taskWrapper.Task;
+            ExecutionState state = _taskWrapper.RunTask(ec);
+            switch (state)
             {
-                this.Wait();
-                ITask task = _task;
-                TraceInformation("Is executing on Managed thread {0}",Thread.CurrentThread.ManagedThreadId);
-                _stopwatch.Restart();
-                ExecutionState state = _task.OnExecute(ec);
-                _stopwatch.Stop();
-                TraceInformation("Executed in {2} ms. with a return value {0} on Managed thread {1}", state, Thread.CurrentThread.ManagedThreadId, _stopwatch.ElapsedMilliseconds);
-                switch (state)
-                {
-                    case ExecutionState.Stop:
-                        ///Stop listening to the event in future
-                        _taskWrapper.Release(ec);
-                        //this.Stop();
-                        break;
-                    case ExecutionState.Recycle:
-                        Reset();
-                        lock (this)
+                case ExecutionState.Stop:
+                    ///Stop listening to the event in future
+                    _taskWrapper.Release(ec);
+                    this.Stop();
+                    break;
+                case ExecutionState.Recycle:
+                    Reset();
+                    lock (this)
+                    {
+                        ///Check if no other thread already recycled the task
+                        if (ReferenceEquals(task, _taskWrapper.Task))
                         {
-                            ///Check if some other thread already recycled the task
-                            if (task == _task)
-                            {
-                                try
-                                {
-                                    _task.OnStop(ec);
-                                }
-                                catch (Exception e)
-                                {
-                                    try
-                                    {
-                                        TraceError("Caught unhandled exception calling OnStop, calling OnUnhandledException: {0}", e);
-                                        _task.OnUnhandledException(e);
-                                    }
-                                    catch (Exception badEx)
-                                    {
-                                        TraceError("Bad Error: {0}", badEx);
-                                    }
-                                }
-                                _task = this.GetTaskInstance();
-                            }
+                            _taskWrapper.Release(ec);
                         }
-                        Set();
-                        ///Since this is Event based we will end up losing the event
-                        ///hence call the task again
-                        RunTask(ec);
-                        break;
-                }
+                    }
+                    Set();
+                    ///Since this is Event based we will end up losing the event
+                    ///hence call the task again, however you don't really manage the recycling again
+                    //RunTask(ec);
+                    state = _taskWrapper.RunTask(ec);
+                    break;
             }
-            catch (Exception ex)
-            {
-                _stopwatch.Stop();
-                TraceInformation("Executed in {2} ms. with a return value {0} on Managed thread {1}", ExecutionState.Exception, Thread.CurrentThread.ManagedThreadId, _stopwatch.ElapsedMilliseconds);
-                try
-                {
-                    TraceError("Caught unhandled exception calling OnExecute, calling OnUnhandledException: {0}", ex);
-                    _task.OnUnhandledException(ex);
-                }
-                catch (Exception badEx)
-                {
-                    TraceError("Bad Error: {0}", badEx);
-                }
-            }
+
         }
 
         #endregion

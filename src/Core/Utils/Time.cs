@@ -8,15 +8,33 @@ using Util = XecMe.Core.Tasks.Utils;
 
 namespace XecMe.Core.Utils
 {
+    /// <summary>
+    /// Time calculations functions
+    /// </summary>
     static class Time
     {
+        /// <summary>
+        /// The day minimum time mid night 12:00 AM
+        /// </summary>
         public static readonly TimeSpan DayMinTime;
+        /// <summary>
+        /// The day maximum time almost mid night 11:59:59 PM
+        /// </summary>
         public static readonly TimeSpan DayMaxTime;
         static Time()
         {
             DayMinTime = TimeSpan.FromSeconds(0);
             DayMaxTime = TimeSpan.FromSeconds(86399);
         }
+
+        /// <summary>
+        /// Disallows the specified today.
+        /// </summary>
+        /// <param name="today">The today.</param>
+        /// <param name="startTime">The start time.</param>
+        /// <param name="endTime">The end time.</param>
+        /// <param name="weekdays">The weekdays.</param>
+        /// <returns>Returns true if execution should be allowed else false</returns>
         internal static bool Disallow(DateTime today, TimeSpan startTime, TimeSpan endTime, Weekdays weekdays)
         {
             TimeSpan now = today.TimeOfDay;

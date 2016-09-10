@@ -61,7 +61,7 @@ namespace XecMe.Core.Fluent.Timer
         /// <param name="from">From time of the day</param>
         /// <param name="to">To time of the day</param>
         /// <returns>Returns <see cref="ITimeZone"/></returns>
-        ITimeZone BetweenTimeOfDay(TimeSpan from, TimeSpan to);
+        ITimeZone DuringTimeOfDay(TimeSpan from, TimeSpan to);
     }
 
     /// <summary>
@@ -106,13 +106,13 @@ namespace XecMe.Core.Fluent.Timer
     /// <summary>
     /// Timer task builder
     /// </summary>
-    /// <seealso cref="XecMe.Core.Fluent.TaskBuilder" />
-    /// <seealso cref="XecMe.Core.Fluent.Timer.ITimerTaskBuilder" />
-    /// <seealso cref="XecMe.Core.Fluent.Timer.ILifetime" />
-    /// <seealso cref="XecMe.Core.Fluent.Timer.IRepeat" />
-    /// <seealso cref="XecMe.Core.Fluent.Timer.ITimeZone" />
-    /// <seealso cref="XecMe.Core.Fluent.Timer.IWeekdays" />
-    /// <seealso cref="XecMe.Core.Fluent.Timer.IOperationalTime" />
+    /// <seealso cref="TaskBuilder" />
+    /// <seealso cref="ITimerTaskBuilder" />
+    /// <seealso cref="ILifetime" />
+    /// <seealso cref="IRepeat" />
+    /// <seealso cref="ITimeZone" />
+    /// <seealso cref="IWeekdays" />
+    /// <seealso cref="IOperationalTime" />
     internal class TimerTaskBuilder: TaskBuilder, ITimerTaskBuilder, ILifetime, IRepeat, ITimeZone, IWeekdays, IOperationalTime
     {
         private long _interval;
@@ -264,7 +264,7 @@ namespace XecMe.Core.Fluent.Timer
         /// or
         /// End time should be less than 23:59:59
         /// </exception>
-        ITimeZone IOperationalTime.BetweenTimeOfDay(TimeSpan dayStartTime, TimeSpan dayEndTime)
+        ITimeZone IOperationalTime.DuringTimeOfDay(TimeSpan dayStartTime, TimeSpan dayEndTime)
         {
             if (dayStartTime < Time.DayMinTime)
                 throw new ArgumentOutOfRangeException(nameof(dayStartTime), "Start time cannot be negative");

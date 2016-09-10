@@ -35,6 +35,9 @@ namespace XecMe.Common.Diagnostics
     /// </summary>
     public static class Log
     {
+        /// <summary>
+        /// Initializes the <see cref="Log"/> class.
+        /// </summary>
         static Log()
         {
             ErrorSink =  log => Trace.TraceError(log);

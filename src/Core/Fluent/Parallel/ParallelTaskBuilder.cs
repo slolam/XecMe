@@ -48,7 +48,7 @@ namespace XecMe.Core.Fluent.Parallel
         /// <param name="from">From time of the day</param>
         /// <param name="to">To time of the day</param>
         /// <returns>Returns <see cref="ITimeZone"/></returns>
-        ITimeZone BetweenTimeOfDay(TimeSpan from, TimeSpan to);
+        ITimeZone DuringTimeOfDay(TimeSpan from, TimeSpan to);
     }
 
     /// <summary>
@@ -218,7 +218,7 @@ namespace XecMe.Core.Fluent.Parallel
         /// or
         /// From time must be less that To time
         /// </exception>
-        ITimeZone IOperationalTime.BetweenTimeOfDay(TimeSpan from, TimeSpan to)
+        ITimeZone IOperationalTime.DuringTimeOfDay(TimeSpan from, TimeSpan to)
         {
             if(from < Time.DayMinTime)
             {

@@ -24,6 +24,9 @@ using System.Net.NetworkInformation;
 
 namespace XecMe.Core.Utils
 {
+    /// <summary>
+    /// Static class represents the information of the service
+    /// </summary>
     public static class ServiceInfo
     {
         static ServiceInfo()

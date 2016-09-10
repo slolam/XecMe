@@ -67,7 +67,9 @@ namespace XecMe.Common.System
         /// </summary>
         private static readonly int ProcessorCount;
 
-
+        /// <summary>
+        /// Initializes the <see cref="CpuUsageLimiter"/> class.
+        /// </summary>
         static CpuUsageLimiter()
         {
             //Initialize the priority class in the acending order
@@ -85,9 +87,17 @@ namespace XecMe.Common.System
             Limit = 10;
         }
 
+        /// <summary>
+        /// Gets the current win32 thread identifier.
+        /// </summary>
+        /// <returns></returns>
         [DllImport("Kernel32", EntryPoint = "GetCurrentThreadId", ExactSpelling = true)]
         private static extern Int32 GetCurrentWin32ThreadId();
 
+        /// <summary>
+        /// Starts this instance.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Cpu Usage Limit can only be run in the default AppDomain</exception>
         public static void Start()
         {
             if (!AppDomain.CurrentDomain.IsDefaultAppDomain())
@@ -331,7 +341,11 @@ namespace XecMe.Common.System
             }
         }
 
-        #region Processor
+        #region Processor        
+        /// <summary>
+        /// Represents the core of a processor
+        /// </summary>
+        /// <seealso cref="System.IDisposable" />
         private class Processor : IDisposable
         {
             /// <summary>
@@ -361,6 +375,12 @@ namespace XecMe.Common.System
                 _mask = Convert.ToInt64(Math.Pow(2, processorNumber));
             }
 
+            /// <summary>
+            /// Gets the mask.
+            /// </summary>
+            /// <value>
+            /// The mask.
+            /// </value>
             public long Mask
             {
                 get
@@ -373,6 +393,12 @@ namespace XecMe.Common.System
                 }
             }
 
+            /// <summary>
+            /// Gets or sets a value indicating whether [in use].
+            /// </summary>
+            /// <value>
+            ///   <c>true</c> if [in use]; otherwise, <c>false</c>.
+            /// </value>
             public bool InUse
             {
                 get
@@ -387,6 +413,12 @@ namespace XecMe.Common.System
                 }
             }
 
+            /// <summary>
+            /// Gets the usage.
+            /// </summary>
+            /// <value>
+            /// The usage.
+            /// </value>
             public float Usage
             {
                 get
@@ -396,20 +428,29 @@ namespace XecMe.Common.System
                 }
             }
 
+            /// <summary>
+            /// Samples the usage.
+            /// </summary>
             public void SampleUsage()
             {
                 ThrowIfDisposed();
                 _usage = _cpu.NextValue();
             }
 
-            #region IDisposable Members
-
+            #region IDisposable Members            
+            /// <summary>
+            /// Throws if disposed.
+            /// </summary>
+            /// <exception cref="ObjectDisposedException">This instance is already disposed</exception>
             private void ThrowIfDisposed()
             {
                 if (_cpu == null)
                     throw new ObjectDisposedException("This instance is already disposed");
             }
 
+            /// <summary>
+            /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+            /// </summary>
             void IDisposable.Dispose()
             {
                 using (_cpu) ;
@@ -417,6 +458,9 @@ namespace XecMe.Common.System
                 GC.SuppressFinalize(this);
             }
 
+            /// <summary>
+            /// Finalizes an instance of the <see cref="Processor"/> class.
+            /// </summary>
             ~Processor()
             {
                 IDisposable dispose = (IDisposable)this;
@@ -633,12 +677,19 @@ namespace XecMe.Common.System
             }
 
 
-            #region IDisposable Members
+            #region IDisposable Members            
+            /// <summary>
+            /// Throws if disposed.
+            /// </summary>
+            /// <exception cref="ObjectDisposedException">This instance is already dispossed</exception>
             private void ThrowIfDisposed()
             {
                 if (_processors == null)
                     throw new ObjectDisposedException("This instance is already dispossed");
             }
+            /// <summary>
+            /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+            /// </summary>
             void IDisposable.Dispose()
             {
                 for (int i = 0; i < _processors.Count; i++)
@@ -647,7 +698,9 @@ namespace XecMe.Common.System
                 GC.SuppressFinalize(this);
             }
 
-
+            /// <summary>
+            /// Finalizes an instance of the <see cref="CpuLoad"/> class.
+            /// </summary>
             ~CpuLoad()
             {
                 IDisposable disposable = (IDisposable)this;
@@ -655,10 +708,21 @@ namespace XecMe.Common.System
             }
             #endregion
 
+            /// <summary>
+            /// Processor/core comparer
+            /// </summary>
+            /// <seealso cref="System.Collections.Generic.IComparer{XecMe.Common.System.CpuUsageLimiter.Processor}" />
             private class UsageComparer : IComparer<Processor>
             {
-                #region IComparer<Processor> Members
-
+                #region IComparer<Processor> Members                
+                /// <summary>
+                /// Compares two objects and returns a value indicating whether one is less than, equal to, or greater than the other.
+                /// </summary>
+                /// <param name="x">The first object to compare.</param>
+                /// <param name="y">The second object to compare.</param>
+                /// <returns>
+                /// A signed integer that indicates the relative values of <paramref name="x" /> and <paramref name="y" />, as shown in the following table.Value Meaning Less than zero<paramref name="x" /> is less than <paramref name="y" />.Zero<paramref name="x" /> equals <paramref name="y" />.Greater than zero<paramref name="x" /> is greater than <paramref name="y" />.
+                /// </returns>
                 int IComparer<Processor>.Compare(Processor x, Processor y)
                 {
                     if (x == null && y == null)

@@ -35,6 +35,9 @@ namespace XecMe.Core.Events
         /// </summary>
         private static Dictionary<string, EventTopic> _eventTopics;
 
+        /// <summary>
+        /// Initializes the <see cref="EventManager"/> class.
+        /// </summary>
         static EventManager()
         {
             _eventTopics = new Dictionary<string, EventTopic>();

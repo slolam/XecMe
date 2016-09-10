@@ -85,10 +85,6 @@
     <Compile Include="Properties\AssemblyVersion.cs" />
     <Compile Include="Reflection.cs" />
     <Compile Include="System\CpuUsageLimiter.cs" />
-    <Compile Include="TranslationService.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="ValueReader.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

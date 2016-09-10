@@ -27,22 +27,39 @@ using XecMe.Core.Injection;
 
 namespace XecMe.Core.Tasks
 {
+    /// <summary>
+    /// Task manager to manage the task runners 
+    /// </summary>
     public static class TaskManager
     {
+        /// <summary>
+        /// The task runners
+        /// </summary>
         private static List<TaskRunner> _taskRunners;
 
+        /// <summary>
+        /// Initializes the <see cref="TaskManager"/> class.
+        /// </summary>
         static TaskManager()
         {
             _taskRunners = new List<TaskRunner>();
         }
 
-
+        /// <summary>
+        /// Starts the specified configuration.
+        /// </summary>
+        /// <param name="config">The configuration.</param>
         public static void Start(ITaskManagerConfig config)
         {
             IContainer container = new DefaultContainer();
             Start(config, container);
         }
 
+        /// <summary>
+        /// Starts the specified configuration.
+        /// </summary>
+        /// <param name="config">The configuration.</param>
+        /// <param name="container">The container.</param>
         public static void Start(ITaskManagerConfig config, IContainer container)
         {
             Stop();
@@ -86,6 +103,9 @@ namespace XecMe.Core.Tasks
             Log.Information("Task Manager started");
         }
 
+        /// <summary>
+        /// Stops this instance.
+        /// </summary>
         public static void Stop()
         {
             while (_taskRunners.Count > 0)
@@ -96,6 +116,10 @@ namespace XecMe.Core.Tasks
             Log.Information("Task Manager stopped");
         }
 
+        /// <summary>
+        /// Waits the tasks to complete.
+        /// </summary>
+        /// <param name="milliSeconds">The milli seconds.</param>
         public static void WaitTasksToComplete(int milliSeconds = -1)
         {
             if (_taskRunners.Count == 0)
@@ -113,8 +137,12 @@ namespace XecMe.Core.Tasks
                 WaitHandle.WaitAll(handles, milliSeconds);
         }
 
-        public static Action<IContainer> Bootstrap
-        { get; set; }
-
+        /// <summary>
+        /// Gets or sets the bootstrap.
+        /// </summary>
+        /// <value>
+        /// The bootstrap.
+        /// </value>
+        public static Action<IContainer> Bootstrap { get; set; }
     }
 }

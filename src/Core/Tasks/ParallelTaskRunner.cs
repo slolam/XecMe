@@ -100,6 +100,33 @@ namespace XecMe.Core.Tasks
         /// </summary>
         private TimeZoneInfo _timeZoneInfo;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ParallelTaskRunner" /> class.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="taskType">Type of the task.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <param name="min">The minimum.</param>
+        /// <param name="max">The maximum.</param>
+        /// <param name="idlePollingPeriod">The idle polling period.</param>
+        /// <param name="startTime">The start time.</param>
+        /// <param name="endTime">The end time.</param>
+        /// <param name="weekdays">The weekdays.</param>
+        /// <param name="timeZoneInfo">The time zone information.</param>
+        /// <param name="logType">Type of the log.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// min and max should be greater than 1 and min should be less than or equal to max
+        /// or
+        /// Idle period should be at least 100ms.
+        /// or
+        /// Start time cannot be negative
+        /// or
+        /// End time cannot be negative
+        /// or
+        /// Start time should be less than 23:59:59
+        /// or
+        /// End time should be less than 23:59:59
+        /// </exception>
         public ParallelTaskRunner(string name, Type taskType, Dictionary<string, object> parameters, uint min, uint max, ulong idlePollingPeriod,
             TimeSpan startTime, TimeSpan endTime, Weekdays weekdays, TimeZoneInfo timeZoneInfo, LogType logType) :
             base(name, taskType, parameters, logType)
@@ -108,22 +135,19 @@ namespace XecMe.Core.Tasks
                 throw new ArgumentOutOfRangeException(nameof(min), "min and max should be greater than 1 and min should be less than or equal to max");
 
             if (idlePollingPeriod < 100)
-                throw new ArgumentOutOfRangeException(nameof(idlePollingPeriod), $"{nameof(idlePollingPeriod)} should be at least 100ms.");
-
-            //if (endTime < startTime)
-            //    throw new ArgumentOutOfRangeException("startTime", "startDateTime should be less than endDateTime");
+                throw new ArgumentOutOfRangeException(nameof(idlePollingPeriod), "Idle period should be at least 100ms.");
 
             if (startTime < Time.DayMinTime)
-                throw new ArgumentOutOfRangeException(nameof(startTime), $"{nameof(startTime)} cannot be negative");
+                throw new ArgumentOutOfRangeException(nameof(startTime), "Start time cannot be negative");
 
             if (endTime < Time.DayMinTime)
-                throw new ArgumentOutOfRangeException(nameof(endTime), $"{nameof(endTime)} cannot be negative");
+                throw new ArgumentOutOfRangeException(nameof(endTime), "End time cannot be negative");
             
             if (startTime > Time.DayMaxTime)
-                throw new ArgumentOutOfRangeException(nameof(startTime), $"{nameof(startTime)} should be less than 23:59:59");
+                throw new ArgumentOutOfRangeException(nameof(startTime), "Start time should be less than 23:59:59");
 
             if (endTime > Time.DayMaxTime)
-                throw new ArgumentOutOfRangeException(nameof(endTime), $"{nameof(endTime)} should be less than 23:59:59");
+                throw new ArgumentOutOfRangeException(nameof(endTime), "End time should be less than 23:59:59");
 
             _dayStartTime = startTime;
             _dayEndTime = endTime;
@@ -170,7 +194,10 @@ namespace XecMe.Core.Tasks
             get { return _parallelInstances; }
         }
 
-        #region TaskRunner Members
+        #region TaskRunner Members        
+        /// <summary>
+        /// Starts this instance.
+        /// </summary>
         public override void Start()
         {
             lock (_sync)
@@ -189,6 +216,9 @@ namespace XecMe.Core.Tasks
             }
         }
 
+        /// <summary>
+        /// Stops this instance.
+        /// </summary>
         public override void Stop()
         {
             lock (_sync)
@@ -208,7 +238,7 @@ namespace XecMe.Core.Tasks
                         _allTasks.RemoveAt(0);
                         taskWrapper.Release();
                     }
-                    using (_timer);
+                    using (_timer) ;
                     _timer = null;
                     _jobsInQueue = 0;
                     _parallelInstances = 0;
@@ -221,6 +251,12 @@ namespace XecMe.Core.Tasks
 
         #endregion
 
+        /// <summary>
+        /// Gets the now for the current timezone
+        /// </summary>
+        /// <value>
+        /// The now.
+        /// </value>
         private DateTime Now
         {
             get
@@ -236,6 +272,10 @@ namespace XecMe.Core.Tasks
             }
         }
 
+        /// <summary>
+        /// Runs the task.
+        /// </summary>
+        /// <param name="state">The state.</param>
         private void RunTask(object state)
         {
             if (!_isStarted)
@@ -284,7 +324,7 @@ namespace XecMe.Core.Tasks
                         TraceInformation("Timer created");
                         _timer = new Timer(new TimerCallback(RunTask), null, Timeout.Infinite, Timeout.Infinite);
                     }
-                    
+
                     ///Do it only for the last thread.
                     if (_parallelInstances == 0 && _allTasks.Count == MinInstances)
                     {
@@ -293,10 +333,10 @@ namespace XecMe.Core.Tasks
                         ///if today is not allowed weekday, move it to next start of the day
                         if (!Utils.HasWeekday(_weekdays, Utils.GetWeekday(today.DayOfWeek)) || today > st)
                             st = st.AddDays(1).Date; //Setting it to next day 12:00 AM
-                        
+
                         ///Find the differene by converting to UTC time to make sure daylight cutover are accounted
                         TimeSpan wait = TimeZoneInfo.ConvertTimeToUtc(st, _timeZoneInfo) - TimeZoneInfo.ConvertTimeToUtc(today, _timeZoneInfo);
-                        
+
                         ///This is for the timer job
                         _jobsInQueue++;
                         _timer.Change((long)wait.TotalMilliseconds, Timeout.Infinite);
