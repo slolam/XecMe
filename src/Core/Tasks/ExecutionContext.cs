@@ -21,6 +21,21 @@ namespace XecMe.Core.Tasks
         /// Simple injector container for DI
         /// </summary>
         private static IContainer _container;
+
+        /// <summary>
+        /// The event argument
+        /// </summary>
+        internal object EventArg { get; set; }
+
+        /// <summary>
+        /// Events the argument.
+        /// </summary>
+        /// <typeparam name="TType">The type of the type.</typeparam>
+        /// <returns></returns>
+        public TType GetEventArg<TType>()
+        {
+            return (TType)EventArg;
+        }
         /// <summary>
         /// Parameters initialized in the config
         /// </summary>
