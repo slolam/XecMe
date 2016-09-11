@@ -75,16 +75,17 @@ namespace XecMe.Core.Tasks
             taskType.NotNull(nameof(taskType));
             parameters.NotNull(nameof(parameters));
 
-            if(!typeof(ITask).IsAssignableFrom(taskType))
-            {
-                throw new ArgumentException($"Type {taskType} does not implement the type {typeof(ITask)}", nameof(taskType));
-            }
-
-            if(taskType.IsAbstract)
+            if (taskType.IsAbstract)
             {
                 throw new ArgumentException($"Type {taskType} cannot be an abstract type", nameof(taskType));
             }
 
+            if (!(typeof(ITask).IsAssignableFrom(taskType) || typeof(ITaskAsync).IsAssignableFrom(taskType)))
+            {
+                throw new ArgumentException($"{taskType} must be either of the type {typeof(ITask)} or {typeof(ITaskAsync)}");
+            }
+
+            
             Name = name;
             TaskType = taskType;
             Parameters = parameters;

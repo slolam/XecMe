@@ -20,9 +20,9 @@ namespace XecMe.Core.Configuration
         /// Gets or sets the delay
         /// </summary>
         [ConfigurationProperty(DELAY, DefaultValue=1000), IntegerValidator(MinValue=0)]
-        public uint Delay
+        public int Delay
         {
-            get { return (uint)base[DELAY]; }
+            get { return (int)base[DELAY]; }
             set { base[DELAY] = value; }
         }
 
@@ -32,7 +32,7 @@ namespace XecMe.Core.Configuration
         /// <returns>Returns the RunOnceTaskRunner instance</returns>
         public override TaskRunner GetRunner()
         {
-            return new RunOnceTaskRunner(this.Name, this.GetTaskType(), InternalParameters(), Delay, TraceFilter);
+            return new RunOnceTaskRunner(this.Name, this.GetTaskType(), InternalParameters(), (uint)Delay, TraceFilter);
         }
 
     }
