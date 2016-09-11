@@ -143,11 +143,11 @@ namespace XecMe.Core.Tasks
                     ec = _taskWrapper.Context.Copy();
                     if (argType.GetGenericTypeDefinition() == typeof(EventArgs<>))
                     {
-                        ec["EventArgs"] = argType.InvokeMember("Value", BindingFlags.Instance | BindingFlags.GetProperty | BindingFlags.Public, null, args, null);
+                        ec.EventArg = argType.InvokeMember("Value", BindingFlags.Instance | BindingFlags.GetProperty | BindingFlags.Public, null, args, null);
                     }
                     else
                     {
-                        ec["EventArgs"] = args;
+                        ec.EventArg = args;
                     }
                 }
             }
