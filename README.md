@@ -64,7 +64,7 @@ XecMe 2.0.0 has introduced fluent APIs for configuring the task. These are fairl
      .RunWithMinimumInstancesOf(1)
      .AndMaximumInstancesOf(50)
      .WithIdlePeriod(2000) // poll every 2 seconds when there is nothing to process
-     .OnWeekdays(Weekdays.Monday | Weekdays.Tuesday | Weekdays.Wednesday | Weekdays.Thursday | Weekdays.Friday) // weekdays
+     .OnWeekdays(Weekdays.Workdays) // weekdays
      .DuringTimeOfDay(TimeSpan.Parse("08:00"), TimeSpan.Parse("17:00")) // during work hours
      .OfUtcTimeZone() // UTC timezone
      .AddParameter("task", 50)
