@@ -1,23 +1,73 @@
 #XecMe
 **XecMe** in short for Execute Me, is a executions and hosting application block for the batches, background processes and Windows Services. It is a highly configurable and extensible framework. It follows the principles of task oriented design approach for solving the business problem.
 
- Now the task on the designer and developer is to solve the problem in a task based approach. Let us take some examples of solving the problem.
+## Fluent APIs
+XecMe 2.0.0 has introduced fluent APIs for configuring the task. These are fairly straight forward to configure each type of task execution
 
-**Batch job to generate a file and post it to a partner's FTP site.**
+```csharp
 
-There are 3 main activities in this job. Retrieving data from the data source, creating a file and posting it to a FTP site. One can code all the 3 activities in to a single ITask implementation. However it is recommended to break this problem into 3 tasks viz.
+ var config = new FlowConfiguration();
 
-1. Retrieving from the database 
-2. Generating the file 
-3. Posting a file to FTP site
+//task to run on ThankGiving
+ config.ScheduledTask<TestTask>("ThanksGiving task", LogType.All)
+     .RunByWeeksOfTheMonths(Months.November)
+     .OnWeeks(Weeks.Last)
+     .OnWeekdays(Weekdays.Thursday)
+     .RunsAt(TimeSpan.Parse("02:00"))
+     .OfLocalTimeZone()
+     .AddParameter("count", 10)
+     .Add();
 
-Why? Well, by breaking it into smaller sub tasks will enable us to reuse the tasks in other area. You have write a generic task that takes DataSet or List of Entities to generates a file based on some configuration (comma separated, tab separated etc). You can reuse this task in many other file generation process. In similar way, you can write a file uploading task that you can reuse it at all the place where you have similar need. 
- You can wire tasks one after another thru the configuration.
+ //task to run on Christmas
+ config.ScheduledTask<TestTask>("Christmas Email blaster", LogType.All)
+     .RunByDaysOfTheMonths(Months.December)
+     .OnDays(25)
+     .RunsAt(TimeSpan.Parse("02:00"))
+     .OfLocalTimeZone()
+     .AddParameter("count", 10)
+     .Add();
 
-**Order processing from a queue**
+ //task to run every other day starting from Jan 01, 2016
+ config.ScheduledTask<TestTask>("Alternate day task", LogType.All)
+     .RunDaily()
+     .RepeatEvery(2) // every other day
+     .StartsFrom(DateTime.Parse("01/01/2016")) //reference point to skip every other day
+     .RunsAt(TimeSpan.Parse("06:00"))
+     .OfLocalTimeZone()
+     .AddParameter("count", 10)
+     .Add();
 
-You can write one task for reading the queue and other task to process and update the database. This way the queue reading task can be generic and can be used in multiple other solutions. Queue reading task can be wired to the processing task thru configuration.
+ // task to run every other Monday starting from Jan 01, 2016
+ config.ScheduledTask<TestTask>("Monday task", LogType.All)
+     .RunWeekly()
+     .OnWeekdays(Weekdays.Monday)
+     .RepeatEvery(2) // every other day
+     .StartsFrom(DateTime.Parse("01/01/2016")) //reference point to skip every other day
+     .RunsAt(TimeSpan.Parse("06:00"))
+     .OfLocalTimeZone()
+     .AddParameter("count", 10)
+     .Add();
+     
+ config.TimerTask<TestTask>("Every 15 mins", LogType.Error)
+     .RunEvery(900000)
+     .RepeatFor(-1) //for continue, you can limit number of time the task should run
+     .OnWeekdays(Weekdays.Monday | Weekdays.Friday) // Run on Mondays and Fridays
+     .DuringPeriod(DateTime.Parse("01/01/2016"), DateTime.Parse("12/31/2016")) // life time of the task
+     .DuringTimeOfDay(TimeSpan.Parse("00:00"), TimeSpan.Parse("06:00")) // valid time during the day. Here it from mid-night thru 6 AM
+     .OfLocalTimeZone()
+     .AddParameter("task", 50)
+     .AddParameter("other", "other parameter")
+     .Add();
 
-**Azure Worker Role or WebJob**
-
-Here is the sample to use XecMe in developing  Worker Role
+//Run parallele task to process requests/transactions etc.
+ config.ParallelTask<TestTask>("Parallel instances", LogType.Information)
+     .RunWithMinimumInstancesOf(1)
+     .AndMaximumInstancesOf(50)
+     .WithIdlePeriod(2000) // poll every 2 seconds when there is nothing to process
+     .OnWeekdays(Weekdays.Monday | Weekdays.Tuesday | Weekdays.Wednesday | Weekdays.Thursday | Weekdays.Friday) // weekdays
+     .DuringTimeOfDay(TimeSpan.Parse("08:00"), TimeSpan.Parse("17:00")) // during work hours
+     .OfUtcTimeZone() // UTC timezone
+     .AddParameter("task", 50)
+     .AddParameter("other", "other parameter")
+     .Add();
+```
