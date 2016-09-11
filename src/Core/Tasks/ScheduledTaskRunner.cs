@@ -406,6 +406,7 @@ namespace XecMe.Core.Tasks
             _recur = recur;
             _taskTime = taskTime;
             _timeZoneInfo = timeZoneInfo ?? TimeZoneInfo.Local;
+            _lastDateTime = new DateTime(_startDate.Year, _startDate.Month, _startDate.Day, _taskTime.Hours, _taskTime.Minutes, _taskTime.Seconds, DateTimeKind.Unspecified);
         }
 
 

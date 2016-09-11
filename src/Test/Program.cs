@@ -20,12 +20,11 @@ namespace XecMe.Test
             Log.ErrorSink = Console.WriteLine;
 
             FlowConfiguration config = new FlowConfiguration();
-            config.TimerTask<TestTask>("Parallel Task", LogType.All)
-                .RunEvery(100)
-                .RepeatFor(-1)
-                .OnWeekdays(Weekdays.All)
-                .DuringPeriod(DateTime.MinValue, DateTime.MaxValue)
-                .DuringTimeOfDay(TimeSpan.Parse("00:00:00"), TimeSpan.Parse("23:59:59"))
+            config.ScheduledTask<TestTask>("Parallel Task", LogType.All)
+                .RunByWeeksOfTheMonths(Months.All)
+                .OnWeeks(Weeks.Last)
+                .OnWeekdays(Weekdays.Friday)
+                .RunsAt(TimeSpan.Parse("19:00"))
                 .OfLocalTimeZone()
                 .AddParameter("count",10)
                 .Add();

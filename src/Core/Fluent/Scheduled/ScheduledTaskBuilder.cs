@@ -410,6 +410,7 @@ namespace XecMe.Core.Fluent.Scheduled
         IScheduledDays IScheduledTaskBuilder.RunByDaysOfTheMonths(Months months)
         {
             _months = months;
+            _recursion = Recursion.Monthly;
             return this;
         }
 
@@ -423,6 +424,7 @@ namespace XecMe.Core.Fluent.Scheduled
         IScheduledWeeks IScheduledTaskBuilder.RunByWeeksOfTheMonths(Months months)
         {
             _months = months;
+            _recursion = Recursion.Monthly;
             return this;
         }
 
