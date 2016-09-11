@@ -6,7 +6,7 @@
     <title>XecMe - Ninject DI Extension</title>
     <authors>Shailesh Lolam</authors>
     <owners>Shailesh Lolam</owners>
-    <licenseUrl>https://github.com/slolam/XecMe/blob/master/licence.md</licenseUrl>
+    <licenseUrl>https://github.com/slolam/XecMe/blob/master/license.md</licenseUrl>
     <projectUrl>https://github.com/slolam/XecMe/</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Ninject implementation for XecMe container</description>
