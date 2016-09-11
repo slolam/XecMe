@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>XecMe Simple Injector DI extension</title>
+    <authors>Shailesh Lolam</authors>
+    <owners>Shailesh Lolam</owners>
+    <licenseUrl>https://github.com/slolam/XecMe/blob/master/license.md</licenseUrl>
+    <projectUrl>https://github.com/slolam/XecMe</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>SimpleInjector implementation for XecMe container</description>
+    <summary>XecMe.DI.SimpleInjector - Simple Injector DI container extention for XecMe</summary>
+    <releaseNotes>
+      XecMe.DI.SimpleInjector 2.0.0
+      - SimpleInjector implementation for XecMe IContainer
+    </releaseNotes>
+    <language>en-US</language>
+    <tags>Azure Worker Role WebJobs Task Oriented Parallel Events Threading Timer Scheduler</tags>
+    <dependencies>
+      <dependency id="XecMe" version="$version$" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\Release\net40\XecMe.DI.SimpleInjector.dll" target="lib\net40\XecMe.DI.SimpleInjector.dll" />
+
+    <file src="bin\Release\net40-client\XecMe.DI.SimpleInjector.dll" target="lib\net40-client\XecMe.DI.SimpleInjector.dll" />
+
+    <file src="bin\Release\net45\XecMe.DI.SimpleInjector.dll" target="lib\net45\XecMe.DI.SimpleInjector.dll" />
+
+    <file src="bin\Release\net46\XecMe.DI.SimpleInjector.dll" target="lib\net46\XecMe.DI.SimpleInjector.dll" />
+  </files>
+</package>

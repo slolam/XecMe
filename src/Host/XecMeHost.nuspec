@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>XecMe</id>
+    <version>$version$</version>
+    <title>XecMe</title>
+    <authors>Shailesh Lolam</authors>
+    <owners>Shailesh Lolam</owners>
+    <licenseUrl>https://github.com/slolam/XecMe/blob/master/license.md</licenseUrl>
+    <projectUrl>https://github.com/slolam/XecMe/</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>XecMe is a hosting and execution framework. It follows the task oriented design approach for solving the business problems. It is a highly configurable framework to execute batch processes, asynchronous tasks, Windows Service etc. You can simplify your Azure Worker Role development to manage multiple task within the same role</description>
+    <summary>XecMe - Task based execution framework</summary>
+    <releaseNotes>
+      XecMe 2.0.0
+      - Flient API for configuring the tasks
+      - Abstracted container into a IContainer interface so that developer use their favorite container
+      - Separated Simple Injector container into separate package XecMe.DI.SimpleInjector and Ninject Container into XecMe.DI.Ninject
+      - Refactored and optimized
+      - All ITask methods are container scoped
+    </releaseNotes>
+    <language>en-US</language>
+    <tags>Azure Worker Role WebJobs Task Oriented Parallel Events Threading Timer Scheduler</tags>
+    <dependencies/>
+  </metadata>
+  <files>
+    <file src="bin\Release\net40\XecMe.Common.dll" target="lib\net40\XecMe.Common.dll" />
+    <file src="bin\Release\net40\XecMe.Configuration.dll" target="lib\net40\XecMe.Configuration.dll" />
+    <file src="bin\Release\net40\XecMe.Core.dll" target="lib\net40\XecMe.Core.dll" />
+
+    <file src="bin\Release\net40-client\XecMe.Common.dll" target="lib\net40-client\XecMe.Common.dll" />
+    <file src="bin\Release\net40-client\XecMe.Configuration.dll" target="lib\net40-client\XecMe.Configuration.dll" />
+    <file src="bin\Release\net40-client\XecMe.Core.dll" target="lib\net40-client\XecMe.Core.dll" />
+
+
+    <file src="bin\Release\net45\XecMe.Common.dll" target="lib\net45\XecMe.Common.dll" />
+    <file src="bin\Release\net45\XecMe.Configuration.dll" target="lib\net45\XecMe.Configuration.dll" />
+    <file src="bin\Release\net45\XecMe.Core.dll" target="lib\net45\XecMe.Core.dll" />
+
+
+    <file src="bin\Release\net46\XecMe.Common.dll" target="lib\net46\XecMe.Common.dll" />
+    <file src="bin\Release\net46\XecMe.Configuration.dll" target="lib\net46\XecMe.Configuration.dll" />
+    <file src="bin\Release\net46\XecMe.Core.dll" target="lib\net46\XecMe.Core.dll" />
+
+
+    <file src="bin\Release\net40\XecMe.Common.dll" target="tools\net40\XecMe.Common.dll" />
+    <file src="bin\Release\net40\XecMe.Configuration.dll" target="tools\net40\XecMe.Configuration.dll" />
+    <file src="bin\Release\net40\XecMe.Core.dll" target="tools\net40\XecMe.Core.dll" />
+    <file src="bin\Release\net40\XecMeHost.exe" target="tools\net40\XecMeHost.exe" />
+
+    <file src="bin\Release\net40-client\XecMe.Common.dll" target="tools\net40-client\XecMe.Common.dll" />
+    <file src="bin\Release\net40-client\XecMe.Configuration.dll" target="tools\net40-client\XecMe.Configuration.dll" />
+    <file src="bin\Release\net40-client\XecMe.Core.dll" target="tools\net40-client\XecMe.Core.dll" />
+    <file src="bin\Release\net40-client\XecMeHost.exe" target="tools\net40-client\XecMeHost.exe" />
+
+
+    <file src="bin\Release\net45\XecMe.Common.dll" target="tools\net45\XecMe.Common.dll" />
+    <file src="bin\Release\net45\XecMe.Configuration.dll" target="tools\net45\XecMe.Configuration.dll" />
+    <file src="bin\Release\net45\XecMe.Core.dll" target="tools\net45\XecMe.Core.dll" />
+    <file src="bin\Release\net45\XecMeHost.exe" target="tools\net45\XecMeHost.exe" />
+
+
+    <file src="bin\Release\net46\XecMe.Common.dll" target="tools\net46\XecMe.Common.dll" />
+    <file src="bin\Release\net46\XecMe.Configuration.dll" target="tools\net46\XecMe.Configuration.dll" />
+    <file src="bin\Release\net46\XecMe.Core.dll" target="tools\net46\XecMe.Core.dll" />
+    <file src="bin\Release\net46\XecMeHost.exe" target="tools\net46\XecMeHost.exe" />
+  </files>
+</package>

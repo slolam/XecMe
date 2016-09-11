@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>XecMe - Ninject DI Extension</title>
+    <authors>Shailesh Lolam</authors>
+    <owners>Shailesh Lolam</owners>
+    <licenseUrl>https://github.com/slolam/XecMe/blob/master/license.md</licenseUrl>
+    <projectUrl>https://github.com/slolam/XecMe/</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Ninject implementation for XecMe container</description>
+    <summary>XecMe.DI.Ninject - Ninject DI container extention for XecMe</summary>
+    <releaseNotes>
+      XecMe.DI.Ninject 2.0.0
+      - Ninject implementation for XecMe IContainer
+    </releaseNotes>
+    <language>en-US</language>
+    <tags>Azure Worker Role WebJobs Task Oriented Parallel Events Threading Timer Scheduler</tags>
+    <dependencies>
+      <dependency id="XecMe" version="$version$" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\Release\net40\XecMe.DI.Ninject.dll" target="lib\net40\XecMe.DI.Ninject.dll" />
+
+    <file src="bin\Release\net40-client\XecMe.DI.Ninject.dll" target="lib\net40-client\XecMe.DI.Ninject.dll" />
+
+    <file src="bin\Release\net45\XecMe.DI.Ninject.dll" target="lib\net45\XecMe.DI.Ninject.dll" />
+
+    <file src="bin\Release\net46\XecMe.DI.Ninject.dll" target="lib\net46\XecMe.DI.Ninject.dll" />
+  </files>
+</package>
