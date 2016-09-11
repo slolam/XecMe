@@ -3,30 +3,17 @@
   <metadata>
     <id>$id$</id>
     <version>$version$</version>
-    <title>XecMe Simple Injector DI extension </title>
+    <title>XecMe Simple Injector DI extension</title>
     <authors>Shailesh Lolam</authors>
     <owners>Shailesh Lolam</owners>
-    <licenseUrl>https://xecme.codeplex.com/license</licenseUrl>
+    <licenseUrl>https://github.com/slolam/XecMe/blob/master/licence.md</licenseUrl>
     <projectUrl>https://github.com/slolam/XecMe</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>XecMe is a hosting and execution framework. It follows the task oriented design approach for solving the business problems. It is a highly configurable framework to execute batch processes, asynchronous tasks, Windows Service etc. You can simplify your Azure Worker Role development to manage multiple task within the same role</description>
-    <summary>XecMe - Task based execution framework</summary>
+    <description>SimpleInjector implementation for XecMe container</description>
+    <summary>XecMe.DI.SimpleInjector - Simple Injector DI container extention for XecMe</summary>
     <releaseNotes>
-      XecMe 1.3.6.0
-      - Fixes in exception scenarios
-      - Controlling the trace from the library using configuration at task level
-      - Trace from the library can be hooked up to any logger using XecMe.Core.Diagnostics.Log class
-      - Consistency across the task in terms of time calculation.
-      - Updated to SimpleInjector 2.8
-
-
-      XecMe 1.3.5.0
-      - Added time window (dayStartTime, dayEndTime) for Parallel task to run. This will enable you to run background process during specific time window
-      - Added TimeZone (timeZone) that enable the process to trigger at correct time irrespective which datacenter in the cloud the process is running.
-      - Added weekdays (weekdays default is All) to Timer &amp; Parallel task. This enable us to run the task on specific week days
-      - TaskManager.Bootstrap delegate is optional, earlier it used to give NullPointerException if not used.
-      - More optimized in wait time reducing the CPU usage during idle period for Timer &amp; Parallel task
-      - Uses SimpleInjector v2.7.2
+      XecMe.DI.SimpleInjector 2.0.0
+      - SimpleInjector implementation for XecMe IContainer
     </releaseNotes>
     <language>en-US</language>
     <tags>Azure Worker Role WebJobs Task Oriented Parallel Events Threading Timer Scheduler</tags>
@@ -42,6 +29,5 @@
     <file src="bin\Release\net45\XecMe.DI.SimpleInjector.dll" target="lib\net45\XecMe.DI.SimpleInjector.dll" />
 
     <file src="bin\Release\net46\XecMe.DI.SimpleInjector.dll" target="lib\net46\XecMe.DI.SimpleInjector.dll" />
-
   </files>
 </package>

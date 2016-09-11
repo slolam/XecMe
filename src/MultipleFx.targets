@@ -78,10 +78,8 @@
     <!-- Ensure the Package directory exists for this project -->
     <!-- Package the project -->
     <Exec WorkingDirectory="$(BuildDir)" Command="$(SolutionDir)nuget\NuGet.exe pack $(ProjectPath) -Verbosity detailed -OutputDir &quot;$(SolutionDir)nuget&quot; -Properties &quot;Configuration=$(Configuration)&quot; -IncludeReferencedProjects"
-          Condition="'$(Framework)' == 'net46' And '$(Configuration)' == 'Release' And ('$(ProjectName)' == 'XecMe' Or '$(ProjectName)' == 'XecMe.DI.Ninject' Or '$(ProjectName)' == 'XecMe.DI.SimpleInjector')"/>
+          Condition="'$(Framework)' == 'net46' And '$(Configuration)' == 'Release' And ('$(ProjectName)' == 'XecMeHost' Or '$(ProjectName)' == 'XecMe.DI.Ninject' Or '$(ProjectName)' == 'XecMe.DI.SimpleInjector')"/>
 
-    <Exec WorkingDirectory="$(BuildDir)" Command="$(SolutionDir)nuget\NuGet.exe pack $(ProjectPath) -Verbosity detailed -OutputDir &quot;$(SolutionDir)nuget&quot; -Properties &quot;Configuration=$(Configuration)&quot;"
-      Condition="'$(Framework)' == 'net46' And '$(Configuration)' == 'Release' And ('$(ProjectName)' == 'XecMe.DI.Ninject' Or '$(ProjectName)' == 'XecMe.DI.SimpleInjector')"/>
     <!-- You could repeat the above node again here and target another framework if there was a property group that would evaluate to true-->
     <!-- Just more logging -->
     <Message Text="Exiting After Build Output:$(OutputPath) Project:$(ProjectName) TargetFrameworkVersion:$(TargetFrameworkVersion) Framework:$(Framework) SimpleInjector:$(SIReference)" Importance="high" />
