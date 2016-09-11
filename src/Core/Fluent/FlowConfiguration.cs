@@ -65,6 +65,18 @@ namespace XecMe.Core.Fluent
         }
 
         /// <summary>
+        /// Returns the asynchronous Parallel task builder.
+        /// </summary>
+        /// <typeparam name="TTaskType">The type of the task type.</typeparam>
+        /// <param name="name">The name.</param>
+        /// <param name="logType">Type of the log.</param>
+        /// <returns></returns>
+        public IParallelTaskBuilder ParallelAsyncTask<TTaskType>(string name, LogType logType = LogType.None) where TTaskType : ITaskAsync
+        {
+            return new ParallelTaskBuilder(this, name, typeof(TTaskType), logType);
+        }
+
+        /// <summary>
         /// Returns the Event task builder
         /// </summary>
         /// <typeparam name="TTaskType">The type of the task type.</typeparam>
@@ -72,6 +84,18 @@ namespace XecMe.Core.Fluent
         /// <param name="logType">Type of the log.</param>
         /// <returns></returns>
         public IEventTaskBuilder EventTask<TTaskType>(string name, LogType logType = LogType.None) where TTaskType : ITask
+        {
+            return new EventTaskBuilder(this, name, typeof(TTaskType), logType);
+        }
+
+        /// <summary>
+        /// Returns the asynchronous Event task builder.
+        /// </summary>
+        /// <typeparam name="TTaskType">The type of the task type.</typeparam>
+        /// <param name="name">The name.</param>
+        /// <param name="logType">Type of the log.</param>
+        /// <returns></returns>
+        public IEventTaskBuilder EventAsyncTask<TTaskType>(string name, LogType logType = LogType.None) where TTaskType : ITaskAsync
         {
             return new EventTaskBuilder(this, name, typeof(TTaskType), logType);
         }
@@ -88,14 +112,39 @@ namespace XecMe.Core.Fluent
             return new RunOnceTaskBuilder(this, name, typeof(TTaskType), logType);
         }
 
+
         /// <summary>
-        /// Returns the Scheduleds task builder
+        /// Returns the asynchronous Run once task builder.
+        /// </summary>
+        /// <typeparam name="TTaskType">The type of the task type.</typeparam>
+        /// <param name="name">The name.</param>
+        /// <param name="logType">Type of the log.</param>
+        /// <returns></returns>
+        public IRunOnceTaskBuilder RunOnceAsync<TTaskType>(string name, LogType logType = LogType.None) where TTaskType : ITaskAsync
+        {
+            return new RunOnceTaskBuilder(this, name, typeof(TTaskType), logType);
+        }
+
+        /// <summary>
+        /// Returns the Scheduled task builder
         /// </summary>
         /// <typeparam name="TTaskType">The type of the task type.</typeparam>
         /// <param name="name">The name.</param>
         /// <param name="logType">Type of the log.</param>
         /// <returns></returns>
         public IScheduledTaskBuilder ScheduledTask<TTaskType>(string name, LogType logType = LogType.None) where TTaskType : ITask
+        {
+            return new ScheduledTaskBuilder(this, name, typeof(TTaskType), logType);
+        }
+
+        /// <summary>
+        /// Returns asynchronous Scheduled task builder.
+        /// </summary>
+        /// <typeparam name="TTaskType">The type of the task type.</typeparam>
+        /// <param name="name">The name.</param>
+        /// <param name="logType">Type of the log.</param>
+        /// <returns></returns>
+        public IScheduledTaskBuilder ScheduledAsyncTask<TTaskType>(string name, LogType logType = LogType.None) where TTaskType : ITaskAsync
         {
             return new ScheduledTaskBuilder(this, name, typeof(TTaskType), logType);
         }
@@ -108,6 +157,19 @@ namespace XecMe.Core.Fluent
         /// <param name="logType">Type of the log.</param>
         /// <returns></returns>
         public ITimerTaskBuilder TimerTask<TTaskType>(string name, LogType logType = LogType.None) where TTaskType : ITask
+        {
+            return new TimerTaskBuilder(this, name, typeof(TTaskType), logType);
+        }
+
+
+        /// <summary>
+        /// Returns the asynchronous Timers task builder.
+        /// </summary>
+        /// <typeparam name="TTaskType">The type of the task type.</typeparam>
+        /// <param name="name">The name.</param>
+        /// <param name="logType">Type of the log.</param>
+        /// <returns></returns>
+        public ITimerTaskBuilder TimerAsyncTask<TTaskType>(string name, LogType logType = LogType.None) where TTaskType : ITaskAsync
         {
             return new TimerTaskBuilder(this, name, typeof(TTaskType), logType);
         }

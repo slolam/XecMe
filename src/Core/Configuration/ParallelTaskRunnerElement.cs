@@ -49,9 +49,9 @@ namespace XecMe.Core.Configuration
         /// Gets or sets the idle polling period when there is not task to execute
         /// </summary>
         [ConfigurationProperty(IDLE_POLLING_PERIOD, DefaultValue=300000L), LongValidator(MinValue=100)]
-        public ulong IdlePollingPeriod
+        public long IdlePollingPeriod
         {
-            get { return (ulong)base[IDLE_POLLING_PERIOD]; }
+            get { return (long)base[IDLE_POLLING_PERIOD]; }
             set { base[IDLE_POLLING_PERIOD] = value; }
         }
 
@@ -141,9 +141,9 @@ namespace XecMe.Core.Configuration
         /// Gets or sets the minimum number threads that should be reserved for this task. 
         /// </summary>
         [ConfigurationProperty(MIN_INSTANCE, IsRequired = true, DefaultValue = 1), IntegerValidator(MinValue = 1)]
-        public uint MinInstances
+        public int MinInstances
         {
-            get { return (uint)base[MIN_INSTANCE]; }
+            get { return (int)base[MIN_INSTANCE]; }
             set { base[MIN_INSTANCE] = value; }
         }
 
@@ -152,9 +152,9 @@ namespace XecMe.Core.Configuration
         /// Gets or sets the maximum number of threads that this instance will run on
         /// </summary>
         [ConfigurationProperty(MAX_INSTANCE, IsRequired = true, DefaultValue=1), IntegerValidator(MinValue=1)]
-        public uint MaxInstances
+        public int MaxInstances
         {
-            get { return (uint)base[MAX_INSTANCE]; }
+            get { return (int)base[MAX_INSTANCE]; }
             set { base[MAX_INSTANCE] = value; }
         }
 
@@ -168,8 +168,8 @@ namespace XecMe.Core.Configuration
             string tzn = TimeZoneName;
             if (!string.IsNullOrEmpty(tzn))
                 tz = TimeZoneInfo.FindSystemTimeZoneById(tzn);
-            return new ParallelTaskRunner(this.Name, this.GetTaskType(), InternalParameters(), MinInstances, MaxInstances, 
-                IdlePollingPeriod, DayStartTime, DayEndTime, Weekdays, tz, TraceFilter);
+            return new ParallelTaskRunner(this.Name, this.GetTaskType(), InternalParameters(), (uint)MinInstances, (uint)MaxInstances, 
+                (ulong)IdlePollingPeriod, DayStartTime, DayEndTime, Weekdays, tz, TraceFilter);
         }
 
     }

@@ -68,9 +68,9 @@ namespace XecMe.Core.Configuration
         /// </summary>
         [ConfigurationProperty(REPEAT, IsRequired = false, DefaultValue = 1)]
         [IntegerValidator(MinValue = 1, MaxValue = short.MaxValue)]
-        public uint Repeat
+        public int Repeat
         {
-            get { return (uint)base[REPEAT]; }
+            get { return (int)base[REPEAT]; }
             set { base[REPEAT] = value; }
         }
 
@@ -147,7 +147,7 @@ namespace XecMe.Core.Configuration
             string tzn = TimeZoneName;
             if (!string.IsNullOrEmpty(tzn))
                 tz = TimeZoneInfo.FindSystemTimeZoneById(tzn);
-            return new ScheduledTaskRunner(this.Name, this.GetTaskType(), InternalParameters(), Repeat, Recursion,
+            return new ScheduledTaskRunner(this.Name, this.GetTaskType(), InternalParameters(), (uint)Repeat, Recursion,
                     this.Schedule, this.StartDate, this.TaskTime, tz, TraceFilter);
         }
     }
