@@ -121,7 +121,18 @@ namespace XecMe.Core.Tasks
         /// <summary>
         /// All weekdays
         /// </summary>
-        All = (Saturday * 2) - 1
+        All = (Saturday * 2) - 1,
+
+        /// <summary>
+        /// The workdays of the week
+        /// </summary>
+        Workdays = Monday | Tuesday | Wednesday | Thursday | Friday,
+
+        /// <summary>
+        /// The weekend days
+        /// </summary>
+        Weekends = Saturday | Sunday
+
     }
 
     /// <summary>

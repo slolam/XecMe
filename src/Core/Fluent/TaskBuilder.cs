@@ -47,9 +47,18 @@ namespace XecMe.Core.Fluent
             name.NotNull(nameof(name));
             taskType.NotNull(nameof(taskType));
             
-            if (taskType.IsAbstract || !typeof(ITask).IsAssignableFrom(taskType))
+            if (taskType.IsAbstract)
             {
-                throw new ArgumentException($"{taskType} is either abstract or not if type {typeof(ITask)}");
+                throw new ArgumentException($"{taskType} is abstract type");
+            }
+            else if (!(typeof(ITaskAsync).IsAssignableFrom(taskType) || typeof(ITask).IsAssignableFrom(taskType)))
+            {
+                throw new ArgumentException($"{taskType} must be either of the type {typeof(ITask)} or {typeof(ITaskAsync)}");
+            }
+
+            if(taskType is ITaskAsync)
+            {
+                //taskType = 
             }
 
             Config = config;

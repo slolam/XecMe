@@ -5,7 +5,7 @@ using System.Text;
 namespace XecMe.Core.Tasks
 {
     /// <summary>
-    /// ITask interface should be implemented by all the task in Cuso
+    /// ITask interface should be implemented by all the task
     /// </summary>
     public interface ITask
     {

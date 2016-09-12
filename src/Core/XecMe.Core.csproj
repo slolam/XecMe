@@ -116,8 +116,10 @@
     <Compile Include="Injection\DefaultContainer.cs" />
     <Compile Include="Services\IService.cs" />
     <Compile Include="Services\TaskManagerService.cs" />
+    <Compile Include="Tasks\AsyncTaskProvider.cs" />
     <Compile Include="Tasks\EventTaskRunner.cs" />
     <Compile Include="Tasks\ExecutionContext.cs" />
+    <Compile Include="Tasks\ITaskAsync.cs" />
     <Compile Include="Tasks\ITaskManagerConfig.cs" />
     <Compile Include="Tasks\ParallelTaskRunner.cs" />
     <Compile Include="Tasks\RunOnceTaskRunner.cs" />

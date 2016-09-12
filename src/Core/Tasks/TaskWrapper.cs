@@ -6,6 +6,7 @@ using XecMe.Common;
 using System.Diagnostics;
 using System.Threading;
 using XecMe.Core.Events;
+using System.Reflection;
 
 namespace XecMe.Core.Tasks
 {
@@ -14,7 +15,7 @@ namespace XecMe.Core.Tasks
     /// </summary>
     internal class TaskWrapper
     {
-
+        private static readonly Type AsyncProviderGenericType = typeof(AsyncTaskProvider<>);
         /// <summary>
         /// 
         /// </summary>
@@ -68,7 +69,15 @@ namespace XecMe.Core.Tasks
             {
                 try
                 {
-                    Task = executionContext.Container.GetInstance(TaskType) as ITask;
+                    var task = executionContext.Container.GetInstance(TaskType);
+                    if(task is ITaskAsync)
+                    {
+                        Task = AsyncProviderGenericType.MakeGenericType(task.GetType()).InvokeMember(".ctor", BindingFlags.CreateInstance, null, null, new object[] { task }) as ITask;
+                    }
+                    else
+                    {
+                        Task = task as ITask;
+                    }
                     Task.OnStart(executionContext);
                     _initialized = true;
                     executionContext.TaskRunner.TraceInformation("Started");
