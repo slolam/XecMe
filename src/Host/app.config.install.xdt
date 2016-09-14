@@ -1,0 +1,125 @@
+<configuration xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+  <configSections xdt:Transform="InsertIfMissing">
+    <sectionGroup name="xecMe.Core" type="XecMe.Configuration.XecMeSectionGroup, XecMe.Configuration, Culture=neutral, PublicKeyToken=e34de6d98c38471a" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />
+      <sectionGroup name="xecMe.Core" type="XecMe.Configuration.XecMeSectionGroup, XecMe.Configuration, Culture=neutral, PublicKeyToken=e34de6d98c38471a" xdt:Locator="Match(name)" xdt:Transform="Replace">
+      <section name="extensions" type="XecMe.Configuration.ExtensionsSection, XecMe.Configuration, Culture=neutral, PublicKeyToken=e34de6d98c38471a"/>
+      <section name="taskManager" type="XecMe.Core.Configuration.TaskManagerSection, XecMe.Core, Culture=neutral, PublicKeyToken=e34de6d98c38471a"/>
+    </sectionGroup>
+  </configSections>
+  <xecMe.Core xdt:Transform="InsertIfMissing">
+    <extensions>
+      <taskRunners>
+        <!-- Whatever is defined in the name below the same tags are to be used in taskRunners section under taskManager -->
+        <!-- The type is the type of the element for the defined tag -->
+        <!-- One can implement other type of TaskRunner by inheriting from TaskRunner class-->
+        <!-- TaskRunnerElement inheriting from TaskRunnerElement class-->
+        <add name="parallelTaskRunner" type="XecMe.Core.Configuration.ParallelTaskRunnerElement, XecMe.Core, Culture=neutral, PublicKeyToken=e34de6d98c38471a"/>
+        <add name="timerTaskRunner" type="XecMe.Core.Configuration.TimerTaskRunnerElement, XecMe.Core, Culture=neutral, PublicKeyToken=e34de6d98c38471a"/>
+        <add name="eventTaskRunner" type="XecMe.Core.Configuration.EventTaskRunnerElement, XecMe.Core, Culture=neutral, PublicKeyToken=e34de6d98c38471a"/>
+        <add name="scheduledTaskRunner" type="XecMe.Core.Configuration.ScheduledTaskRunnerElement, XecMe.Core, Culture=neutral, PublicKeyToken=e34de6d98c38471a"/>
+        <add name="runOnceTaskRunner" type="XecMe.Core.Configuration.RunOnceTaskRunnerElement, XecMe.Core, Culture=neutral, PublicKeyToken=e34de6d98c38471a"/>
+      </taskRunners>
+      <settings>
+        <!-- Use this section for defining batch or Windows Service type -->
+        <!--
+				<add name="IBatchProcess" type="Sample.MyBatch, Sample, Version=1.0.0.0, PublicKeyToken=null, Culture=neutral"/>
+				<add name="IService" type="Sample.MyService, Sample, Version=1.0.0.0, PublicKeyToken=null, Culture=neutral"/>
+                                -->
+      </settings>
+    </extensions>
+    <taskManager>
+      <taskRunners>
+        <!-- threadOptions is 3 possible value BackgroundParallel, BackgroundSerial, Publisher-->
+        
+        <!--<eventTaskRunner name="Task name"
+                         taskType="Fully qualified Type Name implementing ITask"
+                         eventTopic="Name of the event"
+                         threadOption="BackgroundParallel|BackgroundSerial|Publisher"
+						 traceFilter="Warning,Error,Information,All">
+          --><!-- Parameters serve as input parameters to the task and are available during execution--><!--
+          <parameters>
+            <parameter name="test1" value="val1"/>
+            <parameter name="test2" value="val2"/>
+            <parameter name="test3" value="val3"/>
+          </parameters>
+        </eventTaskRunner>-->
+        <!-- The taskType attribute should be an impletementation of ITask-->
+        <!--startDateTime, endDateTime, dayStartTime, dayEndTime, recurrence, timeout, timeZone are optional-->
+        <!--<timerTaskRunner name="Name of the task"
+                         taskType="Fully qualified Type Name implementing ITask"
+						 interval="time between the triggers"
+						 startDateTime="Start date time for this task"
+						 endDateTime="End date time for this task"
+						 dayStartTime="Start time of the day"
+						 dayEndTime="End time of the day"
+						 weekdays="Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,All"
+						 recurrence="number of time"
+						 timeZone="time zone id"
+						 traceFilter="Warning,Error,Information,All">
+          --><!-- Parameters serve as input parameters to the task--><!--
+          <parameters>
+            <parameter name="test1" value="val1"/>
+            <parameter name="test2" value="val2"/>
+            <parameter name="test3" value="val3"/>
+          </parameters>
+        </timerTaskRunner>-->
+        <!-- 
+        minInstance and maxInstance denote the number of thread that can run in parallel. It is also limited by the processing power of the machine
+        idlePollingPeriod = idle polling period when there is no work
+        -->
+        <!--<parallelTaskRunner name="Parallel Task Name"
+                            taskType="Fully qualified Type Name implementing ITask"
+                            idlePollingPeriod="2000"
+                            minInstances="2"
+                            maxInstances="10"
+                            dayStartTime="Start time of the day"
+                            dayEndTime="End time of the day"
+                            weekdays="Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,All"
+                            timeZone="time zone id"
+						    traceFilter="Warning,Error,Information,All">
+          --><!-- Parameters serve as input parameters to the task--><!--
+          <parameters>
+            <parameter name="test1" value="val1"/>
+            <parameter name="test2" value="val2"/>
+            <parameter name="test3" value="val3"/>
+          </parameters>
+        </parallelTaskRunner>-->
+        <!--
+        repeat = every x skips
+        recursion = Daily, schedule = ""
+        recursion = Weekly, schedule = "WD:Sunday,Monday,Tuesday,Wednesday,Thursday,Saturday,All"
+        recursion = Monthly, schedule = "MN:January,February,....|DY:1,2,4,20,LAST" OR "MN:January,February,...|WD:Sunday,Monday,Tuesday,Wednesday,Thursday,Saturday,All|WK:First,Second,Third,Fourth,Last"
+        -->
+        <!--<scheduledTaskRunner name="Scheduled Task"
+                             taskType="Fully qualified task type"
+                             repeat="Skip every x days/weeks/months"
+                             recursion="Daily|Weekly|Monthly"
+                             startDate="Date for initial reference"
+                             taskTime="Time at which task is triggered"
+                             schedule="schedule string for Weekly / Monthly recursion"
+                             timeZone="time zone id string - task will be triggered for this time zone"
+						     traceFilter="Warning,Error,Information,All">
+          <parameters>
+            <parameter name="test1" value="val1"/>
+            <parameter name="test2" value="val2"/>
+            <parameter name="test3" value="val3"/>
+          </parameters>
+        </scheduledTaskRunner>-->
+
+        <!--
+        delay = delay in milliseconds before the task is executed
+        -->
+        <!--<runOnceTaskRunner name="Run Once Task"
+                           taskType="Fully qualified task type"
+                           delay="delay before the task run"
+						   traceFilter="Warning,Error,Information,All">
+          <parameters>
+            <parameter name="test1" value="val1"/>
+            <parameter name="test2" value="val2"/>
+            <parameter name="test3" value="val3"/>
+          </parameters>
+        </runOnceTaskRunner>-->
+      </taskRunners>
+    </taskManager>
+  </xecMe.Core>
+</configuration>

@@ -1,0 +1,6 @@
+<configuration xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+  <configSections>
+    <sectionGroup name="xecMe.Core" xdt:Transform="Remove" xdt:Locator="Match(name)" />
+  </configSections>
+  <xecMe.Core />
+</configuration>

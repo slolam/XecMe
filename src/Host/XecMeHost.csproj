@@ -125,6 +125,12 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
+    <Content Include="app.config.install.xdt">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="app.config.uninstall.xdt" />
+    <Content Include="web.config.install.xdt" />
+    <Content Include="web.config.uninstall.xdt" />
     <None Include="XecMeHost.nuspec" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

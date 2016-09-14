@@ -86,7 +86,8 @@ namespace XecMe.Test
 
 
             //TaskManager.Bootstrap = c => c.Verify();
-            TaskManager.Start(config);
+            //TaskManager.Start(config);
+            TaskManager.Start(new TaskManagerConfig());
             var obj = new Program();
 
             EventManager.AddPublisher("Event", obj, "Fire");
