@@ -70,7 +70,7 @@ namespace XecMe.Core.Configuration
         /// Gets or sets the reccurrence of the instance. Default value is -1 that indicates there is no upper bound defined for this task
         /// </summary>
         [ConfigurationProperty(RECURRENCE, IsRequired = false, DefaultValue = -1L)]
-        [LongValidator(MinValue = 0L, MaxValue = long.MaxValue)]
+        [LongValidator(MinValue = -1L, MaxValue = long.MaxValue)]
         public long Recurrence
         {
             get { return (long)base[RECURRENCE]; }
