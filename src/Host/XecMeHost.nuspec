@@ -12,6 +12,10 @@
     <description>XecMe is a hosting and execution framework. It follows the task oriented design approach for solving the business problems. It is a highly configurable framework to execute batch processes, asynchronous tasks, Windows Service etc. You can simplify your Azure Worker Role development to manage multiple task within the same role</description>
     <summary>XecMe - Task based execution framework</summary>
     <releaseNotes>
+      XecMe 2.1.2
+      - Fixed the Timer configuration issue
+      - Upgraded the SimpleInjector package
+      
       XecMe 2.1.0
       - Added new ITaskAsync interface for the async task
       - Fixed some configuration issues
