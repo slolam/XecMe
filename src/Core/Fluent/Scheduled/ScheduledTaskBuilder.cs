@@ -226,7 +226,7 @@ namespace XecMe.Core.Fluent.Scheduled
                 case Recursion.Monthly:
                     if (_weeks != Tasks.Weeks.None && _weekdays != Tasks.Weekdays.None && _months != Tasks.Months.None)
                         recur = new MonthlyByWeekdays(_months, _weekdays, _weeks);
-                    else if (_days > 1 && _months != Tasks.Months.None)
+                    else if (_days >= 1 && _months != Tasks.Months.None)
                         recur = new MonthlyByDay(_months, _days);
                     else
                         throw new InvalidOperationException($"Missing the attributes for the Monthly task");
