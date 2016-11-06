@@ -6,6 +6,8 @@ using XecMe.Core.Services;
 using XecMe.Core.Utils;
 using XecMe.Core.Tasks;
 using XecMe.Core.Fluent;
+using log4net;
+using XecMe.Common.Diagnostics;
 
 namespace Sample
 {
@@ -52,6 +54,10 @@ namespace Sample
 
         void IService.OnStart()
         {
+            var logger = LogManager.GetLogger(typeof(MyService));
+            Log.ErrorSink = logger.Error;
+            Log.WarningSink = logger.Warn;
+            Log.InformationSink = logger.Info;
             Console.WriteLine("Service starting");
             FlowConfiguration config = new FlowConfiguration();
             config.ScheduledTask<MyTask>("scheduled")
