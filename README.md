@@ -71,3 +71,13 @@ XecMe 2.0.0 has introduced fluent APIs for configuring the task. These are fairl
      .AddParameter("other", "other parameter")
      .Add();
 ```
+
+## Logging using log4net
+Redirecting XecMe internal activities into the application's log is fairly easy to configure. Below is the sample of configuring _log4net_
+
+```csharp
+var logger = LogManager.GetLogger(typeof(MyService));
+XecMe.Common.Diagnostics.Log.ErrorSink = logger.Error;
+XecMe.Common.Diagnostics.Log.WarningSink = logger.Warn;
+XecMe.Common.Diagnostics.Log.InformationSink = logger.Info;
+```
