@@ -473,7 +473,7 @@ namespace XecMe.Core.Tasks
             if (_timer == null)
                 return;
 
-            if (!_skip)
+            if (!_skip && _lastDateTime >= Now)
             {
                 ExecutionState executionState = _taskWrapper.RunTask();
                 TraceInformation("Executed with return value {0}", executionState);
