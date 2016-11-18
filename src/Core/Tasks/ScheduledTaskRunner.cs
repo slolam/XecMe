@@ -473,7 +473,7 @@ namespace XecMe.Core.Tasks
             if (_timer == null)
                 return;
 
-            if (!_skip && _lastDateTime <= Now)
+            if (!_skip)
             {
                 ExecutionState executionState = _taskWrapper.RunTask();
                 TraceInformation("Executed with return value {0}", executionState);
@@ -490,6 +490,15 @@ namespace XecMe.Core.Tasks
                         _taskWrapper.Release();
                         _taskWrapper = new TaskWrapper(this.TaskType, new ExecutionContext(Parameters, this));
                         break;
+                }
+
+                var now = Now;
+                //If the task scheduled time is not past then sleep
+                if (_lastDateTime >= Now)
+                {
+                    var ts = _lastDateTime - now;
+                    TraceInformation("Scheduled time is {0} and current time is {1} wait for {2}", _lastDateTime, now, ts);
+                    Thread.Sleep(ts);
                 }
             }
 
