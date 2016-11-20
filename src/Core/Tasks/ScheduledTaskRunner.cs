@@ -34,7 +34,7 @@ namespace XecMe.Core.Tasks
     /// <summary>
     /// Scheduled by days
     /// </summary>
-    public enum Days: uint
+    public enum Days : uint
     {
         /// <summary>
         /// LAst day of the month
@@ -492,12 +492,11 @@ namespace XecMe.Core.Tasks
                         break;
                 }
 
-                var now = Now;
+                var ts = _lastDateTime - Now;
                 //If the task scheduled time is not past then sleep
-                if (_lastDateTime >= Now)
+                if (ts.TotalMilliseconds > 0)
                 {
-                    var ts = _lastDateTime - now;
-                    TraceInformation("Scheduled time is {0} and current time is {1} wait for {2}", _lastDateTime, now, ts);
+                    TraceInformation("Scheduled time is {0} and current time is {1} wait for {2}", _lastDateTime, Now, ts);
                     Thread.Sleep(ts);
                 }
             }
@@ -975,7 +974,7 @@ namespace XecMe.Core.Tasks
             if (month < 1 || month > 12)
                 throw new ArgumentOutOfRangeException("month");
             month--;
-            
+
             return (Months)(1 << month);
         }
 
