@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>XecMe.Test</RootNamespace>
     <AssemblyName>XecMe.Test</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <NuGetPackageImportStamp>cb7c21c0</NuGetPackageImportStamp>
@@ -42,6 +42,15 @@
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Pack|AnyCPU'">
+    <OutputPath>bin\Pack\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -64,20 +73,16 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\XecMe.Common.csproj">
-      <Project>{95651c69-8bfa-4e66-9a15-585f3df1eb8d}</Project>
+      <Project>{ef10909f-932a-4fcd-aba1-b591df8fc853}</Project>
       <Name>XecMe.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Configuration\XecMe.Configuration.csproj">
-      <Project>{b7baa0d0-dff8-49f8-b6fe-87d92e940446}</Project>
-      <Name>XecMe.Configuration</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Core\XecMe.Core.csproj">
-      <Project>{3039940d-4d0a-423d-8452-f982c996f06a}</Project>
+      <Project>{b3e64f44-1a91-4a12-bd4a-c1c47b49ebba}</Project>
       <Name>XecMe.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\MultipleFx.targets" />
+  <!-- <Import Project="$(SolutionDir)\MultipleFx.targets" /> -->
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

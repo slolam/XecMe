@@ -30,8 +30,7 @@ namespace XecMe.Core.Diagnostics
         /// <param name="log">Error message to be logged</param>
         public static void Error(string log)
         {
-            if (ErrorSink != null)
-                ErrorSink(log);
+            ErrorSink?.Invoke(log);
         }
         /// <summary>
         /// Logs the message as information by calling ErrorSink delegate that by default logs to Trace.TraceInformation
@@ -39,8 +38,7 @@ namespace XecMe.Core.Diagnostics
         /// <param name="log">Information message to be logged</param>
         public static void Information(string log)
         {
-            if (InformationSink != null)
-                InformationSink(log);
+            InformationSink?.Invoke(log);
         }
 
         /// <summary>
@@ -49,8 +47,7 @@ namespace XecMe.Core.Diagnostics
         /// <param name="log">Wanring message to be logged</param>
         public static void Warning(string log)
         {
-            if (WarningSink != null)
-                WarningSink(log);
+            WarningSink?.Invoke(log);
         }
 
         /// <summary>

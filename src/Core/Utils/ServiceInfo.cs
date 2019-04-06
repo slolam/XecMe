@@ -29,17 +29,13 @@ namespace XecMe.Core.Utils
         public readonly static string MachineName;
         /// <summary>
         /// Name of the Windows Service/Batch being installed and run. 
-        /// It is also used as reference to store the configuration in CUSO DB
+        /// It is also used as reference to store the configuration in DB
         /// </summary>
         public static string ServiceName;
         /// <summary>
         /// Path where the Service is implemented
         /// </summary>
         public static string Directory;
-        /// <summary>
-        /// Account used for the Service
-        /// </summary>
-        public static ServiceAccount Account;
         /// <summary>
         /// Configuration file path for the Service
         /// </summary>
@@ -52,13 +48,77 @@ namespace XecMe.Core.Utils
         /// User identity for Service installation
         /// </summary>
         public static string User;
+#if !NETSTANDARD2_0
+        /// <summary>
+        /// Account used for the Service
+        /// </summary>
+        public static ServiceAccount Account;
         /// <summary>
         /// Service start mode type.
         /// </summary>
         public static ServiceStartMode StartType = ServiceStartMode.Automatic;
+#endif
         /// <summary>
         /// This is the timeout for the batch jobs
         /// </summary>
         public static int Timeout = -1;
     }
+
+#if !NETSTANDARD2_0
+    /// <summary>
+    /// Indicates the start mode of the service.
+    /// </summary>
+    public enum ServiceStartMode
+    {
+        /// <summary>
+        /// Indicates that the service is to be started (or was started) by the operating
+        ///     system, at system start-up. If an automatically started service depends on a
+        ///     manually started service, the manually started service is also started automatically
+        ///     at system startup.
+        /// </summary>
+        Automatic = 2,
+        /// <summary>
+        /// Indicates that the service is started only manually, by a user (using the Service
+        ///     Control Manager) or by an application.
+        /// </summary>
+        Manual = 3,
+        /// <summary>
+        /// Indicates that the service is disabled, so that it cannot be started by a user
+        ///     or application.
+        /// </summary>
+        Disabled = 4
+    }
+
+        
+  /// <summary>
+  /// 
+  /// </summary>
+    public enum ServiceAccount
+    {
+        /// <summary>
+        /// An account that acts as a non-privileged user on the local computer, and presents
+        ///     anonymous credentials to any remote server.
+        /// </summary>
+        LocalService = 0,
+        /// <summary>
+        /// An account that provides extensive local privileges, and presents the computer's
+        ///     credentials to any remote server.
+        /// </summary>
+        NetworkService = 1,
+        /// <summary>
+        /// An account, used by the service control manager, that has extensive privileges
+        ///     on the local computer and acts as the computer on the network.
+        /// </summary>
+        LocalSystem = 2,
+        /// <summary>
+        /// An account defined by a specific user on the network. Specifying User for the
+        ///     System.ServiceProcess.ServiceProcessInstaller.Account member causes the system
+        ///     to prompt for a valid user name and password when the service is installed, unless
+        ///     you set values for both the System.ServiceProcess.ServiceProcessInstaller.Username
+        ///     and System.ServiceProcess.ServiceProcessInstaller.Password properties of your
+        ///     System.ServiceProcess.ServiceProcessInstaller instance.
+        /// </summary>
+        User = 3
+    }
+#endif
 }

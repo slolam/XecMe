@@ -1,3 +1,5 @@
+#if !NETSTANDARD2_0
+
 #region GNU GPL Version 3 License
 
 /// Copyright 2013 Shailesh Lolam
@@ -81,3 +83,4 @@ namespace XecMe.Core.Services
         }
     }
 }
+#endif

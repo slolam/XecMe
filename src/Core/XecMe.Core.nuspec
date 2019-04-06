@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>XecMe</title>
+    <authors>Shailesh Lolam</authors>
+    <owners>Shailesh Lolam</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <projectUrl>https://github.com/slolam/XecMe/</projectUrl>
+    <description>XecMe is a hosting and execution framework. It follows the task oriented design approach for solving the business problems. It is a highly configurable framework to execute batch processes, asynchronous tasks, Windows Service etc. You can simplify your Azure Worker Role development to manage multiple task within the same role</description>
+    <summary>XecMe - Task based execution framework</summary>
+    <releaseNotes>
+      XecMe 3.0.0
+      - Package build to support Net Standard 2.0 and .Net Core
+      
+      XecMe 2.1.4
+      - Fixed the edge case bug in ScheduledTaskRunner if task completes under 1 second runtime
+
+      XecMe 2.1.3 &amp; 2.1.3
+      - Fixed the Timer configuration issue
+      - Upgraded the SimpleInjector package
+      
+      XecMe 2.1.0
+      - Added new ITaskAsync interface for the async task
+      - Fixed some configuration issues
+
+      XecMe 2.0.0
+      - Flient API for configuring the tasks
+      - Abstracted container into a IContainer interface so that developer use their favorite container
+      - Separated Simple Injector container into separate package XecMe.DI.SimpleInjector and Ninject Container into XecMe.DI.Ninject
+      - Refactored and optimized
+      - All ITask methods are container scoped</releaseNotes>
+    <language>en-US</language>
+    <tags>Azure Worker Role WebJobs Task Oriented Parallel Events Threading Timer Scheduler</tags>
+    <dependencies />
+  </metadata>
+  <files>
+    <file src="bin\Release\netstandard2.0\*" target="lib\netstandard2.0\" />
+  </files>
+</package>

@@ -49,33 +49,12 @@ namespace XecMe.Core.Tasks
 
             _taskRunners.AddRange(config.Runners);
 
-
-            /////Play safe with the duplicate tasks
-            //var orig = container.Options.AllowOverridingRegistrations;
-
-            //container.Options.AllowOverridingRegistrations = true;
-
             for (int runnerIndex = 0; runnerIndex < _taskRunners.Count; runnerIndex++)
             {
                 container.Register(_taskRunners[runnerIndex].TaskType);
             }
 
-            if (Bootstrap != null)
-                Bootstrap(container);
-
-
-            /////Restore it back for the developer
-            //container.Options.AllowOverridingRegistrations = orig;
-
-            //try
-            //{
-            //    container.Verify();
-            //}
-            //catch(Exception e)
-            //{
-            //    Log.Error(string.Format("Error while verifying the container - {0}", e));
-            //    throw;
-            //}
+            Bootstrap?.Invoke(container);
 
             ExecutionContext.InternalContainer = container;
 

@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if !NETSTANDARD2_0
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using XecMe.Core.Tasks;
@@ -17,7 +19,7 @@ namespace XecMe.Core.Services
         /// Name of the window service
         /// </summary>
         private string _serviceName;
-        #region IService Members
+#region IService Members
 
         /// <summary>
         /// Returns false indicating the service can be paused 
@@ -98,6 +100,7 @@ namespace XecMe.Core.Services
             }
         }
 
-        #endregion
+#endregion
     }
 }
+#endif

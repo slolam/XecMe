@@ -19,6 +19,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
+#if !NETSTANDARD2_0
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
@@ -53,3 +54,4 @@ using System.Runtime.InteropServices;
 //[assembly: AssemblyFileVersion("1.3.6.0")]
 //[assembly: InternalsVisibleTo(
 ///XecMe123
+#endif

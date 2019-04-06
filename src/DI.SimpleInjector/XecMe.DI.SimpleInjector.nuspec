@@ -22,12 +22,6 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\Release\net40\XecMe.DI.SimpleInjector.dll" target="lib\net40\XecMe.DI.SimpleInjector.dll" />
-
-    <file src="bin\Release\net40-client\XecMe.DI.SimpleInjector.dll" target="lib\net40-client\XecMe.DI.SimpleInjector.dll" />
-
-    <file src="bin\Release\net45\XecMe.DI.SimpleInjector.dll" target="lib\net45\XecMe.DI.SimpleInjector.dll" />
-
-    <file src="bin\Release\net46\XecMe.DI.SimpleInjector.dll" target="lib\net46\XecMe.DI.SimpleInjector.dll" />
+    <file src="bin\Release\netstandard2.0\$id$.dll" target="lib\netstandard2.0\" />
   </files>
 </package>

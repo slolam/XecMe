@@ -1,3 +1,5 @@
+#if !NETSTANDARD2_0
+
 namespace XecMe.Core.Services
 {
     partial class ServiceHost
@@ -20,7 +22,7 @@ namespace XecMe.Core.Services
             base.Dispose(disposing);
         }
 
-        #region Component Designer generated code
+#region Component Designer generated code
 
         /// <summary> 
         /// Required method for Designer support - do not modify 
@@ -33,6 +35,7 @@ namespace XecMe.Core.Services
             // 
         }
 
-        #endregion
+#endregion
     }
 }
+#endif

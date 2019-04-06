@@ -52,7 +52,7 @@ namespace XecMe.Core.Tasks
         /// <summary>
         /// The task runner type name
         /// </summary>
-        private string _taskRunnerTypeName;
+        private readonly string _taskRunnerTypeName;
         /// <summary>
         /// The stopwatch
         /// </summary>

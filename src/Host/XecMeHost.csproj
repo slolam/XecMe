@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>XecMe</RootNamespace>
     <AssemblyName>XecMeHost</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SignAssembly>true</SignAssembly>
     <Framework Condition=" '$(Framework)' == '' ">net40</Framework>
@@ -95,16 +95,6 @@
     <Content Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Common\XecMe.Common.csproj">
-      <Project>{95651C69-8BFA-4E66-9A15-585F3DF1EB8D}</Project>
-      <Name>XecMe.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Core\XecMe.Core.csproj">
-      <Project>{3039940D-4D0A-423D-8452-F982C996F06A}</Project>
-      <Name>XecMe.Core</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
       <Visible>False</Visible>
       <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
@@ -132,6 +122,16 @@
     <Content Include="web.config.install.xdt" />
     <Content Include="web.config.uninstall.xdt" />
     <None Include="XecMeHost.nuspec" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\XecMe.Common.csproj">
+      <Project>{ef10909f-932a-4fcd-aba1-b591df8fc853}</Project>
+      <Name>XecMe.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Core\XecMe.Core.csproj">
+      <Project>{b3e64f44-1a91-4a12-bd4a-c1c47b49ebba}</Project>
+      <Name>XecMe.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\MultipleFx.targets" />

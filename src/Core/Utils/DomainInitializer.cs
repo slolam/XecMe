@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Configuration;
-using System.ServiceProcess;
+#if !NETSTANDARD2_0
 using XecMe.Core.Services;
+#endif
 using XecMe.Core.Batch;
 using XecMe.Common;
-using System.Diagnostics;
 using XecMe.Configuration;
 using System.IO;
 using XecMe.Common.Diagnostics;
@@ -18,6 +15,7 @@ namespace XecMe.Core.Utils
     /// </summary>
     public static class DomainInitializer
     {
+#if !NETSTANDARD2_0
         /// <summary>
         /// Runs the service.
         /// </summary>
@@ -25,7 +23,7 @@ namespace XecMe.Core.Utils
         public static void RunService(string[] args)
         {
             Initialize(args);
-            
+
             string serviceTypeName = ExtensionsSection.ThisSection.Settings["IService"].Type;
 
             if (Debugger.IsAttached)
@@ -41,7 +39,7 @@ namespace XecMe.Core.Utils
                 ServiceBase.Run(service);
             }
         }
-
+#endif
         /// <summary>
         /// Runs the batch.
         /// </summary>

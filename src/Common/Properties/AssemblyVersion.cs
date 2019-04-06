@@ -18,7 +18,8 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-
+#if !NETSTANDARD2_0
 [assembly: AssemblyVersion("2.1.3.0")]
 [assembly: AssemblyFileVersion("2.1.3.0")]
 [assembly: AssemblyInformationalVersion("2.1.4")]
+#endif

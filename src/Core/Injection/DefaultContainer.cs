@@ -11,13 +11,9 @@ namespace XecMe.Core.Injection
     /// <seealso cref="XecMe.Common.Injection.IContainer" />
     public class DefaultContainer : IContainer
     {
-        /// <summary>
-        /// Begins the scope of instances
-        /// </summary>
-        /// <returns></returns>
-        public IDisposable BeginScope()
+        public void Dispose()
         {
-            return null;
+
         }
 
         /// <summary>
@@ -58,12 +54,37 @@ namespace XecMe.Core.Injection
         {
         }
 
+        public void Register(Type serviceType, LifeStyle lifeStyle = LifeStyle.Scoped)
+        {
+        }
+
+        public void Register(Type serviceType, Func<IContainer, object> factory, LifeStyle lifeStyle = LifeStyle.Scoped)
+        {
+        }
+
+        public IContainer BeginScope()
+        {
+            return null;
+        }
+
         /// <summary>
         /// Registers this instance.
         /// </summary>
         /// <typeparam name="TService">The type of the service.</typeparam>
         /// <typeparam name="TImplementation">The type of the implementation.</typeparam>
-        void IContainer.Register<TService, TImplementation>()
+        public void Register<TService, TImplementation>()
+        {
+        }
+
+        public void Register<TService, TImplementation>(LifeStyle lifeStyle)
+            where TService : class
+            where TImplementation : class, TService
+        {
+        }
+
+        public void Register<TService, TImplementation>(Func<IContainer, TImplementation> factory, LifeStyle lifeStyle)
+            where TService : class
+            where TImplementation : class, TService
         {
         }
     }
